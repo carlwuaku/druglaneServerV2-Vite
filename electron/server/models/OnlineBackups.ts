@@ -19,7 +19,9 @@ export class OnlineBackups extends Model{
   })
   date!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   url!: string;
 
 

@@ -40,7 +40,9 @@ export class ReceivedTransferDetails extends Model{
   })
   price!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 
   @CreatedAt
@@ -61,11 +63,15 @@ export class ReceivedTransferDetails extends Model{
 
   @Index
   @ForeignKey(() => ReceivedTransfers)
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   date!: string;
 
   @Column({

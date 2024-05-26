@@ -20,37 +20,46 @@ export class Customers extends Model{
   
   @Index
   @Column({
-    allowNull: false
+    allowNull: false,
+    type: DataType.STRING
   })
   name!: string;
 
   
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   sex!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   phone!: string;
 
   @Index
   @Column({
     validate: {
       isEmail: true
-    }
+    },
+    type: DataType.STRING
   })
   email!: string;
 
   @Column({
     validate: {
       isDate: true
-    }
+    },
+    type: DataType.STRING
   })
   date_of_birth!: string;
 
   @CreatedAt
   created_on!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   location!: string;
 
   @HasMany(() => CustomerDiagnostics)

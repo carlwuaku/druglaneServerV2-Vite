@@ -1,5 +1,5 @@
-import { constants } from '../electron/utils/constants';
-import { getToday } from '../electron/utils/dateHelper';
+import { constants } from '../utils/constants';
+import { getToday } from '../utils/dateHelper';
 import path from 'path';
 import * as winston from 'winston';
 

@@ -26,13 +26,15 @@ export class ReceivedTransfers extends Model{
 
   @Index
   @Column({
-    allowNull: false
+    allowNull: false,
+    type: DataType.STRING
   })
   code!: string;
   
   @Index
   @Column({
-    allowNull: false
+    allowNull: false,
+    type: DataType.STRING
   })
   invoice!: string;
 

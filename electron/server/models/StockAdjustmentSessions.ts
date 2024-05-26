@@ -28,7 +28,8 @@ export class StockAdjustmentSessions extends Model{
 
   @Index
   @Column({
-    unique: true
+    unique: true,
+    type: DataType.STRING
   })
   code!: string;
 

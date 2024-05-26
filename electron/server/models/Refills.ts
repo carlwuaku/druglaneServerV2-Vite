@@ -20,7 +20,9 @@ export class Refills extends Model{
   id!: number;
   
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   product!: string;
 
   @ForeignKey(() => Products)
@@ -57,7 +59,9 @@ export class Refills extends Model{
   created_by!: number;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   status!: string;
 
     @ForeignKey(() => Customers)
@@ -67,7 +71,9 @@ export class Refills extends Model{
   })
   customer_id!: number;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   customer_name!: string;
 
     @CreatedAt

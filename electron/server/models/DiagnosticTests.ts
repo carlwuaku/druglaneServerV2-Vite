@@ -15,13 +15,19 @@ export class DiagnosticTests extends Model{
   id!: number;
   
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   test_name!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   parameters!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   comments!: string;
 
     @CreatedAt

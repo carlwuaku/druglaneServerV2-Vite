@@ -28,7 +28,8 @@ export class Sales extends Model{
   @Index
   @Column({
     allowNull: false,
-    unique: true
+    unique: true,
+    type: DataType.STRING
   })
   code!: string;
 
@@ -51,31 +52,45 @@ export class Sales extends Model{
   amount_paid!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   payment_method!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   momo_reference!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   date!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   insurance_provider!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   insurance_member_name!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   insurance_member_id!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   creditor_name!: string;
 
   
@@ -95,7 +110,9 @@ export class Sales extends Model{
   tax!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   shift!: string;
 
   total?: number;

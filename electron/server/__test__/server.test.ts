@@ -6,7 +6,6 @@ import { InsuranceProviders } from "../models/InsuranceProviders";
 import { Users } from "../models/Users";
 import { Roles } from "../models/Roles";
 import fs from 'fs'
-import { constants } from "../../utils/constants";
 import { Customers } from "../models/Customers";
 import { _save } from "../services/customer.service";
 import { Permissions } from "../models/Permissions";

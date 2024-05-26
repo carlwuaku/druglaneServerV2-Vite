@@ -19,9 +19,13 @@ export class Roles extends Model{
   })
   role_id!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   role_name!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   description!: string;
 
   @CreatedAt

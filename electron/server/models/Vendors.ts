@@ -16,31 +16,45 @@ export class Vendors extends Model{
   id!: number;
   
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   name!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   location!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   phone!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   email!: string;
 
  
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   notes!: string;
 
   @CreatedAt
   created_on!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   legacy_id!: string;
 }
 

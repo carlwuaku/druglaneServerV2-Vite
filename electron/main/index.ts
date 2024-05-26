@@ -5,11 +5,11 @@ import path from 'node:path'
 import os from 'node:os'
 import { update } from './update'
 import { isAppActivated, verifyLicenseKey } from "../appValidation";
-import { logger } from "../../config/logger";
+import { logger } from "../../src/config/logger";
 import { constants, defaultOptions } from "../electronConstants";
-import serverEventEmitter from "../utils/ServerEvents";
+import serverEventEmitter from "../server/utils/ServerEvents";
 import { ACTIVATION_RESULT, APP_NOT_ACTIVATED, CALL_ACTIVATION, COMPLTED_DATABASE_UPDATE, CREATE_BACKUP, DATABASE_SETUP_EVENT, ERROR_UPDATING_DATABASE, GET_APP_DETAILS, GET_PREFERENCE, GET_PREFERENCES, GET_SERVER_STATE, GET_SERVER_URL, PREFERENCE_RECEIVED, PREFERENCE_SET, RESTART_APPLICATION, RESTART_SERVER, SERVER_DATABASE_UPDATE, SERVER_MESSAGE_RECEIVED, SERVER_STATE_CHANGED, SERVER_URL_RECEIVED, SERVER_URL_UPDATED, SET_ADMIN_PASSWORD, SET_PREFERENCE, UPDATING_DATABASE } from "../utils/stringKeys";
-import { runFolderCreation } from "../utils/directorySetup";
+import { runFolderCreation } from "@server/utils/directorySetup";
 import Store from "electron-store";
 import contextMenu from 'electron-context-menu';
 import * as url from 'url';
@@ -103,7 +103,7 @@ const appmenu: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
 ]
 
 //create backup folders
-runFolderCreation();
+// runFolderCreation();
 
 
 ipcMain.on(CALL_ACTIVATION, async (event, key) => {
@@ -172,7 +172,6 @@ ipcMain.on(SERVER_DATABASE_UPDATE, (event, data: string) => {
   console.log('server database update', data)
   sendServerDatabaseUpdate(data);
 })
-
 
 
 function savePreference(key: string, value: any) {
@@ -287,8 +286,10 @@ function sendServerUrl() {
 
 
 }
+console.log('nom7')
 
 async function createWindow() {
+  console.log('create window')
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -325,9 +326,12 @@ async function createWindow() {
   // Auto update
   update(win)
 }
+console.log('nom')
 
 app.whenReady().then(() => {
-  createWindow;
+  console.log('noreadym')
+
+  createWindow();
   spawnServer();
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
@@ -392,7 +396,7 @@ export async function spawnServer() {
       //spawn server->runmigrations
       // const serverPath = path.join(__dirname, 'server/server')
       // serverProcess = fork(serverPath);
-      await startServer();
+      // await startServer();
 
       // serverProcess.on('exit', (code: number, signal) => {
       //     logger.error({

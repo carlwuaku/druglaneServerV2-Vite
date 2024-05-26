@@ -18,6 +18,7 @@ export class Products extends Model{
   @Column({
     allowNull: false,
     unique: true,
+    type: DataType.STRING
   })
   name!: string;
 
@@ -33,16 +34,24 @@ export class Products extends Model{
   price!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   category!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   notes!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   picture!: string;
 
   @Index
@@ -81,7 +90,9 @@ export class Products extends Model{
   })
   expiry!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   barcode!: string;
 
   @Index
@@ -112,11 +123,15 @@ export class Products extends Model{
   })
   cost_price!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   size!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   description!: string;
 
   @Column({
@@ -126,7 +141,9 @@ export class Products extends Model{
   })
   status!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   shelf!: string;
 
   @Column({
@@ -134,25 +151,39 @@ export class Products extends Model{
   })
   preferred_vendor!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   is_drug!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   generic_name!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   contraindications!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   pregnancy!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   side_effects!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   caution!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   indications!: string;
 
   @Column({
@@ -166,13 +197,19 @@ export class Products extends Model{
   })
   markup!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   active_ingredients!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   drug_info!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   last_stock_modification!: string;
 
   @Column({

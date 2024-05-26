@@ -1,6 +1,6 @@
 import { logger } from "../config/logger";
 import axios, { AxiosResponse } from 'axios'
-import { constants } from '../../utils/constants'
+import { constants } from '../utils/constants'
 /**
  * make a get call to a url with some optional params
  * @param url the url to call

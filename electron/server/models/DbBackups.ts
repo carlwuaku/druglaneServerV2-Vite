@@ -17,7 +17,9 @@ export class DbBackups extends Model{
   id!: number;
 
   
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   file_name!: string;
 
   @ForeignKey(() => Users)
@@ -25,11 +27,17 @@ export class DbBackups extends Model{
     type: DataType.INTEGER
   })
   created_by!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   description!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   uploaded!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   db_version!: string;
   @CreatedAt
   created_on!: string;

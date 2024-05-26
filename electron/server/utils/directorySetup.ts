@@ -1,5 +1,5 @@
-import { constants } from "./constants";
-import { logger } from "../../config/logger";
+import { constants } from "../utils/constants";
+import { logger } from "../config/logger";
 import * as fs from 'fs';
 
 const folders = [constants.backup_folder,

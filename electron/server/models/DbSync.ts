@@ -14,13 +14,19 @@ export class DbSync extends Model{
   })
   id!: number;
   
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   type!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   action!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   data!: string;
 
   @CreatedAt

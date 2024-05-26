@@ -24,11 +24,14 @@ export class Permissions extends Model{
   @Index
   @Column({
     unique: true,
+    type: DataType.STRING
   })
   name!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   description!: string;
   
   updatedAt!: false;

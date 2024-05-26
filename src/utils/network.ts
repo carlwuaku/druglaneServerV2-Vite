@@ -1,4 +1,4 @@
-import { logger } from "../../src/config/logger";
+import { logger } from "../config/logger";
 import axios, { AxiosHeaders, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios'
 import { constants } from "./constants";
 import { useAuthUser } from 'react-auth-kit'

@@ -24,17 +24,25 @@ export class CustomerDiagnostics extends Model{
   })
   customer!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   test!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   data!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   comments!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   date!: string;
 
   @Index

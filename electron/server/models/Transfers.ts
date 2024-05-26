@@ -29,10 +29,14 @@ export class Transfers extends Model{
   date!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   status!: string;
 
   @CreatedAt

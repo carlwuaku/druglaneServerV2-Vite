@@ -16,8 +16,16 @@ export default defineConfig(({ command }) => {
   return {
     resolve: {
       alias: {
-        '@': path.join(__dirname, 'src')
+        '@': path.join(__dirname, 'src'),
+        '@utils': path.join(__dirname, 'src/utils')
       },
+    },
+    optimizeDeps: {
+      include: [
+        '@emotion/react',
+        '@emotion/styled',
+        '@mui/material/Tooltip'
+      ],
     },
     plugins: [
       react(),
@@ -38,7 +46,7 @@ export default defineConfig(({ command }) => {
               minify: isBuild,
               outDir: 'dist-electron/main',
               rollupOptions: {
-                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+                external: [...(Object.keys('dependencies' in pkg ? pkg.dependencies : {})),"utils/*"],
               },
             },
           },

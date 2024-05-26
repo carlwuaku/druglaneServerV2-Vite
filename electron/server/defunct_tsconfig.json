@@ -9,7 +9,7 @@
         "noFallthroughCasesInSwitch": true,
         "noEmitOnError": true,
         "noImplicitAny": true,
-        "module": "commonjs",
+        "module": "ESNext",
         "esModuleInterop": true,
         "sourceMap": true,
         "baseUrl": "./",
@@ -23,5 +23,5 @@
     },
     "include": [
         "./**/*"
-, "../utils/constants.ts"    ],
+, "../utils/constants.ts"    ]
 }

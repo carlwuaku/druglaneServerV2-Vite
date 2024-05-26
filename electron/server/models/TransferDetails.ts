@@ -37,7 +37,9 @@ export class TransferDetails extends Model{
   })
   cost_price!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 
   @CreatedAt
@@ -58,7 +60,9 @@ export class TransferDetails extends Model{
 
   @Index
   @ForeignKey(() => Transfers)
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @Index

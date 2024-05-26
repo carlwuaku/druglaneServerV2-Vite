@@ -28,14 +28,20 @@ export class Purchases extends Model{
   })
   date!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   site!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   status!: string;
 
   @CreatedAt
@@ -48,11 +54,15 @@ export class Purchases extends Model{
   created_by!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   invoice!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   payment_method!: string;
 
   @Column({

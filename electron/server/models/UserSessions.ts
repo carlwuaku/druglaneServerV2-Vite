@@ -23,7 +23,9 @@ export class UserSessions extends Model{
   user_id!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   token!: string;
 
   @CreatedAt

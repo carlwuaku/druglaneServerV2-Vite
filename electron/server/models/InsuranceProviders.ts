@@ -13,7 +13,9 @@ export class InsuranceProviders extends Model{
   })
   id!: number;
   
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   name!: string;
   
   @CreatedAt

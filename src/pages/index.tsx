@@ -9,7 +9,7 @@ import ServerLogs from '../components/ServerLogs';
 import { getData } from '@/utils/network';
 import { Button, Card, CardContent, CardHeader, Typography } from '@mui/material';
 import AppConfig from '../components/AppConfig';
-import { styled } from '@mui/material/styles';
+// import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -20,13 +20,13 @@ import GlobalContext from '../global/global';
 import {useAuthUser} from 'react-auth-kit'
 // import logo from '@/app/assets/logo.png';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
+// const Item = styled(Paper)(({ theme }) => ({
+//   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+//   ...theme.typography.body2,
+//   padding: theme.spacing(1),
+//   textAlign: 'center',
+//   color: theme.palette.text.secondary,
+// }));
 
 const times = [
   { label: "12 AM", value: "0" },

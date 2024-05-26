@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { logger } from '../config/logger';
+import { logger } from '../src/config/logger';
 import { constants } from './electronConstants';
 import { getData } from './utils/network';
 //check if the database file exists. if it does, then the app has been validated.

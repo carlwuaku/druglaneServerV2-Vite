@@ -2,7 +2,7 @@
  * This contains the logic for all the functionalities in the staffcontroller. also used in the 
  * firebase functions. all functions must be async, and throw errors if necessary
  */
-import { constants } from '../../utils/constants'
+import { constants } from '../utils/constants'
 import path from 'path';
 import { Users } from '../models/Users';
 import { Roles } from '../models/Roles';

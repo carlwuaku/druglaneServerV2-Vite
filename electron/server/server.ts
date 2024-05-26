@@ -1,4 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv';
 import { constants } from '../utils/constants'
 import fork from 'child_process';
@@ -6,7 +8,7 @@ import ip from 'ip';
 import { logger } from './config/logger';
 import { runMigrations } from './config/migrations/migrations';
 import { Settings } from './models/Settings';
-import serverEventEmitter from "../utils/ServerEvents";
+import serverEventEmitter from "./utils/ServerEvents";
 import { PORT, SERVER_MESSAGE_RECEIVED, SERVER_RUNNING, SERVER_STATE_CHANGED, SERVER_URL_UPDATED } from '../utils/stringKeys'
 import adminController from './controllers/admin.controller';
 import customerController from './controllers/customer.controller';
@@ -23,7 +25,8 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import { hasPermission } from './utils/auth';
 const store = new Store();
-
+const require = createRequire(import.meta.url)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenv.config();
 // console.log('erver')

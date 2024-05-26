@@ -20,7 +20,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import Link from '@mui/material/Link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import  LocalImage  from "@/app/components/Image";
+import  LocalImage  from "@/components/Image";
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 import { useSignOut } from 'react-auth-kit'
@@ -148,7 +148,7 @@ const Header = (props: { showBackArrow?: boolean }) => {
               <ArrowBackIcon />
             </IconButton> : ''}
 
-          <LocalImage height='35px' image='logo.png'  />
+          <LocalImage height='35px' image='Logo'  />
           <Typography
             variant="h6"
             noWrap

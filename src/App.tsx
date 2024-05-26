@@ -2,7 +2,6 @@ import { useState } from 'react'
 import UpdateElectron from '@/components/update'
 import logoVite from './assets/logo-vite.svg'
 import logoElectron from './assets/logo-electron.svg'
-import '..css'
 import CssBaseline from '@mui/material/CssBaseline';
 
 import "primereact/resources/themes/md-light-indigo/theme.css";
@@ -11,7 +10,7 @@ import "primeicons/primeicons.css";
 import 'primeflex/primeflex.css';
 import '@fontsource/lato';
 import '@fontsource/ubuntu';
-import '@/style.scss'
+import '@/App.css'
 import { HashRouter, Route, Routes } from "react-router-dom";
 import Activate from "./pages/activate";
 import Index from "./pages";
@@ -31,29 +30,29 @@ import { DatabaseSetup } from "./pages/databaseSetup";
 function App() {
   return (
     <div>
-            <CssBaseline />
-            <Routes>
+      <CssBaseline />
+      <Routes>
 
-                <Route path='/activate' element={<Activate />} />
-                <Route path='/help' element={<Index />} />
-                <Route path='/settings' element={<RequireAuth loginPath={"/login"} ><SettingsPage /></RequireAuth>} />
-                <Route path='/adminPassword' element={<SetAdminPassword />} />
-                <Route path='/roles' element={<RequireAuth loginPath={"/login"} ><Roles /></RequireAuth>} />
-                <Route path='/addRole' element={<AddRole />} />
-                <Route path='/addRole/:id' element={<RequireAuth loginPath={"/login"}><AddRole /></RequireAuth>} />
-                <Route path='/users' element={<RequireAuth loginPath={"/login"}><Users /></RequireAuth>} />
-                <Route path='/addUser' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
-                <Route path='/addUser/:id' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
-                <Route path='/login' element={<Login />} />
-                <Route path='/resetPassword' element={<ResetPassword />} />
-                <Route path='/databaseSetup' element={<DatabaseSetup />} />
-                <Route path="/" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
+        <Route path='/activate' element={<Activate />} />
+        <Route path='/help' element={<Index />} />
+        <Route path='/settings' element={<RequireAuth loginPath={"/login"} ><SettingsPage /></RequireAuth>} />
+        <Route path='/adminPassword' element={<SetAdminPassword />} />
+        <Route path='/roles' element={<RequireAuth loginPath={"/login"} ><Roles /></RequireAuth>} />
+        <Route path='/addRole' element={<AddRole />} />
+        <Route path='/addRole/:id' element={<RequireAuth loginPath={"/login"}><AddRole /></RequireAuth>} />
+        <Route path='/users' element={<RequireAuth loginPath={"/login"}><Users /></RequireAuth>} />
+        <Route path='/addUser' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
+        <Route path='/addUser/:id' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/resetPassword' element={<ResetPassword />} />
+        <Route path='/databaseSetup' element={<DatabaseSetup />} />
+        <Route path="/" element={<Index />} />
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
-      <UpdateElectron />
-        </div>
-    
+      {/* <UpdateElectron /> */}
+    </div>
+
   )
 }
 

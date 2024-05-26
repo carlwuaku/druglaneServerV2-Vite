@@ -1,9 +1,14 @@
 import React from "react";
+import * as Images from "@/assets"
 
-const LocalImage = ({ image, height, className }: { image: string, height:string, className?:string }) => {
-    const imageObject = require(`@/app/assets/${image}`);
+interface ImageProps {
+    image: keyof typeof Images;
+    height: string;
+    className?: string;
+}
 
-    return <img src={imageObject.default} className={className} alt="none" height={height}/>
+const LocalImage = ({ image, height, className }: ImageProps) => {
+        return <img src={Images[image]} className={className} alt="none" height={height}/>
 }
 
 export default LocalImage

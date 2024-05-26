@@ -1,13 +1,13 @@
 
 
 
-require('ts-node/register')
+// require('ts-node/register')
 
 import { Umzug, SequelizeStorage } from 'umzug';
 import { migrationsList } from './migrationsList';
 import { sequelize } from '../sequelize-config'
 import { logger } from '../logger';
-import serverEventEmitter from '../../../utils/ServerEvents';
+import serverEventEmitter from '../../../server/utils/ServerEvents';
 import { COMPLTED_DATABASE_UPDATE, ERROR_UPDATING_DATABASE, SERVER_DATABASE_UPDATE, UPDATING_DATABASE } from '../../../utils/stringKeys';
 const umzug = new Umzug({
   migrations: migrationsList,

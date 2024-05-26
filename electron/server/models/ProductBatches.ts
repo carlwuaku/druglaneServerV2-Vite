@@ -16,14 +16,18 @@ export class ProductBatches extends Model{
   })
   id!: number;
   
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   batch_number!: string;
 
   @Column({
     type: DataType.DATEONLY
   })
   expiry!: string;
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   barcode!: string;
 
   @ForeignKey(() => Products)
@@ -32,7 +36,9 @@ export class ProductBatches extends Model{
   })
   product!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   purchase_code!: string;
 
 }

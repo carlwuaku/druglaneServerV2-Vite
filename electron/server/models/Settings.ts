@@ -1,4 +1,4 @@
-import { Table, Model, Column, Index } from "sequelize-typescript";
+import { Table, Model, Column, Index, DataType } from "sequelize-typescript";
 
 @Table({
   tableName: "settings",
@@ -10,15 +10,19 @@ export class Settings extends Model{
   @Index
   @Column({
     allowNull: false,
-    unique: true
+    unique: true,
+    type: DataType.STRING
   })
   name!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   value!: string;
 
   @Column({
-    allowNull: false
+    allowNull: false,
+    type: DataType.STRING
   })
   module!: string;
 

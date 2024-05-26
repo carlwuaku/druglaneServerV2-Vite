@@ -76,17 +76,23 @@ export class StockAdjustmentPending extends Model {
   })
   created_by!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @CreatedAt
   created_on!: string;
 
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   category!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   size!: string;
 
   @Column({
@@ -97,7 +103,9 @@ export class StockAdjustmentPending extends Model {
   })
   expiry!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   comments!: string;
 
   @Index
@@ -124,9 +132,13 @@ export class StockAdjustmentPending extends Model {
   })
   quantity_damaged!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   shelf!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 }

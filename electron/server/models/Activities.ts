@@ -26,7 +26,7 @@ export class Activities extends Model{
         type: DataType.INTEGER,
         allowNull: false,
     })
-    user_id!: string;
+    user_id!: number;
 
     @Column({
         type: DataType.STRING,

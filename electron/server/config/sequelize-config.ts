@@ -58,7 +58,7 @@ export async function authenticate():Promise<boolean> {
         
     }
 }
-
+console.log("running sequelize config")
 connection.addModels(allModels);
 
 Permissions.belongsToMany(Roles, {

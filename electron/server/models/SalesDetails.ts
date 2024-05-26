@@ -39,7 +39,9 @@ import { Op } from "sequelize";
   })
   price!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 
   @Column({
@@ -48,16 +50,22 @@ import { Op } from "sequelize";
   })
   created_on!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   label!: string;
   
   @Index
   @ForeignKey(() => Sales)
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   date!: string;
 
   @Column({
@@ -67,7 +75,9 @@ import { Op } from "sequelize";
   cost_price!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   expiry!: string;
 
   total?: number;

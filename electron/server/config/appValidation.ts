@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { constants } from '../../utils/constants';
+import { constants } from '../utils/constants';
 import { Settings } from '../models/Settings';
 //check if the database file exists. if it does, then the app has been validated.
 export const isAppActivated = ():boolean => {

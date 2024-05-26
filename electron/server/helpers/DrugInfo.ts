@@ -1,4 +1,4 @@
-import { Table, Model, Column,   CreatedAt } from "sequelize-typescript";
+import { Table, Model, Column,   CreatedAt, DataType } from "sequelize-typescript";
 
 @Table({
    tableName: 'drug_info',
@@ -7,38 +7,68 @@ import { Table, Model, Column,   CreatedAt } from "sequelize-typescript";
 })
 
 export class DrugInfo extends Model{
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   name!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   pregnancy!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   pharmacodynamics!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   indications_and_usage!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   contraindications!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   drug_interactions_table!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   warnings_and_cautions!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   dosage_and_administration!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   adverse_reactions!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   information_for_patients!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   clinical_pharmacology!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   drug_abuse_and_dependence!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   teratogenic_effects!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   geriatric_use!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   overdosage!: string;
 
   @CreatedAt

@@ -37,7 +37,9 @@ export class PurchaseDetails extends Model{
   })
   price!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
 
   @CreatedAt
@@ -56,7 +58,9 @@ export class PurchaseDetails extends Model{
   markup!: number;
 
   @Index
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   code!: string;
 
   @Index

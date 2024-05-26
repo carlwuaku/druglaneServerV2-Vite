@@ -76,7 +76,8 @@ import { Users } from "./Users";
   created_by!: number;
 
   @Column({
-    allowNull: true
+    allowNull: true,
+    type: DataType.STRING
   })
   code!: string;
 
@@ -84,10 +85,14 @@ import { Users } from "./Users";
   created_on!: string;
 
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   category!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   size!: string;
 
   @Column({
@@ -98,7 +103,9 @@ import { Users } from "./Users";
   })
   expiry!: string;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   comments!: string;
 
   @Index
@@ -122,7 +129,9 @@ import { Users } from "./Users";
   quantity_damaged!: number;
 
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   unit!: string;
   
  

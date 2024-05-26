@@ -13,6 +13,8 @@ export class ItemActiveIngredients extends Model{
   })
   product!: number;
 
-  @Column
+  @Column({
+    type: DataType.STRING
+  })
   ingredient!: string;
 }

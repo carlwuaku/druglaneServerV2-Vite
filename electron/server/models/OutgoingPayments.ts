@@ -29,20 +29,30 @@ export class OutgoingPayments extends Model{
   })
   amount!: number;
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   type!: string;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   recipient!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   transaction_id!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   item_code!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   notes!: string;
 
     @ForeignKey(() => Users)

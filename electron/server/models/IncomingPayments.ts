@@ -30,25 +30,37 @@ export class IncomingPayments extends Model{
   amount!: number;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   type!: string;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   payer!: string;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   payment_method!: string;
 
     @Index
-  @Column
+    @Column({
+      type: DataType.STRING
+    })
   transaction_id!: string;
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   item_code!: string;
 
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   notes!: string;
     
     @ForeignKey(() => Users)

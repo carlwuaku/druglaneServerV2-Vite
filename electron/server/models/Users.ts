@@ -60,7 +60,9 @@ export class Users extends Model{
     @CreatedAt
   created_on!: string;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   display_name!: string;
 
     @Index
@@ -71,7 +73,9 @@ export class Users extends Model{
   })
   active!: number;
 
-    @Column
+  @Column({
+    type: DataType.STRING
+  })
   last_seen!: string;
 
     @Index
