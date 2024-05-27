@@ -162,7 +162,7 @@ export const defaultSalesPersonPermissions: number[] = [
 
 
 
- interface PermissionType{
+ export interface PermissionType{
     permission_id: number;
     name: string;
     description: string;

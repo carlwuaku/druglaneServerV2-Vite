@@ -10,7 +10,7 @@ import { sequelize } from "../sequelize-config";
 import { Customers } from "../../models/Customers";
 import { Activities } from "../../models/Activities";
 import { Permissions } from "../../models/Permissions";
-import { allPermissions, defaultSalesPersonPermissions } from "../../config/permissions";
+import { PermissionType, allPermissions, defaultSalesPersonPermissions } from "../../config/permissions";
 import { Roles } from "../../models/Roles";
 import { RolePermissions } from "../../models/RolePermissions";
 import { Users } from "../../models/Users";
@@ -40,8 +40,36 @@ import { OnlineBackups } from "../../models/OnlineBackups";
 import { DbSync } from "../../models/DbSync";
 import { IncomingPayments } from "../../models/IncomingPayments";
 import { DailyRecords } from "../../models/DailyRecords";
+import { ProductBatches } from "../../models/ProductBatches";
 
-async function getIndexes(tableName:string, queryInterface:QueryInterface): Promise<string[]>{
+async function insertIgnore(queryInterface: QueryInterface, tableName: string, data: any[], keys: string[]) {
+    const existing = await queryInterface.select(null, tableName);
+
+    //if there are no rows, do nothing. else for each item in the allPermissions array, check if it exists in the db
+    //if it does not, insert it
+    if (existing.length < 1) {
+        await queryInterface.bulkInsert(Permissions.tableName,
+            data);
+    }
+    else {
+        const rowsToInsert: any[] = [];
+        data.forEach(item => {
+            if (!existing.find((p: any) => keys.every((key: string) => p[key] === item[key]))) {
+                rowsToInsert.push(item);
+            }
+        });
+        console.log(data, rowsToInsert)
+        if (rowsToInsert.length > 0) {
+            await queryInterface.bulkInsert(tableName, rowsToInsert, {
+                logging(sql, timing) {
+                    console.log(sql, timing);
+                },
+            });
+        }
+    }
+}
+
+async function getIndexes(tableName: string, queryInterface: QueryInterface): Promise<string[]> {
     let index_names: string[] = [];
     const indexes: { [key: string]: any } = await queryInterface.showIndex(tableName);
     for (const key in indexes) {
@@ -57,7 +85,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "2019-001-initialMigrations-addActvities",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            
+
             await queryInterface.createTable(Activities.tableName, {
                 activity_id: {
                     allowNull: false,
@@ -155,11 +183,29 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "2019-004-initialMigrations-insertPermissions",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            //get all rows from the permissions table
+            const existing = await queryInterface.select(null, Permissions.tableName);
+            //if there are no rows, do nothing. else for each item in the allPermissions array, check if it exists in the db
+            //if it does not, insert it
+            if (existing.length < 1) {
+                await queryInterface.bulkInsert(Permissions.tableName,
+                    [...allPermissions.values()]);
+            }
+            else {
+                const rowsToInsert: PermissionType[] = [];
+                allPermissions.forEach(permission => {
+                    if (!existing.find((p: any) => p.name === permission.name || p.permission_id === permission.permission_id)) {
+                        rowsToInsert.push(permission);
+                    }
 
-            await queryInterface.bulkInsert(Permissions.tableName,
-                [...allPermissions.values()],
-                {
+
                 });
+                await Permissions.bulkCreate(rowsToInsert.map(permission => ({ ...permission })));
+            }
+
+
+
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             //no going back
@@ -186,7 +232,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             })
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.dropTable(Permissions.tableName);
+            await queryInterface.dropTable(Roles.tableName);
         }
     },
     {
@@ -208,58 +254,70 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     type: INTEGER,
                     allowNull: false
                 }
-            });
+            }, {});
 
-            await queryInterface.addConstraint(
-                RolePermissions.tableName,
-                {
-                    fields: ['role_id'],
-                    type: 'foreign key',
-                    name: 'role_permissions_role_id', // useful if using queryInterface.removeConstraint
-                    references: {
-                        table: Roles.tableName,
-                        field: 'role_id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
-            await queryInterface.addConstraint(RolePermissions.tableName,
-                {
-                    fields: ['permission_id'],
-                    type: 'foreign key',
-                    name: 'role_permissions_permission_id', // useful if using queryInterface.removeConstraint
-                    references: {
-                        table: Permissions.tableName,
-                        field: 'permission_id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(RolePermissions.tableName);
         }
     },
 
+    // {
+    //     name: "2019-006.5-initialMigrations-addRolePermissionConstraints",
+    //     async up({ context: queryInterface }: { context: QueryInterface }) {
+
+    //         const existing = await  queryInterface.getForeignKeysForTables([RolePermissions.tableName]);
+    //         console.log('current existing',existing)
+    //         await queryInterface.addConstraint(
+    //             RolePermissions.tableName,
+    //             {
+    //                 fields: ['role_id'],
+    //                 type: 'foreign key',
+    //                 name: 'role_permissions_role_id', // useful if using queryInterface.removeConstraint
+    //                 references: {
+    //                     table: Roles.tableName,
+    //                     field: 'role_id',
+    //                 },
+    //                 onDelete: 'cascade',
+    //                 onUpdate: 'cascade'
+    //             });
+    //         await queryInterface.addConstraint(RolePermissions.tableName,
+    //             {
+    //                 fields: ['permission_id'],
+    //                 type: 'foreign key',
+    //                 name: 'role_permissions_permission_id', // useful if using queryInterface.removeConstraint
+    //                 references: {
+    //                     table: Permissions.tableName,
+    //                     field: 'permission_id',
+    //                 },
+    //                 onDelete: 'cascade',
+    //                 onUpdate: 'cascade'
+    //             });
+    //     },
+    //     async down({ context: queryInterface }: { context: QueryInterface }) {
+    //     }
+    // },
     {
         name: "2019-007-initialMigrations-insertRoles",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-
-            await queryInterface.bulkInsert(Roles.tableName,
-                [
-                    {
-                        role_id: 1,
-                        role_name: 'Branch Manager',
-                        description: 'manages day-to-day activities. Receives purchases, manages stock. May also make sales'
-                    },
-                    {
-                        role_id: 2,
-                        role_name: 'Sales Person',
-                        description: 'serves customers and makes sales. Limited permissions by default'
-                    }
-                ],
+            const data = [
                 {
-                });
+                    role_id: 1,
+                    role_name: 'Branch Manager',
+                    description: 'manages day-to-day activities. Receives purchases, manages stock. May also make sales'
+                },
+                {
+                    role_id: 2,
+                    role_name: 'Sales Person',
+                    description: 'serves customers and makes sales. Limited permissions by default'
+                }
+            ];
+            await insertIgnore(queryInterface, Roles.tableName, data, ["role_id"])
+
+
+
+
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             //no going back
@@ -275,13 +333,14 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             })
 
             defaultSalesPersonPermissions.forEach(id => {
-                objects.push({role_id: 2, permission_id: id})
+                objects.push({ role_id: 2, permission_id: id })
             })
+            await insertIgnore(queryInterface, RolePermissions.tableName, objects, ["role_id", "permission_id"])
 
-            await queryInterface.bulkInsert(RolePermissions.tableName,
-                objects,
-                {
-                });
+            // await queryInterface.bulkInsert(RolePermissions.tableName,
+            //     objects,
+            //     {
+            //     });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             //no going back
@@ -309,8 +368,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             //check if the indexes exists before adding them
             let index_names: string[] = await getIndexes(InsuranceProviders.tableName, queryInterface)
             if (index_names.indexOf(`${InsuranceProviders.tableName}_name`))
-            await queryInterface.addIndex(InsuranceProviders.tableName,
-                ['name']);
+                await queryInterface.addIndex(InsuranceProviders.tableName,
+                    ['name']);
 
 
         },
@@ -368,10 +427,10 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             //check if the indexes exists before adding them
             let index_names: string[] = await getIndexes(Vendors.tableName, queryInterface)
             if (index_names.indexOf(`${Vendors.tableName}_name`) === -1)
-            await queryInterface.addIndex(Vendors.tableName,
-                ['name'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Vendors.tableName,
+                    ['name'], {
+                    unique: true
+                });
 
 
         },
@@ -420,10 +479,10 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             //check if the indexes exists before adding them
             let index_names: string[] = await getIndexes(Branches.tableName, queryInterface)
             if (index_names.indexOf(`${Branches.tableName}_name`) === -1)
-            await queryInterface.addIndex(Branches.tableName,
-                ['name'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Branches.tableName,
+                    ['name'], {
+                    unique: true
+                });
 
 
         },
@@ -459,10 +518,10 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(Settings.tableName, queryInterface)
             if (index_names.indexOf(`${Settings.tableName}_name`) === -1)
-            await queryInterface.addIndex(Settings.tableName,
-                ['name'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Settings.tableName,
+                    ['name'], {
+                    unique: true
+                });
 
 
         },
@@ -532,16 +591,16 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(Users.tableName, queryInterface)
             if (index_names.indexOf(`${Users.tableName}_username`) === -1)
-            await queryInterface.addIndex(Users.tableName,
-                ['username'], {
+                await queryInterface.addIndex(Users.tableName,
+                    ['username'], {
                     unique: true
-            });
+                });
 
             if (index_names.indexOf(`${Users.tableName}_email`) === -1)
-            await queryInterface.addIndex(Users.tableName,
-                ['email'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Users.tableName,
+                    ['email'], {
+                    unique: true
+                });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(Users.tableName);
@@ -577,10 +636,10 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(UserSessions.tableName, queryInterface)
             if (index_names.indexOf(`${UserSessions.tableName}_user_id_token_expires`) === -1)
-            await queryInterface.addIndex(UserSessions.tableName,
-                ['user_id','token','expires'], {
-                unique: true
-            });
+                await queryInterface.addIndex(UserSessions.tableName,
+                    ['user_id', 'token', 'expires'], {
+                    unique: true
+                });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(UserSessions.tableName);
@@ -671,51 +730,51 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                 }
             });
 
-            
+
             //check if the indexes exists before adding them
             let index_names: string[] = await getIndexes(Products.tableName, queryInterface)
             if (index_names.indexOf(`${Products.tableName}_name`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['name'], {
-                unique: true,
+                await queryInterface.addIndex(Products.tableName,
+                    ['name'], {
+                    unique: true,
 
-            });
+                });
 
-            if(index_names.indexOf(`${Products.tableName}_price`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['price']);
-            
+            if (index_names.indexOf(`${Products.tableName}_price`) === -1)
+                await queryInterface.addIndex(Products.tableName,
+                    ['price']);
+
             if (index_names.indexOf(`${Products.tableName}_category`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['category']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['category']);
+
             if (index_names.indexOf(`${Products.tableName}_max_stock`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['max_stock']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['max_stock']);
+
             if (index_names.indexOf(`${Products.tableName}_min_stock`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['min_stock']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['min_stock']);
+
             if (index_names.indexOf(`${Products.tableName}_expiry`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['expiry']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['expiry']);
+
             if (index_names.indexOf(`${Products.tableName}_current_stock`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['current_stock']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['current_stock']);
+
             if (index_names.indexOf(`${Products.tableName}_last_modified`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['last_modified']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['last_modified']);
+
             if (index_names.indexOf(`${Products.tableName}_status`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                [ 'status']);
-            
+                await queryInterface.addIndex(Products.tableName,
+                    ['status']);
+
             if (index_names.indexOf(`${Products.tableName}_description`) === -1)
-            await queryInterface.addIndex(Products.tableName,
-                ['description']);
+                await queryInterface.addIndex(Products.tableName,
+                    ['description']);
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(Products.tableName);
@@ -798,27 +857,27 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     allowNull: false,
                     defaultValue: 'Not Set'
                 }
-                
-                
+
+
             });
             let index_names: string[] = await getIndexes(Sales.tableName, queryInterface)
             if (index_names.indexOf(`${Sales.tableName}_code`) === -1)
-            await queryInterface.addIndex(Sales.tableName,
-                ['code'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Sales.tableName,
+                    ['code'], {
+                    unique: true
+                });
             if (index_names.indexOf(`${Sales.tableName}_payment_method`) === -1)
-            await queryInterface.addIndex(Sales.tableName,
-                ['payment_method']);
-            
+                await queryInterface.addIndex(Sales.tableName,
+                    ['payment_method']);
+
             if (index_names.indexOf(`${Sales.tableName}_date`) === -1)
-            await queryInterface.addIndex(Sales.tableName,
-                ['date',]);
-            
+                await queryInterface.addIndex(Sales.tableName,
+                    ['date',]);
+
             if (index_names.indexOf(`${Sales.tableName}_customer`) === -1)
-            await queryInterface.addIndex(Sales.tableName,
-                ['customer',]);
-            
+                await queryInterface.addIndex(Sales.tableName,
+                    ['customer',]);
+
             // await queryInterface.addConstraint(
             //     Sales.tableName,
             //     {
@@ -832,8 +891,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             //         onDelete: 'restrict',
             //         onUpdate: 'cascade'
             //     });
-            
-            
+
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(Sales.tableName);
@@ -887,12 +946,12 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(SalesDetails.tableName, queryInterface)
             if (index_names.indexOf(`${SalesDetails.tableName}_code`) === -1)
-            await queryInterface.addIndex(SalesDetails.tableName,
-                ['code']);
+                await queryInterface.addIndex(SalesDetails.tableName,
+                    ['code']);
 
             if (index_names.indexOf(`${SalesDetails.tableName}_date`) === -1)
-            await queryInterface.addIndex(SalesDetails.tableName,
-                ['date',]);
+                await queryInterface.addIndex(SalesDetails.tableName,
+                    ['date',]);
 
             await queryInterface.addConstraint(
                 SalesDetails.tableName,
@@ -987,35 +1046,35 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             let index_names: string[] = await getIndexes(Purchases.tableName, queryInterface)
             if (index_names.indexOf(`${Purchases.tableName}_code`) === -1)
-            await queryInterface.addIndex(Purchases.tableName,
-                ['code'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Purchases.tableName,
+                    ['code'], {
+                    unique: true
+                });
 
             if (index_names.indexOf(`${Purchases.tableName}_payment_method`) === -1)
-            await queryInterface.addIndex(Purchases.tableName,
-                ['payment_method',]);
-            
-            if (index_names.indexOf(`${Purchases.tableName}_date`) === -1)
-            await queryInterface.addIndex(Purchases.tableName,
-                ['date',]);
-            
-            if (index_names.indexOf(`${Purchases.tableName}_vendor`) === -1)
-            await queryInterface.addIndex(Purchases.tableName,
-                ['vendor',]);
+                await queryInterface.addIndex(Purchases.tableName,
+                    ['payment_method',]);
 
-            await queryInterface.addConstraint(
-                Purchases.tableName,
-                {
-                    fields: ['vendor'],
-                    type: 'foreign key',
-                    references: {
-                        table: Vendors.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            if (index_names.indexOf(`${Purchases.tableName}_date`) === -1)
+                await queryInterface.addIndex(Purchases.tableName,
+                    ['date',]);
+
+            if (index_names.indexOf(`${Purchases.tableName}_vendor`) === -1)
+                await queryInterface.addIndex(Purchases.tableName,
+                    ['vendor',]);
+
+            // await queryInterface.addConstraint(
+            //     Purchases.tableName,
+            //     {
+            //         fields: ['vendor'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Vendors.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
 
         },
@@ -1079,38 +1138,38 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(PurchaseDetails.tableName, queryInterface)
             if (index_names.indexOf(`${PurchaseDetails.tableName}_code`) === -1)
-            await queryInterface.addIndex(PurchaseDetails.tableName,
-                ['code']);
+                await queryInterface.addIndex(PurchaseDetails.tableName,
+                    ['code']);
 
             if (index_names.indexOf(`${PurchaseDetails.tableName}_date`) === -1)
-            await queryInterface.addIndex(PurchaseDetails.tableName,
-                ['date']);
+                await queryInterface.addIndex(PurchaseDetails.tableName,
+                    ['date']);
+            // if the table exis
+            // await queryInterface.addConstraint(
+            //     PurchaseDetails.tableName,
+            //     {
+            //         fields: ['code'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Purchases.tableName,
+            //             field: 'code',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
 
-            await queryInterface.addConstraint(
-                PurchaseDetails.tableName,
-                {
-                    fields: ['code'],
-                    type: 'foreign key',
-                    references: {
-                        table: Purchases.tableName,
-                        field: 'code',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
-
-            await queryInterface.addConstraint(
-                PurchaseDetails.tableName,
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     PurchaseDetails.tableName,
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -1158,35 +1217,35 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(ReceivedTransfers.tableName, queryInterface)
             if (index_names.indexOf(`${ReceivedTransfers.tableName}_code`) === -1)
-            await queryInterface.addIndex(ReceivedTransfers.tableName,
-                ['code'], {
-                unique: true
-            });
+                await queryInterface.addIndex(ReceivedTransfers.tableName,
+                    ['code'], {
+                    unique: true
+                });
 
             if (index_names.indexOf(`${ReceivedTransfers.tableName}_invoice`) === -1)
-            await queryInterface.addIndex(ReceivedTransfers.tableName,
-                ['invoice',]);
-            
-            if (index_names.indexOf(`${ReceivedTransfers.tableName}_date`) === -1)
-            await queryInterface.addIndex(ReceivedTransfers.tableName,
-                ['date',]);
-            
-            if (index_names.indexOf(`${ReceivedTransfers.tableName}_sender`) === -1)
-            await queryInterface.addIndex(ReceivedTransfers.tableName,
-                ['sender',]);
+                await queryInterface.addIndex(ReceivedTransfers.tableName,
+                    ['invoice',]);
 
-            await queryInterface.addConstraint(
-                ReceivedTransfers.tableName,
-                {
-                    fields: ['sender'],
-                    type: 'foreign key',
-                    references: {
-                        table: Branches.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            if (index_names.indexOf(`${ReceivedTransfers.tableName}_date`) === -1)
+                await queryInterface.addIndex(ReceivedTransfers.tableName,
+                    ['date',]);
+
+            if (index_names.indexOf(`${ReceivedTransfers.tableName}_sender`) === -1)
+                await queryInterface.addIndex(ReceivedTransfers.tableName,
+                    ['sender',]);
+
+            // await queryInterface.addConstraint(
+            //     ReceivedTransfers.tableName,
+            //     {
+            //         fields: ['sender'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Branches.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
 
         },
@@ -1247,38 +1306,38 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(ReceivedTransferDetails.tableName, queryInterface)
             if (index_names.indexOf(`${ReceivedTransferDetails.tableName}_code`) === -1)
-            await queryInterface.addIndex(ReceivedTransferDetails.tableName,
-                ['code']);
+                await queryInterface.addIndex(ReceivedTransferDetails.tableName,
+                    ['code']);
 
             if (index_names.indexOf(`${ReceivedTransferDetails.tableName}_date`) === -1)
-            await queryInterface.addIndex(ReceivedTransferDetails.tableName,
-                ['date']);
+                await queryInterface.addIndex(ReceivedTransferDetails.tableName,
+                    ['date']);
 
-            await queryInterface.addConstraint(
-                ReceivedTransferDetails.tableName,
-                {
-                    fields: ['code'],
-                    type: 'foreign key',
-                    references: {
-                        table: ReceivedTransfers.tableName,
-                        field: 'code',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     ReceivedTransferDetails.tableName,
+            //     {
+            //         fields: ['code'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: ReceivedTransfers.tableName,
+            //             field: 'code',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
 
-            await queryInterface.addConstraint(
-                ReceivedTransferDetails.tableName,
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     ReceivedTransferDetails.tableName,
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -1326,31 +1385,31 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(Transfers.tableName, queryInterface)
             if (index_names.indexOf(`${Transfers.tableName}_code`) === -1)
-            await queryInterface.addIndex(Transfers.tableName,
-                ['code'], {
-                unique: true
-            });
+                await queryInterface.addIndex(Transfers.tableName,
+                    ['code'], {
+                    unique: true
+                });
 
             if (index_names.indexOf(`${Transfers.tableName}_date`) === -1)
-            await queryInterface.addIndex(Transfers.tableName,
-                ['date',]);
-            
-            if (index_names.indexOf(`${Transfers.tableName}_receiver`) === -1)
-            await queryInterface.addIndex(Transfers.tableName,
-                ['receiver',]);
+                await queryInterface.addIndex(Transfers.tableName,
+                    ['date',]);
 
-            await queryInterface.addConstraint(
-                Transfers.tableName,
-                {
-                    fields: ['receiver'],
-                    type: 'foreign key',
-                    references: {
-                        table: Branches.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            if (index_names.indexOf(`${Transfers.tableName}_receiver`) === -1)
+                await queryInterface.addIndex(Transfers.tableName,
+                    ['receiver',]);
+
+            // await queryInterface.addConstraint(
+            //     Transfers.tableName,
+            //     {
+            //         fields: ['receiver'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Branches.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
 
         },
@@ -1411,45 +1470,45 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(TransferDetails.tableName, queryInterface)
             if (index_names.indexOf(`${TransferDetails.tableName}_code`) === -1)
-            await queryInterface.addIndex(TransferDetails.tableName,
-                ['code']);
-            
+                await queryInterface.addIndex(TransferDetails.tableName,
+                    ['code']);
+
             if (index_names.indexOf(`${TransferDetails.tableName}_date`) === -1)
-            await queryInterface.addIndex(TransferDetails.tableName,
-                ['date']);
+                await queryInterface.addIndex(TransferDetails.tableName,
+                    ['date']);
 
-            await queryInterface.addConstraint(
-                TransferDetails.tableName,
-                {
-                    fields: ['code'],
-                    type: 'foreign key',
-                    references: {
-                        table: Transfers.tableName,
-                        field: 'code',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     TransferDetails.tableName,
+            //     {
+            //         fields: ['code'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Transfers.tableName,
+            //             field: 'code',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
 
-            await queryInterface.addConstraint(
-                TransferDetails.tableName,
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     TransferDetails.tableName,
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable(TransferDetails.tableName);
         }
     },
-    
+
     {
         name: "2019-024-initialMigrations-createStockAdjustment",
         async up({ context: queryInterface }: { context: QueryInterface }) {
@@ -1481,7 +1540,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     type: DOUBLE,
                     allowNull: false
                 },
-                
+
                 created_by: {
                     type: INTEGER,
                     defaultValue: null
@@ -1494,7 +1553,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     type: DATE,
                     defaultValue: NOW
                 },
-                
+
                 cost_price: {
                     type: DOUBLE,
                     allowNull: false
@@ -1530,34 +1589,34 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(StockAdjustment.tableName, queryInterface)
             if (index_names.indexOf(`${StockAdjustment.tableName}_code`) === -1)
-            await queryInterface.addIndex(StockAdjustment.tableName,
-                ['code']);
+                await queryInterface.addIndex(StockAdjustment.tableName,
+                    ['code']);
 
             if (index_names.indexOf(`${StockAdjustment.tableName}_date`) === -1)
-            await queryInterface.addIndex(StockAdjustment.tableName,
-                ['date',]);
-            
-            if (index_names.indexOf(`${StockAdjustment.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(StockAdjustment.tableName,
-                ['created_on',]);
-            
-            if (index_names.indexOf(`${StockAdjustment.tableName}_product`) === -1)
-            await queryInterface.addIndex(StockAdjustment.tableName,
-                ['product',]);
+                await queryInterface.addIndex(StockAdjustment.tableName,
+                    ['date',]);
 
-           
-            await queryInterface.addConstraint(
-                StockAdjustment.tableName,
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            if (index_names.indexOf(`${StockAdjustment.tableName}_created_on`) === -1)
+                await queryInterface.addIndex(StockAdjustment.tableName,
+                    ['created_on',]);
+
+            if (index_names.indexOf(`${StockAdjustment.tableName}_product`) === -1)
+                await queryInterface.addIndex(StockAdjustment.tableName,
+                    ['product',]);
+
+
+            // await queryInterface.addConstraint(
+            //     StockAdjustment.tableName,
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -1579,7 +1638,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     type: DATEONLY,
                     allowNull: false
                 },
-                
+
                 code: {
                     type: STRING,
                     allowNull: false
@@ -1601,15 +1660,15 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(StockAdjustmentSessions.tableName, queryInterface)
             if (index_names.indexOf(`${StockAdjustmentSessions.tableName}_code`) === -1)
-            await queryInterface.addIndex(StockAdjustmentSessions.tableName,
-                ['code'],
-                {
-                unique: true
-            });
+                await queryInterface.addIndex(StockAdjustmentSessions.tableName,
+                    ['code'],
+                    {
+                        unique: true
+                    });
 
             if (index_names.indexOf(`${StockAdjustmentSessions.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(StockAdjustmentSessions.tableName,
-                ['created_on']);
+                await queryInterface.addIndex(StockAdjustmentSessions.tableName,
+                    ['created_on']);
 
 
 
@@ -1657,22 +1716,22 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             let index_names: string[] = await getIndexes(CustomerDiagnostics.tableName, queryInterface)
             if (index_names.indexOf(`${CustomerDiagnostics.tableName}_test`) === -1)
-            await queryInterface.addIndex(CustomerDiagnostics.tableName,
-                ['test'], {
+                await queryInterface.addIndex(CustomerDiagnostics.tableName,
+                    ['test'], {
                     unique: true
                 });
-            await queryInterface.addConstraint(
-                CustomerDiagnostics.tableName,
-                {
-                    fields: ['customer'],
-                    type: 'foreign key',
-                    references: {
-                        table: Customers.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     CustomerDiagnostics.tableName,
+            //     {
+            //         fields: ['customer'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Customers.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -1714,31 +1773,33 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(DiagnosticTests.tableName, queryInterface)
             if (index_names.indexOf(`${DiagnosticTests.tableName}_test_name`) === -1)
-            await queryInterface.addIndex(DiagnosticTests.tableName,
-                ['test_name'], {
+                await queryInterface.addIndex(DiagnosticTests.tableName,
+                    ['test_name'], {
                     unique: true
                 });
-            await queryInterface.bulkInsert(DiagnosticTests.tableName,
-                [
-                    {
-                        test_name: 'Blood Glucose Test',
-                        parameters: 'value (mmol/L)',
-                        comments: `Normal ranges for non-diabetic: Before meals - 4.0 to 5.9 mmol/L; After meals - under 7.8 mmol/L; 
+
+            const data = [
+                {
+                    test_name: 'Blood Glucose Test',
+                    parameters: 'value (mmol/L)',
+                    comments: `Normal ranges for non-diabetic: Before meals - 4.0 to 5.9 mmol/L; After meals - under 7.8 mmol/L; 
       For diabetics: Before meals - 4 to 7 mmol / L; After meals - 5 to 9 mmol / L`,
-                    },
-                    {
-                        test_name: 'Blood Pressure',
-                        parameters: `systolic, diastolic`,
-                        comments: `90/60mmHg  to 120/80mmHg - ideal,
+                },
+                {
+                    test_name: 'Blood Pressure',
+                    parameters: `systolic, diastolic`,
+                    comments: `90/60mmHg  to 120/80mmHg - ideal,
       140/90mmHg or higher - high,
       90/60mmHg or lower - low`,
-                    },
-                    {
-                        test_name: 'Total Blood Cholesterol',
-                        parameters: `value (mmol/L)`,
-                        comments: `Below 5.2 mmol/L - normal, 5.2 to 6.2 mmol/L - Borderline High, Above 6.2 mmol/L - High`,
-                    }
-                ])
+                },
+                {
+                    test_name: 'Total Blood Cholesterol',
+                    parameters: `value (mmol/L)`,
+                    comments: `Below 5.2 mmol/L - normal, 5.2 to 6.2 mmol/L - Borderline High, Above 6.2 mmol/L - High`,
+                }
+            ];
+            await insertIgnore(queryInterface, DiagnosticTests.tableName, data, ['test_name']);
+
 
 
         },
@@ -1834,34 +1895,34 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(StockAdjustmentPending.tableName, queryInterface)
             if (index_names.indexOf(`${StockAdjustmentPending.tableName}_code`) === -1)
-            await queryInterface.addIndex(StockAdjustmentPending.tableName,
-                ['code']);
+                await queryInterface.addIndex(StockAdjustmentPending.tableName,
+                    ['code']);
 
             if (index_names.indexOf(`${StockAdjustmentPending.tableName}_date`) === -1)
-            await queryInterface.addIndex(StockAdjustmentPending.tableName,
-                ['date',]);
-            
+                await queryInterface.addIndex(StockAdjustmentPending.tableName,
+                    ['date',]);
+
             if (index_names.indexOf(`${StockAdjustmentPending.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(StockAdjustmentPending.tableName,
-                ['created_on',]);
-            
+                await queryInterface.addIndex(StockAdjustmentPending.tableName,
+                    ['created_on',]);
+
             if (index_names.indexOf(`${StockAdjustmentPending.tableName}_product`) === -1)
-            await queryInterface.addIndex(StockAdjustmentPending.tableName,
-                ['product',]);
+                await queryInterface.addIndex(StockAdjustmentPending.tableName,
+                    ['product',]);
 
 
-            await queryInterface.addConstraint(
-                StockAdjustmentPending.tableName,
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     StockAdjustmentPending.tableName,
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -1909,8 +1970,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(DbBackups.tableName, queryInterface)
             if (index_names.indexOf(`${DbBackups.tableName}_file_name_created_on`) === -1)
-            await queryInterface.addIndex(DbBackups.tableName,
-                ['file_name', 'created_on']);
+                await queryInterface.addIndex(DbBackups.tableName,
+                    ['file_name', 'created_on']);
 
 
 
@@ -1976,29 +2037,29 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(Refills.tableName, queryInterface)
             if (index_names.indexOf(`${Refills.tableName}_end_date`) === -1)
-            await queryInterface.addIndex(Refills.tableName,
-                ['end_date']);
-            
+                await queryInterface.addIndex(Refills.tableName,
+                    ['end_date']);
+
             if (index_names.indexOf(`${Refills.tableName}_start_date`) === -1)
-            await queryInterface.addIndex(Refills.tableName,
-                ['start_date']);
-            
+                await queryInterface.addIndex(Refills.tableName,
+                    ['start_date']);
+
             if (index_names.indexOf(`${Refills.tableName}_status`) === -1)
-            await queryInterface.addIndex(Refills.tableName,
-                ['status']);
-            
-            await queryInterface.addConstraint(
-                Refills.tableName,
-                {
-                    fields: ['product_id'],
-                    type: 'foreign key',
-                    references: {
-                        table: Products.tableName,
-                        field: 'id',
-                    },
-                    onDelete: 'restrict',
-                    onUpdate: 'cascade'
-                });
+                await queryInterface.addIndex(Refills.tableName,
+                    ['status']);
+
+            // await queryInterface.addConstraint(
+            //     Refills.tableName,
+            //     {
+            //         fields: ['product_id'],
+            //         type: 'foreign key',
+            //         references: {
+            //             table: Products.tableName,
+            //             field: 'id',
+            //         },
+            //         onDelete: 'restrict',
+            //         onUpdate: 'cascade'
+            //     });
 
 
         },
@@ -2104,20 +2165,20 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(OutgoingPayments.tableName, queryInterface)
             if (index_names.indexOf(`${OutgoingPayments.tableName}_date`) === -1)
-            await queryInterface.addIndex(OutgoingPayments.tableName,
-                ['date']);
-            
+                await queryInterface.addIndex(OutgoingPayments.tableName,
+                    ['date']);
+
             if (index_names.indexOf(`${OutgoingPayments.tableName}_type`) === -1)
-            await queryInterface.addIndex(OutgoingPayments.tableName,
-                ['type']);
-            
+                await queryInterface.addIndex(OutgoingPayments.tableName,
+                    ['type']);
+
             if (index_names.indexOf(`${OutgoingPayments.tableName}_recipient`) === -1)
-            await queryInterface.addIndex(OutgoingPayments.tableName,
-                ['recipient']);
-            
+                await queryInterface.addIndex(OutgoingPayments.tableName,
+                    ['recipient']);
+
             if (index_names.indexOf(`${OutgoingPayments.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(OutgoingPayments.tableName,
-                ['created_on']);
+                await queryInterface.addIndex(OutgoingPayments.tableName,
+                    ['created_on']);
 
 
         },
@@ -2125,7 +2186,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             await queryInterface.dropTable(OutgoingPayments.tableName);
         }
     },
-    
+
     {
         name: "2019-034-initialMigrations-createOnlineBackups",
         async up({ context: queryInterface }: { context: QueryInterface }) {
@@ -2154,8 +2215,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
             let index_names: string[] = await getIndexes(OnlineBackups.tableName, queryInterface)
             if (index_names.indexOf(`${OnlineBackups.tableName}_date`) === -1)
-            await queryInterface.addIndex(OnlineBackups.tableName,
-                ['date']);
+                await queryInterface.addIndex(OnlineBackups.tableName,
+                    ['date']);
 
 
         },
@@ -2196,8 +2257,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             let index_names: string[] = await getIndexes(DbSync.tableName, queryInterface)
             if (index_names.indexOf(`${DbSync.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(DbSync.tableName,
-                ['created_on']);
+                await queryInterface.addIndex(DbSync.tableName,
+                    ['created_on']);
 
 
         },
@@ -2262,20 +2323,20 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             let index_names: string[] = await getIndexes(IncomingPayments.tableName, queryInterface)
             if (index_names.indexOf(`${IncomingPayments.tableName}_date`) === -1)
-            await queryInterface.addIndex(IncomingPayments.tableName,
-                ['date']);
-            
+                await queryInterface.addIndex(IncomingPayments.tableName,
+                    ['date']);
+
             if (index_names.indexOf(`${IncomingPayments.tableName}_type`) === -1)
-            await queryInterface.addIndex(IncomingPayments.tableName,
-                ['type']);
-            
+                await queryInterface.addIndex(IncomingPayments.tableName,
+                    ['type']);
+
             if (index_names.indexOf(`${IncomingPayments.tableName}_payer`) === -1)
-            await queryInterface.addIndex(IncomingPayments.tableName,
-                ['payer']);
-            
+                await queryInterface.addIndex(IncomingPayments.tableName,
+                    ['payer']);
+
             if (index_names.indexOf(`${IncomingPayments.tableName}_created_on`) === -1)
-            await queryInterface.addIndex(IncomingPayments.tableName,
-                ['created_on']);
+                await queryInterface.addIndex(IncomingPayments.tableName,
+                    ['created_on']);
 
 
         },
@@ -2302,21 +2363,25 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20210314155622-addCustomerDob",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            
-            await queryInterface.addColumn(Customers.tableName, 'date_of_birth',
-                {
-                    type: DATEONLY
-                });
+            const tableDescription = await queryInterface.describeTable(Customers.tableName);
+            console.log(tableDescription);
+            if (!tableDescription.date_of_birth) {
+                await queryInterface.addColumn(Customers.tableName, 'date_of_birth',
+                    {
+                        type: DATEONLY
+                    });
+            }
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn(Customers.tableName, 'date_of_birth');
- 
+
         }
     },
     {
         name: "20210314180101-create-product-batches",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.createTable('ProductBatches', {
+            await queryInterface.createTable(ProductBatches.tableName, {
                 id: {
                     allowNull: false,
                     autoIncrement: true,
@@ -2350,30 +2415,36 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.dropTable('ProductBatches');
+            await queryInterface.dropTable(ProductBatches.tableName);
         }
     },
     {
         name: "20210315154011-addQuantityToProductBatches",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('productbatches', 'quantity',
-                {
-                    type: DOUBLE
-                });
+            const tableDescription = await queryInterface.describeTable(ProductBatches.tableName);
+            if (!tableDescription.quantity) {
+                await queryInterface.addColumn(ProductBatches.tableName, 'quantity',
+                    {
+                        type: DOUBLE
+                    });
+            }
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.removeColumn('productbatches', 'quantity');
+            await queryInterface.removeColumn(ProductBatches.tableName, 'quantity');
 
         }
     },
     {
         name: "20210317181610-addQuantitySoldToproductBatches",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('productbatches', 'quantity_sold',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
+            const tableDescription = await queryInterface.describeTable(ProductBatches.tableName);
+            if (!tableDescription.quantity_sold) {
+                await queryInterface.addColumn('productbatches', 'quantity_sold',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('productbatches', 'quantity_sold');
@@ -2416,42 +2487,56 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20210324173726-addPaymentMethodsToDailyRecords",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('dailyRecords', 'cash',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-            await queryInterface.addColumn('dailyRecords', 'momo',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-            await queryInterface.addColumn('dailyRecords', 'insurance',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-            await queryInterface.addColumn('dailyRecords', 'credit',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-            await queryInterface.addColumn('dailyRecords', 'pos',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-
-            await queryInterface.addColumn('dailyRecords', 'cheque',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
-            await queryInterface.addColumn('dailyRecords', 'other',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                });
+            const tableDescription = await queryInterface.describeTable(DailyRecords.tableName);
+            if (!tableDescription.cash) {
+                await queryInterface.addColumn('dailyRecords', 'cash',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.momo) {
+                await queryInterface.addColumn('dailyRecords', 'momo',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.insurance) {
+                await queryInterface.addColumn('dailyRecords', 'insurance',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.credit) {
+                await queryInterface.addColumn('dailyRecords', 'credit',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.pos) {
+                await queryInterface.addColumn('dailyRecords', 'pos',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.cheque) {
+                await queryInterface.addColumn('dailyRecords', 'cheque',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
+            if (!tableDescription.other) {
+                await queryInterface.addColumn('dailyRecords', 'other',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    });
+            }
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('dailyRecords', 'cash');
@@ -2510,10 +2595,13 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20210409085254-addExpiryToSalesBatches",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('sales_batches', 'expiry',
-                {
-                    type: DATE
-                });
+            const tableDescription = await queryInterface.describeTable('sales_batches');
+            if (!tableDescription.expiry) {
+                await queryInterface.addColumn('sales_batches', 'expiry',
+                    {
+                        type: DATE
+                    });
+            }
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('sales_batches', 'expiry');
@@ -2523,10 +2611,13 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20210409095027-addPreferredVendorToProducts",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('products', 'preferred_vendor',
-                {
-                    type: INTEGER
-                });
+            const tableDescription = await queryInterface.describeTable('products');
+            if (!tableDescription.preferred_vendor) {
+                await queryInterface.addColumn('products', 'preferred_vendor',
+                    {
+                        type: INTEGER
+                    });
+            }
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('products', 'preferred_vendor');
@@ -2566,11 +2657,13 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20210824173831-addOnlineToUsers",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('users', 'allow_online',
-                {
-                    type: STRING,
-                    defaultValue: 'no'
-                })
+            const tableDescription = await queryInterface.describeTable('users');
+            if (!tableDescription.allow_online)
+                await queryInterface.addColumn('users', 'allow_online',
+                    {
+                        type: STRING,
+                        defaultValue: 'no'
+                    })
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('users', 'allow_online');
@@ -2589,14 +2682,12 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211023131213-insertTaxSetting",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.bulkInsert('settings', [{
+            const data = [{
                 name: 'tax',
                 module: 'System',
                 value: '0'
-            }],
-                {
-                    // ignoreDuplicates: true
-                });
+            }];
+            await insertIgnore(queryInterface, 'settings', data, ['name'])
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.bulkDelete('settings', {
@@ -2607,11 +2698,13 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211023134920-addTaxToSales",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('sales', 'tax',
-                {
-                    type: DOUBLE,
-                    defaultValue: 0
-                })
+            const tableDescription = await queryInterface.describeTable('sales');
+            if (!tableDescription.tax)
+                await queryInterface.addColumn('sales', 'tax',
+                    {
+                        type: DOUBLE,
+                        defaultValue: 0
+                    })
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('sales', 'tax');
@@ -2621,18 +2714,14 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211024133528-insertBatchSetting",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            const queryOptions: QueryOptions = {
 
-            }
-            await queryInterface.bulkInsert('settings',
+            await insertIgnore(queryInterface, 'settings',
                 [{
                     name: 'activate_batch_mode',
                     module: 'System',
                     value: 'no'
                 }],
-                {
-
-                }
+                ['name']
             )
 
         },
@@ -2645,12 +2734,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211109143824-addLogoToSettings",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            // const logo_exists = await Settings.findAll({
-            //     where: {
-            //         name: { [Op.in]: ['logo','receipt_logo']}
-            //     }
-            // })
-            // console.log("logo exists",logo_exists)
+
             const data: any[] = [{
                 name: 'logo',
                 module: 'System',
@@ -2661,7 +2745,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                 module: 'System',
                 value: 'no'
             }];
-            await queryInterface.bulkInsert('settings', data)
+            await insertIgnore(queryInterface, 'settings', data, ['name'])
 
 
         },
@@ -2677,47 +2761,55 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211121152934-productsAddDrugInfo",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('products', 'is_drug',
-                {
-                    type: STRING,
-                    defaultValue: 'yes'
-                });
-            await queryInterface.addColumn('products', 'generic_name',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
-            await queryInterface.addColumn('products', 'contraindications',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
-            await queryInterface.addColumn('products', 'pregnancy',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
-            await queryInterface.addColumn('products', 'side_effects',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
-            await queryInterface.addColumn('products', 'caution',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
-            await queryInterface.addColumn('products', 'indications',
-                {
-                    allowNull: true,
-                    type: STRING,
-                    defaultValue: null
-                });
+            const tableDescription = await queryInterface.describeTable('products');
+            if (!tableDescription.is_drug)
+                await queryInterface.addColumn('products', 'is_drug',
+                    {
+                        type: STRING,
+                        defaultValue: 'yes'
+                    });
+            if (!tableDescription.generic_name)
+                await queryInterface.addColumn('products', 'generic_name',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
+            if (!tableDescription.contraindications)
+                await queryInterface.addColumn('products', 'contraindications',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
+            if (!tableDescription.pregnancy)
+                await queryInterface.addColumn('products', 'pregnancy',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
+            if (!tableDescription.side_effects)
+                await queryInterface.addColumn('products', 'side_effects',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
+            if (!tableDescription.caution)
+                await queryInterface.addColumn('products', 'caution',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
+            if (!tableDescription.indications)
+                await queryInterface.addColumn('products', 'indications',
+                    {
+                        allowNull: true,
+                        type: STRING,
+                        defaultValue: null
+                    });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('products', 'is_drug');
@@ -2788,31 +2880,31 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                 }
             });
 
-            await queryInterface.addConstraint(
-                'store_inventory',
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    name: 'products_storeInventory_product', // useful if using queryInterface.removeConstraint
-                    references: {
-                        table: 'products',
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
-            await queryInterface.addConstraint('store_inventory',
-                {
-                    fields: ['store'],
-                    type: 'foreign key',
-                    name: 'products_storeInventory_store', // useful if using queryInterface.removeConstraint
-                    references: {
-                        table: 'stores',
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint(
+            //     'store_inventory',
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         name: 'products_storeInventory_product', // useful if using queryInterface.removeConstraint
+            //         references: {
+            //             table: 'products',
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
+            // await queryInterface.addConstraint('store_inventory',
+            //     {
+            //         fields: ['store'],
+            //         type: 'foreign key',
+            //         name: 'products_storeInventory_store', // useful if using queryInterface.removeConstraint
+            //         references: {
+            //             table: 'stores',
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable('stores');
@@ -2914,56 +3006,56 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     name: 'requisitions_code_key', // useful if using queryInterface.removeConstraint
 
                 });
-            await queryInterface.addConstraint('requisitions',
-                {
-                    fields: ['sender'],
-                    type: 'foreign key',
-                    name: 'requisitions_store_sender',
-                    references: {
-                        table: 'stores',
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
-            await queryInterface.addConstraint('requisitions',
-                {
-                    fields: ['recipient'],
-                    type: 'foreign key',
-                    name: 'requisitions_store_recipient',
-                    references: {
-                        table: 'stores',
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint('requisitions',
+            //     {
+            //         fields: ['sender'],
+            //         type: 'foreign key',
+            //         name: 'requisitions_store_sender',
+            //         references: {
+            //             table: 'stores',
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
+            // await queryInterface.addConstraint('requisitions',
+            //     {
+            //         fields: ['recipient'],
+            //         type: 'foreign key',
+            //         name: 'requisitions_store_recipient',
+            //         references: {
+            //             table: 'stores',
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
 
 
-            await queryInterface.addConstraint('requisition_details',
-                {
-                    fields: ['product'],
-                    type: 'foreign key',
-                    name: 'requisition_details_product_key', // useful if using queryInterface.removeConstraint
-                    references: {
-                        table: 'products',
-                        field: 'id',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
-            await queryInterface.addConstraint('requisition_details',
-                {
-                    fields: ['code'],
-                    type: 'foreign key',
-                    name: 'requisition_details_code_key',
-                    references: {
-                        table: 'requisitions',
-                        field: 'code',
-                    },
-                    onDelete: 'cascade',
-                    onUpdate: 'cascade'
-                });
+            // await queryInterface.addConstraint('requisition_details',
+            //     {
+            //         fields: ['product'],
+            //         type: 'foreign key',
+            //         name: 'requisition_details_product_key', // useful if using queryInterface.removeConstraint
+            //         references: {
+            //             table: 'products',
+            //             field: 'id',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
+            // await queryInterface.addConstraint('requisition_details',
+            //     {
+            //         fields: ['code'],
+            //         type: 'foreign key',
+            //         name: 'requisition_details_code_key',
+            //         references: {
+            //             table: 'requisitions',
+            //             field: 'code',
+            //         },
+            //         onDelete: 'cascade',
+            //         onUpdate: 'cascade'
+            //     });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable('requisitions');
@@ -2974,12 +3066,14 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20211125214835-addDescriptionToStores",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.addColumn('stores', 'description',
-                {
-                    type: STRING,
-                    allowNull: true,
-                    defaultValue: ''
-                })
+            const tableDescription = await queryInterface.describeTable('stores');
+            if (!tableDescription.description)
+                await queryInterface.addColumn('stores', 'description',
+                    {
+                        type: STRING,
+                        allowNull: true,
+                        defaultValue: ''
+                    })
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.removeColumn('stores', 'description')
@@ -2988,7 +3082,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220105074517-addReceiptSettings",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.bulkInsert('settings', [
+            await insertIgnore(queryInterface, 'settings', [
                 {
                     name: 'tax_title',
                     module: 'System',
@@ -3014,8 +3108,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     module: 'System',
                     value: ''
                 },
-            ]
-                );
+            ], ['name']
+            );
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.bulkDelete('settings',
@@ -3033,6 +3127,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220223095800-addMarkupToProducts",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            const tableDescription = await queryInterface.describeTable('products');
+            if(!tableDescription.markup)
             await queryInterface.addColumn('products', 'markup',
                 {
                     type: DOUBLE,
@@ -3046,12 +3142,15 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220311134330-addActiveIngredient",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            const tableDescription = await queryInterface.describeTable('products');
+            if (!tableDescription.active_ingredients)
             await queryInterface.addColumn('products', 'active_ingredients',
                 {
                     type: STRING,
                     defaultValue: null,
                     allowNull: true
                 });
+            if (!tableDescription.drug_info)
             await queryInterface.addColumn('products', 'drug_info',
                 {
                     type: STRING,
@@ -3068,6 +3167,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220328084933-addExpiryToPurchaseDetails",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            const tableDescription = await queryInterface.describeTable('purchase_details');
+            if (!tableDescription.expiry)
             await queryInterface.addColumn('purchase_details', 'expiry',
                 {
                     type: STRING,
@@ -3083,7 +3184,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220411095651-receiptSettings",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.bulkInsert('settings', [
+            await insertIgnore(queryInterface, 'settings', [
                 {
                     name: 'receipt_show_customer',
                     module: 'System',
@@ -3104,7 +3205,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     module: 'System',
                     value: "yes"
                 }
-            ]);
+            ], ['name']);
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.bulkDelete('settings',
@@ -3121,18 +3222,22 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220503070044-updateSalesDetails",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            const tableDescription = await queryInterface.describeTable('sales_details');
+            if (!tableDescription.expiry)
             await queryInterface.addColumn('sales_details', 'expiry',
                 {
                     type: STRING,
                     defaultValue: null,
                     allowNull: true
                 });
+            if (!tableDescription.unit)
             await queryInterface.addColumn('sales_details', 'unit',
                 {
                     type: STRING,
                     defaultValue: null,
                     allowNull: true
                 });
+            if (!tableDescription.label)
             await queryInterface.addColumn('sales_details', 'label',
                 {
                     type: STRING,
@@ -3150,16 +3255,16 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220506130046-addSalesPermissions",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.bulkInsert('permissions', [{
+            await insertIgnore(queryInterface,'permissions', [{
                 permission_id: '88',
                 name: 'Edit Sales Prices',
                 description: 'Allow user to change the price of items during sales'
-            }]);
+            }], ['name']);
 
-            await queryInterface.bulkInsert('role_permissions', [{
+            await insertIgnore(queryInterface, 'role_permissions', [{
                 permission_id: 88,
                 role_id: 1
-            }]);
+            }],['permission_id','role_id']);
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.bulkDelete('permissions',
@@ -3219,34 +3324,34 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             let index_names: string[] = await getIndexes('sales_payment_methods', queryInterface)
             if (index_names.indexOf(`sales_payment_methods_payment_method`) === -1)
-            await queryInterface.addIndex('sales_payment_methods',
-                {
-                    fields: ['payment_method'],
+                await queryInterface.addIndex('sales_payment_methods',
+                    {
+                        fields: ['payment_method'],
 
-                });
-            
+                    });
+
             if (index_names.indexOf(`sales_payment_methods_created_on`) === -1)
-            await queryInterface.addIndex('sales_payment_methods',
-                {
-                    fields: ['created_on'],
+                await queryInterface.addIndex('sales_payment_methods',
+                    {
+                        fields: ['created_on'],
 
-                });
-            
+                    });
+
             if (index_names.indexOf(`sales_payment_methods_date`) === -1)
-            await queryInterface.addIndex('sales_payment_methods',
-                {
-                    fields: ['date'],
+                await queryInterface.addIndex('sales_payment_methods',
+                    {
+                        fields: ['date'],
 
-                });
+                    });
 
             if (index_names.indexOf(`sales_payment_methods_amount_paid`) === -1)
-            await queryInterface.addIndex('sales_payment_methods',
-                {
-                    fields: ['amount_paid'],
+                await queryInterface.addIndex('sales_payment_methods',
+                    {
+                        fields: ['amount_paid'],
 
-                });
+                    });
 
-            
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable('sales_payment_methods')
@@ -3255,18 +3360,18 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20220711162301-addDuplicateTimeoutSetting",
         async up({ context: queryInterface }: { context: QueryInterface }) {
-            await queryInterface.bulkInsert('settings', [
+            await insertIgnore(queryInterface, 'settings', [
                 {
                     name: 'duplicate_record_timeout',
                     module: 'System',
                     value: "10"
                 }
-            ]);
+            ], ['name']);
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.bulkDelete('settings', {
                 name: 'duplicate_record_timeout',
-               
+
             })
         }
     },
@@ -3306,7 +3411,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
             });
 
             //add the default data
-            await queryInterface.bulkInsert('reminders', [
+            await insertIgnore(queryInterface, 'reminders', [
                 {
                     'type': 'upcoming refills',
                     'dayOfWeek': 'Monday',
@@ -3314,7 +3419,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     'recipient': 'none',
                     'cc': ''
                 }
-            ])
+            ], ['type'])
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.dropTable('reminders')
@@ -3342,19 +3447,19 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                         });
                     }
                 }
-               
+
                 transaction.commit();
             } catch (error: any) {
                 transaction.rollback();
                 throw new Error(error);
 
             }
-            
-            
-            
+
+
+
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
-            const tables = ["insurance_providers", 
+            const tables = ["insurance_providers",
                 "reminders", "role_permissions", "roles"];
             tables.forEach(async (table) => {
                 await queryInterface.removeColumn(table, 'created_on')
@@ -3372,7 +3477,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                     const model = models[index];
                     //check if the column exists first
                     let tableDescription = await queryInterface.describeTable(model.tableName);
-                    
+
                     if (!tableDescription.updatedAt) {
                         await queryInterface.addColumn(model.tableName, 'updatedAt',
                             {
@@ -3384,22 +3489,22 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                         });
                     }
                 }
-                
+
                 transaction.commit();
-            } catch (error:any) {
+            } catch (error: any) {
                 transaction.rollback();
                 throw new Error(error);
-                
+
             }
 
 
-            
-            
-            
+
+
+
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
-            
+
             models.forEach(async (model) => {
                 await queryInterface.removeColumn(model.tableName, 'updatedAt')
             });
@@ -3417,7 +3522,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                         type: STRING,
                     });
             }
-            
+
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -3446,7 +3551,7 @@ export const migrationsList: InputMigrations<QueryInterface> = [
                         });
                     }
                 }
-                
+
                 transaction.commit();
             } catch (error: any) {
                 transaction.rollback();
@@ -3454,9 +3559,9 @@ export const migrationsList: InputMigrations<QueryInterface> = [
 
             }
 
-           
-           
-            
+
+
+
 
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
@@ -3470,6 +3575,8 @@ export const migrationsList: InputMigrations<QueryInterface> = [
     {
         name: "20230314000000-addLastProductStockModified",
         async up({ context: queryInterface }: { context: QueryInterface }) {
+            const tableDescription = await queryInterface.describeTable(Products.tableName);
+            if (!tableDescription.last_stock_modification)
             await queryInterface.addColumn(Products.tableName, 'last_stock_modification',
                 {
                     type: STRING,
@@ -3486,18 +3593,18 @@ export const migrationsList: InputMigrations<QueryInterface> = [
         async up({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.addIndex(StockValues.tableName,
                 ['date'], {
-                    unique: true
-                });
+                unique: true
+            });
         },
         async down({ context: queryInterface }: { context: QueryInterface }) {
         }
     },
-    
+
     {
         name: "20230527000000-addUniqueIndexToDailyRecords",
         async up({ context: queryInterface }: { context: QueryInterface }) {
             await queryInterface.addIndex(DailyRecords.tableName,
-                ['date','shift'], {
+                ['date', 'shift'], {
                 unique: true
             });
         },

@@ -3,7 +3,8 @@ import { logger } from '../src/config/logger';
 import { constants } from './electronConstants';
 import { getData } from './utils/network';
 //check if the database file exists. if it does, then the app has been validated.
-export const isAppActivated = ():boolean => {
+export const isAppActivated = (): boolean => {
+    console.log(constants.db_path)
     return fs.existsSync(constants.db_path)
 }
 

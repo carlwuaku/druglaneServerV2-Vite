@@ -6,9 +6,9 @@ import path from 'path';
 import os from 'os';
 const appName = "Druglane";
 const appLongName = "Druglane Pharmacy Management System";
-const databaseName = "druglanev1.db";
+const databaseName = "druglane.db";
 
-const appDirectory = "druglaneServerV1";
+const appDirectory = "druglaneServer";
 const settings_location:string =  path.join(process.env.APPDATA!, appDirectory);
 export const defaultOptions:{[key:string]:any} = {
    "port": 5000,

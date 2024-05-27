@@ -396,7 +396,7 @@ export async function spawnServer() {
       //spawn server->runmigrations
       // const serverPath = path.join(__dirname, 'server/server')
       // serverProcess = fork(serverPath);
-      // await startServer();
+      await startServer();
 
       // serverProcess.on('exit', (code: number, signal) => {
       //     logger.error({
