@@ -3,9 +3,8 @@ import { GlobalState } from '../models/globalState';
 
 const GlobalContext = createContext<GlobalState>({
     serverUrl: "",
-    companyName: "",
-    setServerUrl: () =>{},
-    setCompanyName: () => {}
+    serverState: "",
+    settings: null
 });
 
 export default GlobalContext;

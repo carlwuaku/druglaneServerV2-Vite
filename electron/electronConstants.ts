@@ -1,4 +1,6 @@
-const PORT = process.env.PORT || 5100;
+import { app } from 'electron';
+
+const PORT = 5000;
 // const appName = "Shoplane";
 // const appLongName = "Shoplane POS & Inventory Management System";
 // const databaseName = "shoplane.db";
@@ -9,7 +11,7 @@ const appLongName = "Druglane Pharmacy Management System";
 const databaseName = "druglane.db";
 
 const appDirectory = "druglaneServer";
-const settings_location:string =  path.join(process.env.APPDATA!, appDirectory);
+const settings_location: string = path.join(app.getPath("appData"), appDirectory);
 export const defaultOptions:{[key:string]:any} = {
    "port": 5000,
    "backup_time": 19

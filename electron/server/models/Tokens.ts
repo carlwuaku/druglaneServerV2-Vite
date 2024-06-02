@@ -9,12 +9,12 @@ import { Table, Model, PrimaryKey, Column, DataType, CreatedAt } from "sequelize
 
 
 export class Tokens extends Model {
-    @PrimaryKey
-    @Column({
-        type: DataType.INTEGER,
-        autoIncrement: true
-    })
-    id!: number;
+    // @PrimaryKey
+    // @Column({
+    //     type: DataType.INTEGER,
+    //     autoIncrement: true
+    // })
+    // id!: number;
 
     @Column({
         type: DataType.STRING

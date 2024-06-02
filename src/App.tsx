@@ -25,9 +25,20 @@ import Login from "./pages/login";
 import { AuthProvider, RequireAuth } from "react-auth-kit";
 import ResetPassword from "./pages/resetPassword";
 import { DatabaseSetup } from "./pages/databaseSetup";
+import { useGlobalState } from './global/globalProvider';
+import { APP_NOT_ACTIVATED } from './utils/stringKeys';
 
 
 function App() {
+  const globalState = useGlobalState();
+  //if globalState.settings is
+  if (globalState.serverState === "loading") { 
+    return <div className='flex justify-center align-middle'>Loading...</div>
+  }
+  if (globalState.serverState === APP_NOT_ACTIVATED) {
+    return <Activate />
+   }
+  
   return (
     <div>
       <CssBaseline />

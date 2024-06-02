@@ -211,10 +211,12 @@ export async function getSettings(_data?: { settings: string[] }): Promise<Setti
     try {
         let data = await Settings.findAll(
             {
-                where: _data && _data.settings ? { name: { [Op.in]: _data.settings } } : {} 
+                where: _data && _data.settings ? { name: { [Op.in]: _data.settings } } : {},
+                raw: true
             }
         );
-        let returnData:any = {};
+        console.log(data)
+        let returnData: any = {};
         data.forEach(setting => {
             returnData[setting.name] = setting.value;
         });

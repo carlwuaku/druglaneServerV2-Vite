@@ -11,12 +11,12 @@ import { Users } from "./Users";
 })
 
 export class ReceivedTransfers extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Column({
     type: DataType.DATEONLY,

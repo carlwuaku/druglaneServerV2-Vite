@@ -34,8 +34,8 @@ export class Permissions extends Model{
   })
   description!: string;
   
-  updatedAt!: false;
-  deletedAt!: false;
+  // updatedAt!: false;
+  // deletedAt!: false;
   
 
   // @HasMany(() => Roles)

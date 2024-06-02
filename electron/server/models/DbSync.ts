@@ -7,12 +7,12 @@ import { Table, Model, Column,   CreatedAt, DataType, PrimaryKey } from "sequeli
 })
 
 export class DbSync extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Column({
     type: DataType.STRING

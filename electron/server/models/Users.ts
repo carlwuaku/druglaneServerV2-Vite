@@ -10,12 +10,12 @@ import { Roles } from "./Roles";
 
 
 export class Users extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @ForeignKey(() => Roles)
   @Column({

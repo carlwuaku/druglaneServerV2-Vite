@@ -5,56 +5,57 @@ import { ipcRenderer } from "electron";
 import { Button } from "primereact/button";
 import { Button as MatButton } from "@mui/material"
 import React, { useEffect, useState } from "react";
-import QRCode from "react-qr-code";
 import Hub from '@mui/icons-material/Hub';
 import { Link, useNavigate } from "react-router-dom";
+import { useGlobalState } from "@/global/globalProvider";
 
 const ServerState = () => {
-    const [serverState, setServerState] = useState("...");
-    const [serverUrl, setServerUrl] = useState(null);
+    const appData = useGlobalState();
+    // const [serverState, setServerState] = useState("...");
+    // const [serverUrl, setServerUrl] = useState(null);
     const [loading, setLoading] = useState(false);
-    const title = "Server State";
-    const subtitle = "Shows the state of the main application server";
-    const restartButton = <Button loading={loading} onClick={restartServer} label="Restart" icon="pi pi-refresh" />
-    const navigate = useNavigate();
+    // const title = "Server State";
+    // const subtitle = "Shows the state of the main application server";
+    // const restartButton = <Button loading={loading} onClick={restartServer} label="Restart" icon="pi pi-refresh" />
+    // const navigate = useNavigate();
     function restartServer() {
         setLoading(true);
         ipcRenderer.send(RESTART_SERVER);
     };
     
 
-    useEffect(() => {
-        const handleServerStateReceived = (event: any, data: any) => {
-            setLoading(false)
-            setServerState(data.data) 
-            console.log(SERVER_STATE_CHANGED, data == APP_NOT_ACTIVATED)
-            if (data.data === APP_NOT_ACTIVATED){
-                //navigate to the activation page
-                // navigate('/activate');
-            }
-        }
-        ipcRenderer.send(GET_SERVER_STATE);
+    // useEffect(() => {
+    //     const handleServerStateReceived = (event: any, data: any) => {
+    //         setLoading(false)
+    //         setServerState(data.data) 
+    //         console.log(SERVER_STATE_CHANGED, data == APP_NOT_ACTIVATED)
+    //         if (data.data === APP_NOT_ACTIVATED){
+    //             //navigate to the activation page
+    //             // navigate('/activate');
+    //         }
+    //     }
+    //     ipcRenderer.send(GET_SERVER_STATE);
 
-        ipcRenderer.on(SERVER_STATE_CHANGED, handleServerStateReceived);
+    //     ipcRenderer.on(SERVER_STATE_CHANGED, handleServerStateReceived);
        
 
 
 
-        const handleServerUrlReceived = (event: any, data: any) => {
-            console.log(SERVER_URL_RECEIVED, data.data)
-            setServerUrl(data.data);
-            ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        }
+    //     const handleServerUrlReceived = (event: any, data: any) => {
+    //         console.log(SERVER_URL_RECEIVED, data.data)
+    //         setServerUrl(data.data);
+    //         ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
+    //     }
 
-        ipcRenderer.send(GET_SERVER_URL);
+    //     ipcRenderer.send(GET_SERVER_URL);
 
-        ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
+    //     ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
 
     
 
 
-    }, [])
-    switch (serverState) {
+    // }, [])
+    switch (appData.serverState) {
         case SERVER_RUNNING:
             return <Card >
                 <CardHeader
@@ -70,7 +71,7 @@ const ServerState = () => {
                     
                     <p className="text-primary">
                         To make sales, manage your inventory, or do any other day-to-day activities,&nbsp;
-                        <a className="unsetAll" href={`${serverUrl}/client`} target="_blank" rel="noopener noreferrer">
+                        <a className="unsetAll" href={`${appData.serverUrl}/client`} target="_blank" rel="noopener noreferrer">
                             <MatButton variant="contained" size="small">
                                 click here</MatButton>
                         </a>&nbsp; to login to the main application.
@@ -81,7 +82,7 @@ const ServerState = () => {
                         Google Chrome, Microsoft Edge or Firefox) on the device,
                         and enter the following url in the address bar:
                             <br />
-                        {serverUrl}/client.
+                        {appData.serverUrl}/client.
                     </p>
 
                     
@@ -100,7 +101,7 @@ const ServerState = () => {
             return <Card >
                 <CardContent>
                     <Alert severity="warning">
-                        <AlertTitle>{serverState}</AlertTitle>
+                        <AlertTitle>{appData.serverState}</AlertTitle>
                         <b>
                             Please wait for the server to get fired up!
                         </b>
@@ -111,7 +112,7 @@ const ServerState = () => {
             return <Card >
                 <CardContent>
                     <Alert severity="warning">
-                        <AlertTitle>{serverState}</AlertTitle>
+                        <AlertTitle>{appData.serverState}</AlertTitle>
                         <b>
                             This app has not been activated. Please go to the activation page and 
                             enter your activation key.
@@ -128,7 +129,7 @@ const ServerState = () => {
             return <Card >
                 <CardContent>
                     <Alert severity="error">
-                        <AlertTitle>{serverState}</AlertTitle>
+                        <AlertTitle>{appData.serverState}</AlertTitle>
                         <b>
                             The server process has stopped. Use the controls to restart it
                         </b>

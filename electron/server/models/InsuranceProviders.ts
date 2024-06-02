@@ -6,12 +6,12 @@ import { Table, Model, Column, CreatedAt, PrimaryKey, DataType } from "sequelize
   paranoid: true,
 })
 export class InsuranceProviders extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Column({
     type: DataType.STRING
@@ -21,5 +21,5 @@ export class InsuranceProviders extends Model{
   @CreatedAt
   created_on!: string;
 
-  updatedAt!: false;
+  // updatedAt!: false;
 }

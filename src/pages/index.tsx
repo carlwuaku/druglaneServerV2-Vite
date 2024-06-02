@@ -18,6 +18,8 @@ import DashboardTile from '../components/DashboardTile';
 import SettingItem from '../components/SettingItem';
 import GlobalContext from '../global/global';
 import {useAuthUser} from 'react-auth-kit'
+import useGetServerState from '@/hooks/useGetServerState';
+import { useGlobalState } from '@/global/globalProvider';
 // import logo from '@/app/assets/logo.png';
 
 // const Item = styled(Paper)(({ theme }) => ({
@@ -57,35 +59,37 @@ const times = [
 
 const Index = () => {
 
-  const auth = useAuthUser();
-  const [companyName, setCompanyName] = useState("Company Name");
-  const openPreferences = () => {
-    ipcRenderer.send(GET_PREFERENCES)
-  }
-  const appData = useContext(GlobalContext)
+  // const auth = useAuthUser();
+  // const [companyName, setCompanyName] = useState("Company Name");
+  // const openPreferences = () => {
+  //   ipcRenderer.send(GET_PREFERENCES)
+  // }
+  const {settings} = useGlobalState();
   const backupClicked = () => {
     console.log('backup clicked');
     ipcRenderer.send(CREATE_BACKUP);
   }
 
-  useEffect(() => {
-    const handleServerUrlReceived = async (event: any, data: any) => {
-      let serverUrl = data.data;
-      console.log('index server url ', serverUrl)
-      //get the settings
-      const getSettings = await getData<any>({ url: `${serverUrl}/api_admin/settings`, token: auth()?.token });
-      setCompanyName(getSettings.data.company_name);
-      ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-    }
+  // const serverState = useGetServerState();
 
-    ipcRenderer.send(GET_SERVER_URL);
+  // useEffect(() => {
+  //   const handleServerUrlReceived = async (event: any, data: any) => {
+  //     let serverUrl = data.data;
+  //     console.log('index server url ', serverUrl)
+  //     //get the settings
+  //     const getSettings = await getData<any>({ url: `${serverUrl}/api_admin/settings`, token: auth()?.token });
+  //     setCompanyName(getSettings.data.company_name);
+  //     ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
+  //   }
 
-    ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
+  //   ipcRenderer.send(GET_SERVER_URL);
+
+  //   ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
 
 
     
 
-  }, []);
+  // }, []);
 
 
 
@@ -99,7 +103,7 @@ const Index = () => {
       <Button><Link to="/settings">settngs</Link></Button> */}
       <Box className="container">
         <h3>Druglane Management System</h3>
-        <h4>Licensed to {companyName}</h4>
+        <h4>Licensed to {settings?.company_name}</h4>
         <Grid container spacing={2}>
           
           <Grid xs={12} md={8} >

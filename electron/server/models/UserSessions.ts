@@ -8,12 +8,12 @@ import { Users } from "./Users";
 })
 
 export class UserSessions extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @ForeignKey(() => Users)
   @Column({

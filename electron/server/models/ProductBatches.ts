@@ -9,12 +9,12 @@ import { Users } from "./Users";
   paranoid: true,
 })
 export class ProductBatches extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Column({
     type: DataType.STRING

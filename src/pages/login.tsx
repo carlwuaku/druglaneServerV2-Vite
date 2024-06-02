@@ -111,7 +111,7 @@ export default function Login() {
                     <div className="flex-column align-items-center justify-content-center">
                     <div className=" w-full lg:w-6">
                         <div className="text-center mb-5">
-                            <LocalImage image='logo.png'  height={"75px"} className="mb-3" />
+                            <LocalImage image='Logo'  height={"75px"} className="mb-3" />
                             <div className="text-900 text-3xl font-medium mb-3">Log in as the administrator</div>
                         </div>
 

@@ -12,12 +12,12 @@ import { Op } from "sequelize";
 })
  export class SalesDetails extends Model{
   
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @ForeignKey(() => Products)
   @Column({

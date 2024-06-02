@@ -46,7 +46,7 @@ code: 'ER_BAD_DB_ERROR'
 SequelizeDatabaseError: (conn=60, no: 1046, SQLState: 3D000) No database selected
 */
 
-const connection = new Sequelize(sqliteConfig[process.env.NODE_ENV!]);
+const connection = new Sequelize(sqliteConfig[process.env.NODE_ENV || 'production']);
 
 export async function authenticate():Promise<boolean> {
     try {

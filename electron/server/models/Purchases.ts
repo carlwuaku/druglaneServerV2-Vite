@@ -8,12 +8,12 @@ import { Table, Model, Column, DataType, Index, CreatedAt, PrimaryKey } from "se
 
 export class Purchases extends Model{
 
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
 
   
   @Column({

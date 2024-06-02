@@ -22,7 +22,7 @@ let databaseUpdateWindow: BrowserWindow | undefined;
 let serverState: "Application Activated" |
   "Application Not Activated" | "Server Started" | "Checking Activation"
   | "Server Starting" | "Server Stopping" = "Checking Activation";
-const isDev = process.env.NODE_ENV == "development";
+const isDev = process.env.NODE_ENV === "development";//TODO: use vite env
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -60,7 +60,10 @@ const indexHtml = path.join(RENDERER_DIST, 'index.html')
 let serverUrl = "";
 const store = new Store();
 contextMenu({
-  showSaveImageAs: true
+  showSaveImageAs: true,
+  showSelectAll: true,
+  showInspectElement: isDev,
+  showCopyLink: true,
 });
 
 
@@ -286,10 +289,8 @@ function sendServerUrl() {
 
 
 }
-console.log('nom7')
 
 async function createWindow() {
-  console.log('create window')
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -301,12 +302,14 @@ async function createWindow() {
     },
     width: 800,
   })
+  console.log(VITE_DEV_SERVER_URL)
 
   if (VITE_DEV_SERVER_URL) { // #298
     win.loadURL(VITE_DEV_SERVER_URL)
     // Open devTool if the app is not packaged
     win.webContents.openDevTools()
   } else {
+    win.webContents.openDevTools()
     win.loadFile(indexHtml)
   }
 
@@ -326,10 +329,8 @@ async function createWindow() {
   // Auto update
   update(win)
 }
-console.log('nom')
 
 app.whenReady().then(() => {
-  console.log('noreadym')
 
   createWindow();
   spawnServer();

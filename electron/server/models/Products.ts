@@ -7,12 +7,12 @@ import { Table, Model, Column, DataType, ForeignKey, Index, CreatedAt, PrimaryKe
 })
 
 export class Products extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Index
   @Column({

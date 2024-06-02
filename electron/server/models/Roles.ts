@@ -31,7 +31,7 @@ export class Roles extends Model{
   @CreatedAt
   created_on!: string;
 
-  updatedAt!: false;
+  // updatedAt!: false;
 
  
 }

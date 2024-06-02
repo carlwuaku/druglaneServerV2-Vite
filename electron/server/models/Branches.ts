@@ -7,12 +7,12 @@ import { Table, Model, Column, DataType, PrimaryKey, CreatedAt, Index } from "se
 })
 
 export class Branches extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
 
   @Index
   @Column({

@@ -48,7 +48,7 @@ async function insertIgnore(queryInterface: QueryInterface, tableName: string, d
     //if there are no rows, do nothing. else for each item in the allPermissions array, check if it exists in the db
     //if it does not, insert it
     if (existing.length < 1) {
-        await queryInterface.bulkInsert(Permissions.tableName,
+        await queryInterface.bulkInsert(tableName,
             data);
     }
     else {

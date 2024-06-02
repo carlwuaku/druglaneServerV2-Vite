@@ -7,12 +7,12 @@ import { Column, CreatedAt, DataType, Index, Model, PrimaryKey, Table } from "se
 })
 
 export class StockValues extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Index
   @Column({

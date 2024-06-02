@@ -10,12 +10,12 @@ import { Users } from "./Users";
 })
 
 export class Sales extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @ForeignKey(() => Customers)
   @Column({

@@ -7,12 +7,12 @@ import { Table, Model, Column, CreatedAt, Index, DataType, PrimaryKey } from "se
 })
 
 export class DiagnosticTests extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Index
   @Column({

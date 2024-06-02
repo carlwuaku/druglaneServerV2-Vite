@@ -1,21 +1,21 @@
-const PORT = process.env.PORT || 5100;
+const PORT = 5000;
 // const appName = "Shoplane";
 // const appLongName = "Shoplane POS & Inventory Management System";
 // const databaseName = "shoplane.db";
 import path from 'path';
 import os from 'os';
+import { app } from 'electron';
 const appName = "Druglane";
 const appLongName = "Druglane Pharmacy Management System";
 const databaseName = "druglane.db";
 
 const appDirectory = "druglaneServer";
-const settings_location:string =  path.join(process.env.APPDATA!, appDirectory);
+const settings_location:string =  path.join(app.getPath("appData"), appDirectory);
 
 export const constants = {
   appLongName : appLongName,
      appname : appName,
-     server_url : process.env.NODE_ENV == "production" ? 
-     "https://druglanepms.calgadsoftwares.com": "http://localhost/druglanebackend",
+  server_url: "https://druglanepms.calgadsoftwares.com",
      settings_location,
      customer_image_url : "assets/customer_images/",
      customer_image_thumbnail_url : "assets/customer_images/thumbnails/",

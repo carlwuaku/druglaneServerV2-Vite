@@ -1,4 +1,4 @@
-import { Table, Model, Column,   CreatedAt, DataType } from "sequelize-typescript";
+import { Table, Model, Column,   CreatedAt, DataType, UpdatedAt } from "sequelize-typescript";
 
 @Table({
    tableName: 'drug_info',
@@ -73,6 +73,5 @@ export class DrugInfo extends Model{
 
   @CreatedAt
   created_on!: string;
-
-  updatedAt!: false;
+  
 }

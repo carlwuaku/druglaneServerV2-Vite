@@ -6,12 +6,12 @@ import { Table, Model, Column, DataType, ForeignKey, CreatedAt, PrimaryKey } fro
   paranoid: true,
 })
 export class OnlineBackups extends Model{
-  @PrimaryKey
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true
-  })
-  id!: number;
+  // @PrimaryKey
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true
+  // })
+  // id!: number;
   
   @Column({
     type: DataType.DATEONLY,
