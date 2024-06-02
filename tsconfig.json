@@ -19,9 +19,17 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@server/*": [
+        "electron/server/*"
       ]
     },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["src", "electron"],
+  "include": ["src", "electron", "src/config", "src/utils"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
