@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 const appName = "Druglane";
 const appLongName = "Druglane Pharmacy Management System";
-const databaseName = "druglane.db";
+const databaseName = "druglanev2.db";
 
 const appDirectory = "druglaneServer";
 const settings_location: string = path.join(app.getPath("appData"), appDirectory);

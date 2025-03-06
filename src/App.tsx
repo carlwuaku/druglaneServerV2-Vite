@@ -26,21 +26,26 @@ import { AuthProvider, RequireAuth } from "react-auth-kit";
 import ResetPassword from "./pages/resetPassword";
 import { DatabaseSetup } from "./pages/databaseSetup";
 import { useGlobalState } from './global/globalProvider';
-import { APP_NOT_ACTIVATED } from './utils/stringKeys';
+import { APP_NOT_ACTIVATED, DATABASE_SETUP_EVENT, UPDATING_DATABASE } from './utils/stringKeys';
+import { DatabaseMigration } from './pages/databaseMigration';
 
 
 function App() {
   const globalState = useGlobalState();
   //if globalState.settings is
-  if (globalState.serverState === "loading") { 
-    return <div className='flex justify-center align-middle'>Loading...</div>
+  if (globalState.serverState === "loading" || globalState.dbState === UPDATING_DATABASE) { 
+    return <div className='flex justify-center align-middle  h-full w-full'>Loading...</div>
   }
+  
   if (globalState.serverState === APP_NOT_ACTIVATED) {
     return <Activate />
-   }
+  }
+  if (globalState.dbState === UPDATING_DATABASE) {
+    return <DatabaseMigration />
+  }
   
   return (
-    <div>
+    <>
       <CssBaseline />
       <Routes>
 
@@ -62,7 +67,7 @@ function App() {
 
       </Routes>
       {/* <UpdateElectron /> */}
-    </div>
+    </>
 
   )
 }

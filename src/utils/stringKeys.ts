@@ -1,6 +1,8 @@
 export const SERVER_STATE_CHANGED = "server_state_changed"
 export const SERVER_MESSAGE_RECEIVED = "server_message_received"
 export const GET_SERVER_STATE = "getServerState";
+export const GET_SERVER_DATABASE_STATE = "getServerDatabaseState";
+export const SERVER_DATABASE_STATE_CHANGED = "server_database_state_changed";
 export const GET_APP_DETAILS = "getAppDetails";
 export const GET_COMPANY_NAME = "getCompanyName";
 export const COMPANY_NAME_RECEIVED = "companyNameReceived"
@@ -33,4 +35,6 @@ export const SERVER_DATABASE_UPDATE = "server_database_update";
 export const DATABASE_UPDATED = "database_updated";
 export const UPDATING_DATABASE =  "Updating Database"
 export const COMPLTED_DATABASE_UPDATE =  "Completed Database Update"
-export const ERROR_UPDATING_DATABASE =  "Error Updating Database"
+export const ERROR_UPDATING_DATABASE = "Error Updating Database"
+export const COMPLETED_DATABASE_UPDATE = "Completed Database Update"
+

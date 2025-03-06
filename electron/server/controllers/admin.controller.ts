@@ -42,11 +42,11 @@ router.post('/admin_login', async (req: Request, res: Response) => {
     try {
 
         const token = await server_admin_login_function(req.body);
-        res.status(201).json(token);
+        res.status(200).json(token);
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ status: '-1', data: null, message: error })
+    } catch (error:any) {
+        console.log('err',error)
+        res.status(400).json({ message: error })
 
     }
 
@@ -153,7 +153,7 @@ router.get('/allPermissions', hasPermission, async (req: Request, res: Response)
     }
 });
 
-router.post('/saveSettings', hasPermission, async (req: Request, res: Response) => {
+router.post('/saveSettings', async (req: Request, res: Response) => {
     try {
         console.log(req.body)
 

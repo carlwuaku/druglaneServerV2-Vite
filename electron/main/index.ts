@@ -8,7 +8,14 @@ import { isAppActivated, verifyLicenseKey } from "../appValidation";
 import { logger } from "../../src/config/logger";
 import { constants, defaultOptions } from "../electronConstants";
 import serverEventEmitter from "../server/utils/ServerEvents";
-import { ACTIVATION_RESULT, APP_NOT_ACTIVATED, CALL_ACTIVATION, COMPLTED_DATABASE_UPDATE, CREATE_BACKUP, DATABASE_SETUP_EVENT, ERROR_UPDATING_DATABASE, GET_APP_DETAILS, GET_PREFERENCE, GET_PREFERENCES, GET_SERVER_STATE, GET_SERVER_URL, PREFERENCE_RECEIVED, PREFERENCE_SET, RESTART_APPLICATION, RESTART_SERVER, SERVER_DATABASE_UPDATE, SERVER_MESSAGE_RECEIVED, SERVER_STATE_CHANGED, SERVER_URL_RECEIVED, SERVER_URL_UPDATED, SET_ADMIN_PASSWORD, SET_PREFERENCE, UPDATING_DATABASE } from "../utils/stringKeys";
+import {
+  ACTIVATION_RESULT, APP_NOT_ACTIVATED, CALL_ACTIVATION, COMPLETED_DATABASE_UPDATE, CREATE_BACKUP, DATABASE_SETUP_EVENT, ERROR_UPDATING_DATABASE, GET_APP_DETAILS, GET_PREFERENCE, GET_PREFERENCES,
+  GET_SERVER_STATE, GET_SERVER_URL, PREFERENCE_RECEIVED, PREFERENCE_SET,
+  RESTART_APPLICATION, RESTART_SERVER, SERVER_DATABASE_UPDATE, SERVER_MESSAGE_RECEIVED,
+  SERVER_RUNNING,
+  SERVER_STATE_CHANGED, SERVER_URL_RECEIVED, SERVER_URL_UPDATED, SET_ADMIN_PASSWORD,
+  SET_PREFERENCE, UPDATING_DATABASE
+} from "../utils/stringKeys";
 import { runFolderCreation } from "@server/utils/directorySetup";
 import Store from "electron-store";
 import contextMenu from 'electron-context-menu';
@@ -21,7 +28,7 @@ let lastServerUrl: string = "";
 let databaseUpdateWindow: BrowserWindow | undefined;
 let serverState: "Application Activated" |
   "Application Not Activated" | "Server Started" | "Checking Activation"
-  | "Server Starting" | "Server Stopping" = "Checking Activation";
+  | "Server Starting" | "Server Stopping" | "Server Running" = "Checking Activation";
 const isDev = process.env.NODE_ENV === "development";//TODO: use vite env
 // The built directory structure
 //
@@ -58,6 +65,7 @@ let win: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 let serverUrl = "";
+let dbState = "";
 const store = new Store();
 contextMenu({
   showSaveImageAs: true,
@@ -113,8 +121,11 @@ ipcMain.on(CALL_ACTIVATION, async (event, key) => {
   try {
     let data = await verifyLicenseKey(key);
     if (data.data.status === "1") {
-      console.log('activation successful')
-      await startServer();
+      console.log('activation successful');
+      console.log('server state', serverState)
+      if (serverState !== SERVER_RUNNING) {
+        await startServer();
+      }
     }
     win?.webContents?.send(ACTIVATION_RESULT, { data: data.data, error: false, message: "" })
   } catch (error) {
@@ -171,12 +182,10 @@ ipcMain.on(CREATE_BACKUP, (event) => {
   console.log('create backup')
 })
 
-ipcMain.on(SERVER_DATABASE_UPDATE, (event, data: string) => {
-  console.log('server database update', data)
-  sendServerDatabaseUpdate(data);
+
+ipcMain.on(SERVER_DATABASE_UPDATE, () => {
+  sendServerDatabaseUpdate(dbState)
 })
-
-
 function savePreference(key: string, value: any) {
   try {
     console.log(key, value)
@@ -243,6 +252,7 @@ serverEventEmitter.on(SERVER_URL_UPDATED, (data) => {
 });
 
 serverEventEmitter.on(SERVER_DATABASE_UPDATE, (data) => {
+  dbState = data;
   sendServerDatabaseUpdate(data);
   switch (data) {
     case UPDATING_DATABASE:
@@ -251,7 +261,7 @@ serverEventEmitter.on(SERVER_DATABASE_UPDATE, (data) => {
         databaseUpdateWindow = createChildWindow("electronPages/runningMigrations.html", { title: "Running Migrations", parent: win! })
       }
       break;
-    case COMPLTED_DATABASE_UPDATE:
+    case COMPLETED_DATABASE_UPDATE:
       //create the window if it doesn't exist
       if (databaseUpdateWindow) {
         databaseUpdateWindow.close();
@@ -264,7 +274,7 @@ serverEventEmitter.on(SERVER_DATABASE_UPDATE, (data) => {
       break;
 
     case ERROR_UPDATING_DATABASE:
-      //create the window if it doesn't exist
+      //close the window if it was open
       if (databaseUpdateWindow) {
         databaseUpdateWindow.close();
 
