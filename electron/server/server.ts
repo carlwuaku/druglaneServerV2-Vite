@@ -158,6 +158,7 @@ const SERVER_PORT = store.get(PORT, constants.port);
 
 const startServer = async () => {
     //make sure the app has been activated
+    console.log("Starting server on port " + SERVER_PORT);
     try {
         server = app.listen(SERVER_PORT, () => {
             logger.info("server started successfully on " + SERVER_PORT);

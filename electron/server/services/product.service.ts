@@ -79,12 +79,7 @@ function getWhereWithMode(mode: string, param: string): WhereOptions {
                     [Op.lte]: 0
                 }
             }
-        case "stock_out":
-            return {
-                current_stock: {
-                    [Op.lte]: 0
-                }
-            }
+
 
 
         default:
@@ -565,7 +560,7 @@ export async function save_single_stock_adjustment(_data: { [key: string]: any }
     try {
 
         let object = await Products.findByPk(_data.product);
-        
+
         const result = await sequelize.transaction(async (t: Transaction) => {
             if (!object) {
                 throw new Error(`Product not found id ${_data.product}`)
@@ -623,7 +618,7 @@ export async function save_pending_single_stock_adjustment(_data: { [key: string
             });
 
             let object = await Products.findByPk(_data.product);
-            
+
 
 
             t.afterCommit(() => {
@@ -666,7 +661,7 @@ export async function get_pending_stock_quantity(_data: { code: string; product:
         if (!object) {
             throw new Error(`StockAdjustmentPending not found id ${_data.code}`)
         }
-        
+
         else {
             return object.quantity_counted
         }
