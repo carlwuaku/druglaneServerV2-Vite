@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import React, { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ActivationFailed from '../components/ActivationFailed';
 import ActivationSuccess from '../components/ActivationSuccess';
 import { TabPanel, TabView } from 'primereact/tabview';
@@ -13,6 +13,8 @@ import { useFormik, FormikErrors, } from 'formik';
 import SetAdminPassword from '../components/SetAdminPassword';
 
 const Activate = () => {
+  const history = useNavigate();
+
   //define the url. since the https version fails
   //sometimes, retry with the http version when 
   //necessary
@@ -70,7 +72,8 @@ const Activate = () => {
     setActiveIndex(2)
   }
 
-  const adminPasswordSet = (password:string) => {
+  const adminPasswordSet = (password: string) => {
+    history('/')
   }
 
   // function sendValidation() {
@@ -140,13 +143,13 @@ const Activate = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className='flex flex-column gap-3 justify-content-center align-items-center '>
+    <div className='flex flex-column gap-1  align-items-center p-2'>
       <h2>Activate Your System</h2>
-      <Button><Link to="/">HOME</Link></Button>
+      {/* <Button><Link to="/">HOME</Link></Button> */}
       <TabView activeIndex={activeIndex}  onTabChange={(e) => setActiveIndex(e.index)}>
         <TabPanel header="Enter Activation Code" disabled>
           <form onSubmit={formik.handleSubmit} >
-            <div className="flex flex-column gap-3 justify-content-center align-items-center">
+            <div className="flex flex-column gap-1  align-items-center">
 
               <div >
                 <b>Please enter your activation code. If you do not have one, please contact us via our form at

@@ -4,7 +4,8 @@ import { GlobalState } from '../models/globalState';
 const GlobalContext = createContext<GlobalState>({
     serverUrl: "",
     serverState: "",
-    settings: null
+    settings: null,
+    dbState: ""
 });
 
 export default GlobalContext;

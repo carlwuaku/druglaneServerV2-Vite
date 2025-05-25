@@ -8,7 +8,7 @@ import { migrationsList } from './migrationsList';
 import { sequelize } from '../sequelize-config'
 import { logger } from '../logger';
 import serverEventEmitter from '../../../server/utils/ServerEvents';
-import { COMPLTED_DATABASE_UPDATE, ERROR_UPDATING_DATABASE, SERVER_DATABASE_UPDATE, UPDATING_DATABASE } from '../../../utils/stringKeys';
+import { COMPLETED_DATABASE_UPDATE, ERROR_UPDATING_DATABASE, SERVER_DATABASE_UPDATE, UPDATING_DATABASE } from '../../../utils/stringKeys';
 const umzug = new Umzug({
   migrations: migrationsList,
   context: sequelize.getQueryInterface(),
@@ -25,7 +25,7 @@ export const runMigrations =
     try {
       serverEventEmitter.emit(SERVER_DATABASE_UPDATE, UPDATING_DATABASE)
       await umzug.up();
-      serverEventEmitter.emit(SERVER_DATABASE_UPDATE, COMPLTED_DATABASE_UPDATE)
+      serverEventEmitter.emit(SERVER_DATABASE_UPDATE, COMPLETED_DATABASE_UPDATE)
 
     } catch (error) {
       serverEventEmitter.emit(SERVER_DATABASE_UPDATE, ERROR_UPDATING_DATABASE)

@@ -3,7 +3,8 @@ import React from 'react';
 export interface GlobalState {
     serverUrl: string;
     serverState: string;
-    settings: ISettings|null;
+    settings: ISettings | null;
+    dbState: string;
 }
 
 export interface ISettings {

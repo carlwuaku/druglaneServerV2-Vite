@@ -203,7 +203,9 @@ export async function save(_data: { [key: string]: any }): Promise<string> {
  * @param _data must contain some search params
  * @returns a list of purchase details
  */
-export async function getDetails(_data: { param?: any; vendor?:any }): Promise<PurchaseDetails[]> {
+export async function getDetails(_data: {
+    param?: any; vendor?: string,
+}): Promise<PurchaseDetails[]> {
     try {
 
         let where: WhereOptions = {};
@@ -212,6 +214,7 @@ export async function getDetails(_data: { param?: any; vendor?:any }): Promise<P
             let searchQuery = JSON.parse(_data.param)
             where = parseSearchQuery(searchQuery)
         }
+        
         if (_data.vendor) {
             purchaseWhere['vendor'] = _data.vendor
         }

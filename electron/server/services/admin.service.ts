@@ -114,7 +114,7 @@ export async function server_admin_login_function(data: {  password: string; }):
         }
 
         if (!password_valid) {
-            throw new Error(errorMessages.PASSWORD_INCORRECT)
+            throw errorMessages.PASSWORD_INCORRECT
 
         }
         //user is valid
@@ -148,11 +148,11 @@ export async function server_admin_login_function(data: {  password: string; }):
             };
 
             logger.error({ message: serializedError });
-            throw new Error(error.message);
+            throw error;
             
         }
         else {
-            throw new Error(error);
+            throw error;
 
         }
 

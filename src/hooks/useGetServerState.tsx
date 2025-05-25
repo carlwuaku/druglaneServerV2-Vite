@@ -7,6 +7,7 @@ export default function useGetServerState() {
     useEffect(() => {
         setLoading(true);
         const handleServerStateReceived = async (event: any, data: any) => {
+            console.log(data)
             setServerState(data.data);
             setLoading(false);
             
