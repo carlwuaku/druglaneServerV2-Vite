@@ -413,7 +413,11 @@ router.get('/getStockNearMaxList', async (req: Request, res: Response) => {
 
 router.get('/getStockChanges', async (req: Request, res: Response) => {
     try {
-        const data = await service.get_stock_changes(req.query);
+        if (!req.query['product']) {
+            res.status(500).json({ status: '-1', data: null });
+            return;
+        }
+        const data = await service.get_stock_changes({ product: parseInt(req.query['product'] as string) });
         res.status(200).json({ status: '1', data });
     } catch (error) {
         logger.error(error);
@@ -557,8 +561,8 @@ router.post('/upload', async (req: UploadRequest, res: Response) => {
         for (let i = 0; i < Math.min(arr.length, 1000); i++) {
             const obj_array = arr[i];
             if (obj_array.name && typeof obj_array.name === "string" && obj_array.name.trim()) {
-                const expiry = obj_array.expiry ? 
-                    new Date(Date.parse(obj_array.expiry)).toISOString().split('T')[0] : 
+                const expiry = obj_array.expiry ?
+                    new Date(Date.parse(obj_array.expiry)).toISOString().split('T')[0] :
                     "1970-01-01";
 
                 mother_array.push({
@@ -609,7 +613,10 @@ router.post('/addItemActiveIngredient', async (req: Request, res: Response) => {
 
 router.get('/getChangedStock', async (req: Request, res: Response) => {
     try {
-        const data = await service.get_changed_stock(req.query);
+        if (!req.query['code']) {
+            return res.status(400).json({ status: '-1', message: 'Code parameter is required' });
+        }
+        const data = await service.get_changed_stock({ code: req.query['code'] as string });
         res.status(200).json({ status: '1', data });
     } catch (error) {
         logger.error(error);

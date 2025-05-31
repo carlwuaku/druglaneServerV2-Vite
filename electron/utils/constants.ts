@@ -1,15 +1,16 @@
+import { app } from 'electron';
+
 const PORT = 5001;
 // const appName = "Shoplane";
 // const appLongName = "Shoplane POS & Inventory Management System";
 // const databaseName = "shoplane.db";
 import path from 'path';
 import os from 'os';
-import { app } from 'electron';
 const appName = "Druglane";
 const appLongName = "Druglane Pharmacy Management System";
-const databaseName = "druglane.db";
+const databaseName = "druglanev2.db";
 
-const appDirectory = "druglaneServer";
+const appDirectory = "druglane-server";
 const settings_location: string = path.join(app.getPath("appData"), appDirectory);
 
 export const constants = {
@@ -60,6 +61,7 @@ export const constants = {
       "Paediatric Multivitamins"
 
    ],
+
    default_config: {
       port: PORT,
       host: "localhost",
@@ -97,6 +99,6 @@ export const constants = {
    PERMISSION_VIEW_SALES_REPORTS: "View Sales Reports",
    PERMISSION_VIEW_SALES_HISTORY: "View Sales History",
    STRING_DB_VERSION: "dbversion",
-
+   logs_path: path.join(settings_location, 'logs')
 
 }

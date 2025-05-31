@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
 import { verifyLicenseKey } from "../appValidation";
-import { defaultOptions } from "../electronConstants";
+// import { defaultOptions } from "../electronConstants";
 import {
     ACTIVATION_RESULT, CALL_ACTIVATION, CREATE_BACKUP, GET_APP_DETAILS, GET_PREFERENCE, GET_PREFERENCES,
     GET_SERVER_STATE, GET_SERVER_URL, PREFERENCE_RECEIVED, PREFERENCE_SET,
@@ -13,9 +13,8 @@ import Store from "electron-store";
 import { startServer } from "../server/server";
 import { getAppDetails, restartApp, savePreference, sendServerDatabaseUpdate, sendServerState, sendServerUrl, spawnServer } from "./app-functions";
 import { appGlobals } from "./globals";
-let serverState: "Application Activated" |
-    "Application Not Activated" | "Server Started" | "Checking Activation"
-    | "Server Starting" | "Server Stopping" | "Server Running" = "Checking Activation";
+import { constants } from "../utils/constants";
+
 
 export function registerIpcHandlers(win: BrowserWindow, store: Store) {
 
@@ -25,10 +24,12 @@ export function registerIpcHandlers(win: BrowserWindow, store: Store) {
             let data = await verifyLicenseKey(key);
             if (data.data.status === "1") {
                 console.log('activation successful');
-                console.log('server state', serverState)
-                if (serverState !== SERVER_RUNNING) {
+                console.log('server state', appGlobals.serverState)
+                // in some cases the server might already be running, so we check the server state. e.g. if the user tried activation and did not complete it
+                if (appGlobals.serverState !== SERVER_RUNNING) {
                     await startServer();
                 }
+
             }
             win?.webContents?.send(ACTIVATION_RESULT, { data: data.data, error: false, message: "" })
         } catch (error) {
@@ -44,7 +45,7 @@ export function registerIpcHandlers(win: BrowserWindow, store: Store) {
 
     /** run when ui requests the server state */
     ipcMain.on(GET_SERVER_STATE, () => {
-        sendServerState(serverState, win);
+        sendServerState(appGlobals.serverState, win);
     })
 
     /** run when user requests to restart the server from the ui */
@@ -60,7 +61,7 @@ export function registerIpcHandlers(win: BrowserWindow, store: Store) {
 
     ipcMain.on(GET_PREFERENCE, (event, data: { key: string }) => {
 
-        let value = store.get(data.key, defaultOptions[data.key])
+        let value = store.get(data.key, constants.default_config[data.key as keyof typeof constants.default_config]);
         event.reply(PREFERENCE_RECEIVED, { name: data.key, value: value })
     }
     )

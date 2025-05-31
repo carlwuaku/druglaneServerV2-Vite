@@ -1,4 +1,3 @@
-import React from "react";
 import * as Images from "@/assets"
 
 interface ImageProps {
@@ -8,7 +7,7 @@ interface ImageProps {
 }
 
 const LocalImage = ({ image, height, className }: ImageProps) => {
-        return <img src={Images[image]} className={className} alt="none" height={height}/>
+    return <img src={Images[image]} className={className} alt="none" height={height} />
 }
 
 export default LocalImage

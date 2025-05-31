@@ -20,7 +20,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import Link from '@mui/material/Link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import  LocalImage  from "@/components/Image";
+import LocalImage from "@/components/Image";
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 import { useSignOut } from 'react-auth-kit'
@@ -118,8 +118,8 @@ const Header = (props: { showBackArrow?: boolean }) => {
 
   const logo = <label htmlFor=""> {title}</label>
   const search = <InputText placeholder="Search" type="text" className="w-full" />;
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -147,33 +147,32 @@ const Header = (props: { showBackArrow?: boolean }) => {
             <IconButton onClick={() => { window.history.back(); }} aria-label="delete">
               <ArrowBackIcon />
             </IconButton> : ''}
-
-          <LocalImage height='35px' image='Logo'  />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'flex' },
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Druglane
-          </Typography>
-
+          <div className='flex gap-1'>
+            <LocalImage height='35px' image='LogoShadowWhiteOutline' />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/"
+              sx={{
+                mr: 2,
+                display: { xs: 'flex', md: 'flex' },
+                fontWeight: 700,
+                letterSpacing: '.3rem',
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+              Druglane 2.0
+            </Typography>
+          </div>
           <Button
-            component={RouterLink} 
-            to={`/`}
-            sx={{ my: 2, color: 'white', display: 'block' }}
-            onClick={logout}
+            variant='outlined'
+            href='/'
+            sx={{ color: 'white' }}
             startIcon={<Home />}
           >
-             Home/Menu
+            Home/Menu
           </Button>
           <Box sx={{ flexGrow: 1, display: 'flex' }}></Box>
           {/* <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'flex' } }}>
@@ -189,12 +188,12 @@ const Header = (props: { showBackArrow?: boolean }) => {
               </Button>
 ))}
           </Box> */}
-          <Button 
-            sx={{ my: 2, color: 'white', display: 'block' }}
+          <Button
+            sx={{ color: 'white' }}
             onClick={logout}
             endIcon={<Logout />}
           >
-           Logout 
+            Logout
           </Button>
 
 

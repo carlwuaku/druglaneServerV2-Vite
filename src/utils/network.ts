@@ -38,7 +38,7 @@ import { useAuthUser } from 'react-auth-kit'
 
 // }
 
-export async function getData<T>(data: { url: string, params?: Map<string, any>, token: string | undefined }): Promise<AxiosResponse<T>> {
+export async function getData<T>(data: { url: string, params?: Map<string, any>, token?: string | undefined }): Promise<AxiosResponse<T>> {
     try {
         console.log('token', data.token)
         if (data.params) {
@@ -66,7 +66,7 @@ export async function getData<T>(data: { url: string, params?: Map<string, any>,
     }
 }
 
-export async function postData<T>(data: {url: string, formData: any, token:string|undefined}): Promise<AxiosResponse<T>> {
+export async function postData<T>(data: { url: string, formData: any, token: string | undefined }): Promise<AxiosResponse<T>> {
     try {
         logger.info({ message: `call made to ${data.url}. data: ${JSON.stringify(data.formData)}` });
         const response = await axios.post(data.url, data.formData, {
@@ -96,7 +96,7 @@ export async function deleteData<T>(data: { url: string, token: string | undefin
     }
 }
 
-export  async function sendEmail(message:string, recipient:string, subject:string) {
+export async function sendEmail(message: string, recipient: string, subject: string) {
 
     try {
         const FormData = require('form-data');
@@ -111,12 +111,12 @@ export  async function sendEmail(message:string, recipient:string, subject:strin
     catch (error) {
         logger.info({ message: `error sending email : ${error}` })
         throw new Error(`Server error: ${error}`);
-        
+
     };
 }
 
-export function getAuthHeaders(token?:string): AxiosRequestConfig['headers'] {
-    
+export function getAuthHeaders(token?: string): AxiosRequestConfig['headers'] {
+
     const header: AxiosRequestConfig['headers'] = {
         'token': token,
         'Content-Type': 'application/json'

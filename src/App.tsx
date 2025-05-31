@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import UpdateElectron from '@/components/update'
 import logoVite from './assets/logo-vite.svg'
 import logoElectron from './assets/logo-electron.svg'
@@ -26,24 +26,29 @@ import { AuthProvider, RequireAuth } from "react-auth-kit";
 import ResetPassword from "./pages/resetPassword";
 import { DatabaseSetup } from "./pages/databaseSetup";
 import { useGlobalState } from './global/globalProvider';
-import { APP_NOT_ACTIVATED, DATABASE_SETUP_EVENT, UPDATING_DATABASE } from './utils/stringKeys';
+import { APP_NOT_ACTIVATED, CHECKING_ACTIVATION, DATABASE_SETUP_EVENT, LOADING, UPDATING_DATABASE } from './utils/stringKeys';
 import { DatabaseMigration } from './pages/databaseMigration';
-
+import Loading from './components/Loading';
 
 function App() {
   const globalState = useGlobalState();
+  console.log("Global State", globalState);
+
   //if globalState.settings is
-  if (globalState.serverState === "loading" || globalState.dbState === UPDATING_DATABASE) { 
-    return <div className='flex justify-center align-middle  h-full w-full'>Loading...</div>
+  if (globalState.serverState === LOADING || globalState.dbState === UPDATING_DATABASE || globalState.serverState === CHECKING_ACTIVATION) {
+    return <div className='w-full h-full flex flex-col justify-center items-center'>
+      <Loading />
+      <div className='text-2xl font-bold text-center mt-4'>{globalState.serverState}</div>
+    </div>
   }
-  
+
   if (globalState.serverState === APP_NOT_ACTIVATED) {
     return <Activate />
   }
   if (globalState.dbState === UPDATING_DATABASE) {
     return <DatabaseMigration />
   }
-  
+
   return (
     <>
       <CssBaseline />

@@ -1,15 +1,12 @@
-import express, { Express, NextFunction, Request, Response } from 'express';
+import express, { Express } from 'express';
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv';
-import { constants } from '../utils/constants'
-import fork from 'child_process';
 import ip from 'ip';
 import { logger } from './config/logger';
 import { runMigrations } from './config/migrations/migrations';
-import { Settings } from './models/Settings';
 import serverEventEmitter from "./utils/ServerEvents";
-import { PORT, SERVER_MESSAGE_RECEIVED, SERVER_RUNNING, SERVER_STATE_CHANGED, SERVER_URL_UPDATED } from '../utils/stringKeys'
+import { PORT, SERVER_MESSAGE_RECEIVED, SERVER_STATE_CHANGED, SERVER_URL_UPDATED } from '../utils/stringKeys'
 import adminController from './controllers/admin.controller';
 import customerController from './controllers/customer.controller';
 import productController from './controllers/product.controller';
@@ -23,7 +20,7 @@ import cors from 'cors';
 import Store from "electron-store";
 import bodyParser from 'body-parser';
 import path from 'path';
-import { hasPermission } from './utils/auth';
+import { constants } from '../utils/constants';
 const store = new Store();
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -32,46 +29,6 @@ dotenv.config();
 // console.log('erver')
 export const app: Express = express();
 
-/**
- * checks the database if the company details have been set
- * @returns {boolean}
- */
-export async function isCompanySet(): Promise<boolean>{
-    //get a connection to the database
-    const setting = await Settings.findOne({
-        where: {
-            'name': 'company_id'
-        }
-    });
-    if (!setting) {
-        return false;
-    }
-    //check if the actual value exists and is a valid number
-    return isValidInt(setting.value) ;
-}
-
-
-/**
- * check the database if the admin password is set
- * @returns {boolean}
- */
-export async function isAdminPasswordSet(): Promise<boolean>{
-    const setting = await Settings.findOne({
-        where: {
-            'name': 'admin_password'
-        }
-    });
-    if (setting == null) {
-        return false;
-    }
-    //check if the actual value exists and is a valid string
-    return setting.value.trim().length > 0;
-}
-
-export function isValidInt(value: any): boolean {
-    return value != null && Number.isInteger(value);
-
-}
 
 app.use(cors());
 app.use(bodyParser.json())

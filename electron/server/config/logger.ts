@@ -1,4 +1,4 @@
-import { constants } from '../utils/constants';
+import { constants } from '../../utils/constants';
 import * as winston from 'winston';
 import path from 'path';
 import { getToday } from '../helpers/dateHelper';
@@ -10,7 +10,7 @@ const defaultFormat = winston.format.combine(
 )
 
 const logger = winston.createLogger({
-    
+
     transports: [
         //
         // - Write all logs with importance level of `error` or less to `error.log`
@@ -19,7 +19,7 @@ const logger = winston.createLogger({
         new winston.transports.File({
             filename: path.resolve(constants.settings_location, 'logs', `${getToday()} debug.log`),
             level: 'debug',
-            format:  defaultFormat,
+            format: defaultFormat,
         }),
         new winston.transports.File({
             filename: path.resolve(constants.settings_location, 'logs', `${getToday()} info.log`),
@@ -45,4 +45,4 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-export {logger}
+export { logger }

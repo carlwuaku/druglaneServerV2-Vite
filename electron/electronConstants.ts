@@ -1,49 +1,49 @@
-import { app } from 'electron';
+// import { app } from 'electron';
 
-const PORT = 5000;
-// const appName = "Shoplane";
-// const appLongName = "Shoplane POS & Inventory Management System";
-// const databaseName = "shoplane.db";
-import path from 'path';
-import os from 'os';
-const appName = "Druglane";
-const appLongName = "Druglane Pharmacy Management System";
-const databaseName = "druglane.db";
+// const PORT = 5000;
+// // const appName = "Shoplane";
+// // const appLongName = "Shoplane POS & Inventory Management System";
+// // const databaseName = "shoplane.db";
+// import path from 'path';
+// import os from 'os';
+// const appName = "Druglane";
+// const appLongName = "Druglane Pharmacy Management System";
+// const databaseName = "druglane.db";
 
-const appDirectory = "druglaneServer";
-const settings_location: string = path.join(app.getPath("appData"), appDirectory);
-export const defaultOptions:{[key:string]:any} = {
-   "port": 5000,
-   "backup_time": 19
-}
-export const constants = {
-  appLongName : appLongName,
-     appname : appName,
-   server_url: "https://druglanepms.calgadsoftwares.com",
-   // process.env.NODE_ENV == "development" ? 
-   //      "http://localhost/druglanebackend" : "https://druglanepms.calgadsoftwares.com",
-     settings_location,
-     customer_image_url : "assets/customer_images/",
-     customer_image_thumbnail_url : "assets/customer_images/thumbnails/",
+// const appDirectory = "druglaneServer";
+// const settings_location: string = path.join(app.getPath("appData"), appDirectory);
+// export const defaultOptions:{[key:string]:any} = {
+//    "port": 5000,
+//    "backup_time": 19
+// }
+// export const constants = {
+//   appLongName : appLongName,
+//      appname : appName,
+//    server_url: "https://druglanepms.calgadsoftwares.com",
+//    // process.env.NODE_ENV == "development" ? 
+//    //      "http://localhost/druglanebackend" : "https://druglanepms.calgadsoftwares.com",
+//      settings_location,
+//      customer_image_url : "assets/customer_images/",
+//      customer_image_thumbnail_url : "assets/customer_images/thumbnails/",
          
-     product_image_url : "assets/product_images/",
-     product_image_thumbnail_url : "assets/product_images/thumbnails/",
-     port : PORT, 
+//      product_image_url : "assets/product_images/",
+//      product_image_thumbnail_url : "assets/product_images/thumbnails/",
+//      port : PORT, 
     
      
-     firebase_user_collection : "users",
-     firebase_requests_collection : "requests",
-     firebase_responses_collection : "responses",
+//      firebase_user_collection : "users",
+//      firebase_requests_collection : "requests",
+//      firebase_responses_collection : "responses",
      
-     db_path : path.join( settings_location, databaseName),
-     backup_folder : path.join(os.homedir(), `${appName}Backups`),
-     settings_filename : 'system-settings.json',
-     db_filename : databaseName,
-     internal_backups_path :path.join( settings_location,'backups'),
-     logs_path :path.join( settings_location,'logs'),
-     company_id : '',
+//      db_path : path.join( settings_location, databaseName),
+//      backup_folder : path.join(os.homedir(), `${appName}Backups`),
+//      settings_filename : 'system-settings.json',
+//      db_filename : databaseName,
+//      internal_backups_path :path.join( settings_location,'backups'),
+//      logs_path :path.join( settings_location,'logs'),
+//      company_id : '',
     
-  STRING_DB_VERSION:"dbversion",
+//   STRING_DB_VERSION:"dbversion",
    
      
-     }
+//      }

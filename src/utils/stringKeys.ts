@@ -33,8 +33,14 @@ export const CREATE_BACKUP = "create_backup";
 export const DATABASE_SETUP_EVENT = "database_setup_event";
 export const SERVER_DATABASE_UPDATE = "server_database_update";
 export const DATABASE_UPDATED = "database_updated";
-export const UPDATING_DATABASE =  "Updating Database"
-export const COMPLTED_DATABASE_UPDATE =  "Completed Database Update"
+export const UPDATING_DATABASE = "Updating Database"
+export const COMPLTED_DATABASE_UPDATE = "Completed Database Update"
 export const ERROR_UPDATING_DATABASE = "Error Updating Database"
-export const COMPLETED_DATABASE_UPDATE = "Completed Database Update"
+export const COMPLETED_DATABASE_UPDATE = "Completed Database Update";
+export const LOADING = "Loading";
+export const CHECKING_ACTIVATION = "Checking Activation";
+export const COMPANY_NOT_SET = "Company Not Set";
+export const COMPANY_SET = "Company Set";
+export const ADMIN_PASSWORD_NOT_SET = "Admin Password Not SET";
+export const APP_ACTIVATED = "App Activated";
 

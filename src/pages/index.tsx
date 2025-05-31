@@ -17,7 +17,7 @@ import { Backup, CloudDownload, CloudSync, DisplaySettings, LockPerson, Notifica
 import DashboardTile from '../components/DashboardTile';
 import SettingItem from '../components/SettingItem';
 import GlobalContext from '../global/global';
-import {useAuthUser} from 'react-auth-kit'
+import { useAuthUser } from 'react-auth-kit'
 import useGetServerState from '@/hooks/useGetServerState';
 import { useGlobalState } from '@/global/globalProvider';
 // import logo from '@/app/assets/logo.png';
@@ -64,9 +64,8 @@ const Index = () => {
   // const openPreferences = () => {
   //   ipcRenderer.send(GET_PREFERENCES)
   // }
-  const {settings} = useGlobalState();
+  const { settings } = useGlobalState();
   const backupClicked = () => {
-    console.log('backup clicked');
     ipcRenderer.send(CREATE_BACKUP);
   }
 
@@ -87,7 +86,7 @@ const Index = () => {
   //   ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
 
 
-    
+
 
   // }, []);
 
@@ -98,14 +97,14 @@ const Index = () => {
   return (
     <>
       <Header></Header>
-      
+
       {/* <Button><Link to="/activate">Activation</Link></Button>
       <Button><Link to="/settings">settngs</Link></Button> */}
       <Box className="container">
         <h3>Druglane Management System</h3>
         <h4>Licensed to {settings?.company_name}</h4>
         <Grid container spacing={2}>
-          
+
           <Grid xs={12} md={8} >
             <ServerState></ServerState>
 
@@ -114,18 +113,18 @@ const Index = () => {
             <SettingItem key={BACKUP_TIME} description='Backup time' name={BACKUP_TIME} type={'select'} options={times}></SettingItem>
 
           </Grid>
-          
+
         </Grid>
         <Grid container spacing={2}>
           <Grid lg={3} md={3} sm={6}>
-            <Link  to={''} className="unsetAll link ">
+            <Link to={''} className="unsetAll link ">
               <DashboardTile
                 title={'Backup your database now'}
                 subtitle={'Create a backup file of your database'}
                 icon={<Backup sx={{ fontSize: 30 }}></Backup>}
                 onClick={backupClicked}
               ></DashboardTile>
-           </Link>
+            </Link>
           </Grid>
           <Grid lg={3} md={3} sm={6}>
             <Link to={'backups'} className="unsetAll link">
@@ -140,7 +139,7 @@ const Index = () => {
               <DashboardTile
                 title={'Edit system settings'}
                 subtitle={'Edit the phone, email, address, etc'}
-                icon={<DisplaySettings sx={{ fontSize: 30 }}></DisplaySettings>} ></DashboardTile>
+                icon={<img src="/assets/001-databases.png" alt="Logo" />} ></DashboardTile>
             </Link>
           </Grid>
           <Grid lg={3} md={3} sm={6}>
@@ -151,7 +150,7 @@ const Index = () => {
                 icon={<Person2Outlined sx={{ fontSize: 30 }}></Person2Outlined>} ></DashboardTile>
             </Link>
           </Grid>
-          
+
         </Grid>
 
         <Grid container spacing={2}>
@@ -171,12 +170,12 @@ const Index = () => {
                 icon={<NotificationsOutlined sx={{ fontSize: 30 }}></NotificationsOutlined>} ></DashboardTile>
             </Link>
           </Grid>
-          
+
 
         </Grid>
-       
+
       </Box>
-      
+
     </>
   );
 }

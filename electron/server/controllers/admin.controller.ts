@@ -1,9 +1,9 @@
 import { logger } from '../config/logger';
 import express, { Router, Response, Request } from 'express';
 const router: Router = express.Router();
-import {addRole, delete_role_function, delete_role_permission_function, delete_user_function, doResetAdminPassword, getSettings, get_branches_function, get_insurers_function, get_logo_function, get_permissions_function, get_roles_function, get_role_function, get_role_permissions_function, get_users_function, get_user_function, login_function, resetAdminPassword, saveSettings, save_branch_function, save_user_function, server_admin_login_function} from '../services/admin.service'
+import { addRole, delete_role_function, delete_role_permission_function, delete_user_function, doResetAdminPassword, getSettings, get_branches_function, get_insurers_function, get_logo_function, get_permissions_function, get_roles_function, get_role_function, get_role_permissions_function, get_users_function, get_user_function, login_function, resetAdminPassword, saveSettings, save_branch_function, save_user_function, server_admin_login_function, checkActivationStatus } from '../services/admin.service'
 import { hasPermission } from '../utils/auth';
-import { constants } from '../utils/constants';
+import { constants } from '../../utils/constants';
 
 
 router.get("/", async (req: Request, res: Response) => {
@@ -13,7 +13,16 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get('/getAppName', async (req: Request, res: Response) => {
     try {
-        let data = { name: constants.appname, long_name: constants.appLongName }; 
+        let data = { name: constants.appname, long_name: constants.appLongName };
+        res.status(201).json(data)
+    } catch (error) {
+        res.status(500).json({ status: '-1', data: null, message: error })
+    }
+})
+
+router.get('/activation_status', async (req: Request, res: Response) => {
+    try {
+        let data = await checkActivationStatus();
         res.status(201).json(data)
     } catch (error) {
         res.status(500).json({ status: '-1', data: null, message: error })
@@ -44,8 +53,8 @@ router.post('/admin_login', async (req: Request, res: Response) => {
         const token = await server_admin_login_function(req.body);
         res.status(200).json(token);
 
-    } catch (error:any) {
-        console.log('err',error)
+    } catch (error: any) {
+        console.log('err', error)
         res.status(400).json({ message: error })
 
     }
@@ -84,7 +93,7 @@ router.post('/resetAdminPassword', async (req: Request, res: Response) => {
 
 router.get('/getBranches', hasPermission, async (req: Request, res: Response) => {
     try {
-        let data = await get_branches_function(); 
+        let data = await get_branches_function();
         res.status(201).json(data)
     } catch (error) {
         res.status(500).json({ status: '-1', data: null, message: error })
@@ -131,7 +140,7 @@ router.get('/getInsurers', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/settings',  async (req: Request, res: Response) => {
+router.get('/settings', async (req: Request, res: Response) => {
     try {
         let data = await getSettings();
         res.json(data);
@@ -201,7 +210,7 @@ router.get('/getUsers', hasPermission, async (req: Request, res: Response) => {
 
 router.get('/user/:id', hasPermission, async (req: Request, res: Response) => {
     try {
-        let data = await get_user_function({id: req.params.id});
+        let data = await get_user_function({ id: req.params.id });
         res.status(200).json(data)
     } catch (error) {
         logger.error({ message: error })

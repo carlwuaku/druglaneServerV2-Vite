@@ -1,6 +1,6 @@
 import { logger } from "../config/logger";
 import axios, { AxiosResponse } from 'axios'
-import { constants } from '../utils/constants'
+import { constants } from '../../utils/constants'
 /**
  * make a get call to a url with some optional params
  * @param url the url to call
@@ -64,7 +64,7 @@ export async function deleteData<T>(url: string): Promise<AxiosResponse<T>> {
     }
 }
 
-export  async function sendEmail(message:string, recipient:string, subject:string) {
+export async function sendEmail(message: string, recipient: string, subject: string) {
 
     try {
         const FormData = require('form-data');
@@ -80,6 +80,6 @@ export  async function sendEmail(message:string, recipient:string, subject:strin
         console.log(error)
         logger.info({ message: `error sending email : ${error}` })
         throw new Error(`Server error: ${error}`);
-        
+
     };
 }

@@ -1,9 +1,8 @@
 import * as fs from 'fs';
-import { constants } from '../utils/constants';
 import { Settings } from '../models/Settings';
+import { constants } from '../../utils/constants';
 //check if the database file exists. if it does, then the app has been validated.
 export const isAppActivated = (): boolean => {
-    console.log('db path', constants.db_path)
     return fs.existsSync(constants.db_path)
 }
 
@@ -11,7 +10,7 @@ export const isAppActivated = (): boolean => {
  * checks the database if the company details have been set
  * @returns {boolean}
  */
-export async function isCompanySet(): Promise<boolean>{
+export async function isCompanySet(): Promise<boolean> {
     //get a connection to the database
     const setting = await Settings.findOne({
         where: {
@@ -22,7 +21,7 @@ export async function isCompanySet(): Promise<boolean>{
         return false;
     }
     //check if the actual value exists and is a valid number
-    return isValidInt(setting.value) ;
+    return isValidInt(setting.value);
 }
 
 
@@ -30,7 +29,7 @@ export async function isCompanySet(): Promise<boolean>{
  * check the database if the admin password is set
  * @returns {boolean}
  */
-export async function isAdminPasswordSet(): Promise<boolean>{
+export async function isAdminPasswordSet(): Promise<boolean> {
     const setting = await Settings.findOne({
         where: {
             'name': 'admin_password'
@@ -43,7 +42,7 @@ export async function isAdminPasswordSet(): Promise<boolean>{
     return setting.value.trim().length > 0;
 }
 
-export function isValidInt(value:any): boolean{
+export function isValidInt(value: any): boolean {
     return value != null && Number.isInteger(value);
 
 }

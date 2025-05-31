@@ -1,4 +1,4 @@
-import { ACTIVATION_RESULT, CALL_ACTIVATION } from '@/utils/stringKeys';
+import { ACTIVATION_RESULT, ADMIN_PASSWORD_NOT_SET, APP_ACTIVATED, CALL_ACTIVATION, COMPANY_NOT_SET, RESTART_APPLICATION, SERVER_RUNNING } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -11,10 +11,18 @@ import Settings from '../components/settings';
 import { Dialog } from 'primereact/dialog';
 import { useFormik, FormikErrors, } from 'formik';
 import SetAdminPassword from '../components/SetAdminPassword';
+import Box from '@mui/material/Box';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import { useGlobalState } from '@/global/globalProvider';
+import { getData } from '@/utils/network';
+import { ActivationStateType } from '@/types/activationStateType';
 
 const Activate = () => {
   const history = useNavigate();
-
+  //track the server url. in some cases the activation would have been done and the database created. in that case we have to check if company details have been set and password set
+  const { serverUrl, serverState } = useGlobalState();
   //define the url. since the https version fails
   //sometimes, retry with the http version when 
   //necessary
@@ -23,7 +31,7 @@ const Activate = () => {
       code: ''
     },
     validate: (values: { code: string }) => {
-      let errors: FormikErrors<{code:string}> = {};
+      let errors: FormikErrors<{ code: string }> = {};
       if (!values.code) {
         errors.code = 'Required';
       }
@@ -37,9 +45,9 @@ const Activate = () => {
     }
   });
   const [loading, setLoading] = useState(false)
-  const keyField = useRef<HTMLInputElement>();
-  const [requestStatus, setRequestStatus] = useState<{status:string, data:any}>({status: "", data:{}});
-  const toast = useRef(null);
+
+  const [requestStatus, setRequestStatus] = useState<{ status: string, data: any }>({ status: "", data: {} });
+
   const [errorVisible, setErrorVisible] = useState(false);
 
   const [settingsData, setSettingsData] = useState({
@@ -72,8 +80,8 @@ const Activate = () => {
     setActiveIndex(2)
   }
 
-  const adminPasswordSet = (password: string) => {
-    history('/')
+  const adminPasswordSet = () => {
+    ipcRenderer.send(RESTART_APPLICATION)
   }
 
   // function sendValidation() {
@@ -94,7 +102,7 @@ const Activate = () => {
       //         "message": ""
       //     }
       // }
-      
+
       console.log(data.data)
       if (data.data.status === "1") {
         setRequestStatus(data.data)
@@ -122,7 +130,7 @@ const Activate = () => {
           admin_password: '',
           company_id: data.data.data.id
         })
-        
+
         console.log(settingsData)
 
         setActiveIndex(1)
@@ -140,63 +148,105 @@ const Activate = () => {
 
 
   }, [])
+
+  useEffect(() => {
+    //if the server url is set and the server is running, then get the activation state from the server
+    //this is to check if the activation has already been done
+    const getServerState = async () => {
+      const serverState = await getData<ActivationStateType>({ url: `${serverUrl}/api_admin/activation_status` });
+      console.log(serverState)
+      if (serverState.data === APP_ACTIVATED) {
+        history('/')
+      }
+    }
+    if (serverUrl && serverState === SERVER_RUNNING) {
+      getServerState();
+    }
+  }, [serverUrl, serverState]);
+
+
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className='flex flex-column gap-1  align-items-center p-2'>
+    <div className='flex flex-column gap-1  align-items-center p-2 overflow-x-auto'>
       <h2>Activate Your System</h2>
-      {/* <Button><Link to="/">HOME</Link></Button> */}
-      <TabView activeIndex={activeIndex}  onTabChange={(e) => setActiveIndex(e.index)}>
-        <TabPanel header="Enter Activation Code" disabled>
-          <form onSubmit={formik.handleSubmit} >
-            <div className="flex flex-column gap-1  align-items-center">
-
-              <div >
-                <b>Please enter your activation code. If you do not have one, please contact us via our form at
+      <Box sx={{ width: '100%' }}>
+        <Stepper activeStep={activeIndex} alternativeLabel>
+          <Step key="enter-activation-code">
+            <StepLabel>Enter Activation Code</StepLabel>
+          </Step>
+          <Step key="settings">
+            <StepLabel>Company Details</StepLabel>
+          </Step>
+          <Step key="admin-password">
+            <StepLabel>Set Administrator Password</StepLabel>
+          </Step>
+        </Stepper>
+        <div className="step-content">
+          {activeIndex === 0 && (
+            <form onSubmit={formik.handleSubmit}>
+              <div className="flex flex-column gap-1 align-items-center">
+                <div className='text-center mb-2'>
+                  Please enter your activation code. If you do not have one, please contact us via our form at
                   <a href="http://calronsoftwares.com"> http://calronsoftwares.com</a>
-                </b>
-              </div>
-           
-                <label htmlFor="location">Activation Code</label>
-              <InputText id="code" className='wide-input'
+                </div>
+
+                <label className='font-bold' htmlFor="location">Activation Code</label>
+                <InputText
+                  id="code"
+                  className='wide-input'
                   aria-describedby="code-help"
                   value={formik.values.code}
                   onChange={(e) => {
                     formik.setFieldValue('code', e.target.value);
                   }}
                 />
-            
-              <Button type='submit' label='Submit' loading={loading} ></Button>
-              {
-                requestStatus && requestStatus.data.status === "-1" ? <ActivationFailed /> : null
-              }
-            </div>
 
-          </form>
+                <Button type='submit' label='Submit' loading={loading}></Button>
+                {
+                  requestStatus && requestStatus.data.status === "-1" ? <ActivationFailed /> : null
+                }
+              </div>
+            </form>
+          )}
+
+          {activeIndex === 1 && (
+            <div className='flex flex-column justify-content-center align-items-center'>
+              {
+                requestStatus && requestStatus.status === "1" ?
+                  <div>
+                    <ActivationSuccess name={requestStatus.data.name} />
+
+                  </div> : null
+              }
+              <Settings data={settingsData} onSubmit={settingsSubmitted}></Settings>
+            </div>
+          )}
+
+          {activeIndex === 2 && (
+            <div className='flex flex-column justify-content-center align-items-center'>
+              <SetAdminPassword onSubmit={adminPasswordSet}></SetAdminPassword>
+            </div>
+          )}
+        </div>
+      </Box>
+      {/* <Button><Link to="/">HOME</Link></Button> */}
+      {/* <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
+        <TabPanel header="Enter Activation Code" disabled>
+
         </TabPanel>
         <TabPanel header="Settings" disabled>
-          <div className='flex flex-column justify-content-center align-items-center'>
-            {
-              requestStatus && requestStatus.status === "1" ?
-                <div>
-                  <ActivationSuccess name={requestStatus.data.name} />
-                  <Settings data={settingsData} onSubmit={settingsSubmitted}  ></Settings>
-                </div> : null
-            }
-
-          </div>
+          
         </TabPanel>
         <TabPanel header="Set Administrator Password" disabled>
-          <div className='flex flex-column justify-content-center align-items-center'>
-            <SetAdminPassword onSubmit={adminPasswordSet}></SetAdminPassword>
-          </div>
+          
         </TabPanel>
-      </TabView>
+      </TabView> */}
 
 
-      <Dialog  visible={errorVisible} style={{ width: '50vw' }}
+      <Dialog visible={errorVisible} style={{ width: '50vw' }}
         footer={<Button label="Close" icon="pi pi-times" onClick={() => setErrorVisible(false)} className="p-button-text" />
-}
+        }
         onHide={() => setErrorVisible(false)}>
         <p className="m-0">
           Your activation key is invalid. Please check and try again

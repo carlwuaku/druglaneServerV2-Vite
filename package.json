@@ -2,7 +2,7 @@
   "name": "druglane-v2",
   "version": "2.2.0",
   "main": "dist-electron/main/index.js",
-  "description": "Electron Vite React boilerplate.",
+  "description": "Druglane V2 - A comprehensive application for managing drug-related data and operations.",
   "author": "Carl",
   "license": "MIT",
   "private": true,

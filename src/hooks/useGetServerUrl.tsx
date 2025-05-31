@@ -8,20 +8,21 @@ export default function useGetServerUrl() {
     useEffect(() => {
         setLoading(true);
         const handleServerUrlReceived = async (event: any, data: any) => {
+            console.log('server url', data)
             setServerUrl(data.data);
             setLoading(false);
-            
+
         }
 
         ipcRenderer.send(GET_SERVER_URL);
 
         ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
-    
-      return () => {
-          ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-      }
+
+        return () => {
+            ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
+        }
     }, [])
 
     return { serverUrl, serverUrlLoading: loading };
-    
+
 }

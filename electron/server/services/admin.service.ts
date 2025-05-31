@@ -2,7 +2,7 @@
  * This contains the logic for all the functionalities in the staffcontroller. also used in the 
  * firebase functions. all functions must be async, and throw errors if necessary
  */
-import { constants } from '../utils/constants'
+import { constants } from '../../utils/constants'
 import path from 'path';
 import { Users } from '../models/Users';
 import { Roles } from '../models/Roles';
@@ -16,11 +16,14 @@ import { Op, Sequelize } from 'sequelize';
 import bcrypt from 'bcryptjs'
 import { Permissions } from '../models/Permissions';
 import { RolePermissions } from '../models/RolePermissions';
-import {configKeys, errorMessages, infoMessages, moduleNames} from '../helpers/stringHelpers'
+import { configKeys, errorMessages, infoMessages, moduleNames } from '../helpers/stringHelpers'
 import { SettingsTransfer } from '../interfaces/settingsTransferInterface';
 import crypto from 'crypto'
 import { Tokens } from '../models/Tokens';
 import { sendEmail } from '../utils/network'
+import { isAdminPasswordSet, isAppActivated, isCompanySet } from '../config/appValidation';
+import { ADMIN_PASSWORD_NOT_SET, APP_ACTIVATED, APP_NOT_ACTIVATED, COMPANY_NOT_SET } from '../../utils/stringKeys';
+import { ActivationStateType } from '../types/activationStateType';
 
 // const path = require('path')
 
@@ -34,7 +37,32 @@ import { sendEmail } from '../utils/network'
 // const CustomerHelper = require('../helpers/customerHelper.js');
 // const customerHelper = new CustomerHelper();
 
-
+/**
+ * Checks the current activation state of the application. The application is considered activated
+ * if the database file exists, a company has been set, and the admin password has been set.
+ * @returns {Promise<ActivationStateType>} The state of the application's activation. Possible values
+ * are APP_NOT_ACTIVATED, COMPANY_NOT_SET, ADMIN_PASSWORD_NOT_SET, or APP_ACTIVATED.
+ */
+export async function checkActivationStatus(): Promise<ActivationStateType> {
+    try {
+        //check if the database file exists. if it does, then the app has been validated.
+        if (!isAppActivated()) {
+            return APP_NOT_ACTIVATED;
+        }
+        const companySet = await isCompanySet();
+        if (!companySet) {
+            return COMPANY_NOT_SET
+        }
+        const adminPasswordSet = await isAdminPasswordSet();
+        if (!adminPasswordSet) {
+            return ADMIN_PASSWORD_NOT_SET;
+        }
+        return APP_ACTIVATED
+    } catch (error: any) {
+        logger.error({ message: error })
+        throw new Error(errorMessages.ERROR_CHECKING_ACTIVATION_STATUS)
+    }
+}
 
 /**
  * Verify a username and password and log the user in if correct
@@ -76,7 +104,7 @@ export async function login_function(data: { username: any; password: any; }): P
 
 
         user.type = "staff";
-         Activities.create({
+        Activities.create({
             activity: ` ${user.display_name} ${infoMessages.LOGGED_IN}`,
             user_id: user.id,
             module: 'System'
@@ -86,7 +114,7 @@ export async function login_function(data: { username: any; password: any; }): P
     } catch (error: any) {
         //if the error is "user not found", rethrow it. else if it's some other error, log it
         if (error instanceof Error) {
-            logger.error({message:error})
+            logger.error({ message: error })
             throw new Error(error.message)
         }
         else {
@@ -98,7 +126,7 @@ export async function login_function(data: { username: any; password: any; }): P
     }
 }
 
-export async function server_admin_login_function(data: {  password: string; }): Promise<string> {
+export async function server_admin_login_function(data: { password: string; }): Promise<string> {
     let password = data.password;
     try {
 
@@ -121,7 +149,7 @@ export async function server_admin_login_function(data: {  password: string; }):
 
         const now = new Date();
         const hash = bcrypt.hashSync(configKeys.ADMIN_PASSWORD_SALT + now, 10);
-        
+
         await Settings.update({
             value: hash
         }, {
@@ -130,7 +158,7 @@ export async function server_admin_login_function(data: {  password: string; }):
             }
         })
 
-       
+
         Activities.create({
             activity: ` server admin ${infoMessages.LOGGED_IN}`,
             user_id: '',
@@ -149,7 +177,7 @@ export async function server_admin_login_function(data: {  password: string; }):
 
             logger.error({ message: serializedError });
             throw error;
-            
+
         }
         else {
             throw error;
@@ -171,7 +199,7 @@ export async function get_branches_function(): Promise<Branches[]> {
         return query;
 
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error(errorMessages.ERROR_GETTING_BRANCHES)
     }
 }
@@ -189,12 +217,12 @@ export async function get_logo_function(): Promise<string> {
                 'name': "logo"
             }
         });//null or string (filenam.jpg for instance)
-        
+
         let image = "";
         if (logo) {
             //get the extension. it will be the last item in the array if split by a dot (.)
             let split = logo.value.split(".");
-            let extension =  split.pop()
+            let extension = split.pop()
             image = `data:image/${extension};base64,` + fs.readFileSync(path.join(constants.settings_location, logo.value), 'base64');
 
         }
@@ -202,7 +230,7 @@ export async function get_logo_function(): Promise<string> {
         return image
 
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error(errorMessages.ERROR_GETTING_LOGO)
     }
 }
@@ -222,17 +250,17 @@ export async function getSettings(_data?: { settings: string[] }): Promise<Setti
         });
         return returnData;
     } catch (error: any) {
-        logger.error({ message: error})
+        logger.error({ message: error })
         throw new Error(errorMessages.ERROR_GETTING_SETTINGS)
     }
-   
+
 }
 
 /**
  * update settings
  * @param _data the setting names and their new values
  */
-export async function saveSettings(_data: {[key:string]: any}): Promise<string[]>{
+export async function saveSettings(_data: { [key: string]: any }): Promise<string[]> {
     try {
         const results: string[] = [];
         for (const key in _data) {
@@ -268,21 +296,21 @@ export async function saveSettings(_data: {[key:string]: any}): Promise<string[]
  * @param {Object} _data object containing data
  * @returns {Object}
  */
-export async function save_branch_function(_data: { [key: string]: any}): Promise<Branches> {
+export async function save_branch_function(_data: { [key: string]: any }): Promise<Branches> {
     try {
         let data = {
             name: `'${_data.name}'`,
             phone: `'${_data.phone}'`
         }
         let branch = await Branches.create(data)
-         Activities.create({
+        Activities.create({
             activity: infoMessages.CREATED_NEW_BRANCH,
             user_id: _data.user_id,
             module: moduleNames.SYSTEM
         })
         return branch;
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error(errorMessages.ERROR_CREATING_BRANCH)
     }
 }
@@ -296,7 +324,7 @@ export async function get_insurers_function(): Promise<InsuranceProviders[]> {
         let insurers = await InsuranceProviders.findAll();
         return insurers
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error(errorMessages.ERROR_GETTING_INSURERS)
 
     }
@@ -308,18 +336,18 @@ export async function get_insurers_function(): Promise<InsuranceProviders[]> {
  * add a new insurance provider
  * @param _data an object containing the name of the insurance provider
  */
-export async function add_insurer_function(_data: { [key: string]: any}): Promise<InsuranceProviders> {
+export async function add_insurer_function(_data: { [key: string]: any }): Promise<InsuranceProviders> {
     try {
         let data = { name: `'${_data.name}'` }
         let insuranceProvider = await InsuranceProviders.create(data);
-         Activities.create({
+        Activities.create({
             activity: 'created a new branch',
             user_id: _data.user_id,
             module: 'System'
         })
         return insuranceProvider
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error("Error creating insurer")
     }
 };
@@ -329,7 +357,7 @@ export async function add_insurer_function(_data: { [key: string]: any}): Promis
  * @param _data {id:string}
  * @returns {Promise<ReturnData>} 
  */
-export async function delete_insurer_function(_data: { [key: string]: any}): Promise<boolean> {
+export async function delete_insurer_function(_data: { [key: string]: any }): Promise<boolean> {
     //split the id or name into an array
     const ids = _data.id.split(",");
     try {
@@ -348,7 +376,7 @@ export async function delete_insurer_function(_data: { [key: string]: any}): Pro
         })
         return true
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error("Error deleting insurer")
     }
 };
@@ -404,7 +432,7 @@ export async function get_all_activities_function(_data: {
         //console.log(objects)
         return objects
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error("Error getting activities")
     }
 
@@ -416,10 +444,10 @@ export async function get_all_activities_function(_data: {
  * @param _data 
  * @returns a list of activities
  */
-export async function get_activities_function(_data: { [key: string]: any}): Promise<Activities[]> {
+export async function get_activities_function(_data: { [key: string]: any }): Promise<Activities[]> {
     let reg = _data.r;//this would be the id or unique identifier of an object
     let offset = _data.offset == undefined ? 0 : parseInt(_data.offset);
-    let limit = _data.limit|| parseInt(_data.limit);
+    let limit = _data.limit || parseInt(_data.limit);
     try {
         let objects = await Activities.findAll({
             where: {
@@ -436,7 +464,7 @@ export async function get_activities_function(_data: { [key: string]: any}): Pro
 
         return objects
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error("Error getting Activities")
     }
 
@@ -447,8 +475,8 @@ export async function get_activities_function(_data: { [key: string]: any}): Pro
  * @param _data 
  * @returns {Promise<Activities[]>} a list of activities
  */
-export async function get_user_activities_function(_data: { [key: string]: any}): Promise<Activities[]> {
-    let offset = _data.offset == undefined ? 0 :parseInt(_data.offset);
+export async function get_user_activities_function(_data: { [key: string]: any }): Promise<Activities[]> {
+    let offset = _data.offset == undefined ? 0 : parseInt(_data.offset);
     let limit = _data.limit == undefined ? 100 : parseInt(_data.limit);
 
     let start = _data.start_date == undefined ? null : _data.start_date;
@@ -494,7 +522,7 @@ export async function get_user_activities_function(_data: { [key: string]: any})
  * @param _data 
  * @returns {Promise<Users>} a list of users
  */
-export async function get_users_function(_data: { [key: string]: any}): Promise<Users[]> {
+export async function get_users_function(_data: { [key: string]: any }): Promise<Users[]> {
     try {
 
         let offset = _data.offset == undefined ? 0 : parseInt(_data.offset);
@@ -504,7 +532,7 @@ export async function get_users_function(_data: { [key: string]: any}): Promise<
             offset: offset,
             include: {
                 model: Roles
-            }, 
+            },
             raw: true
         });
 
@@ -532,7 +560,7 @@ export async function save_user_function(_data: { [key: string]: any }): Promise
         //whether to update the password or not
         let user = null;
         if (id) {
-           user = await Users.findByPk(_data.id)
+            user = await Users.findByPk(_data.id)
         }
         //update. else insert
         let password = _data.password;
@@ -542,19 +570,19 @@ export async function save_user_function(_data: { [key: string]: any }): Promise
                 let hash = bcrypt.hashSync(password, 10);
                 // console.log(hash)
                 _data.password_hash = `${hash}`;
-            } 
+            }
         }
-        
+
         else {
             delete _data.password_hash;
         }
         if (!user) {
-          user  = await Users.create(_data)
+            user = await Users.create(_data)
         }
         else {
-           await user.update(_data)
+            await user.update(_data)
         }
-        
+
         Activities.create({
             activity: `modified a  user: ${user.display_name}`,
             user_id: _data.user_id || '0',
@@ -581,7 +609,7 @@ export async function save_user_function(_data: { [key: string]: any }): Promise
  * @param _data 
  * @returns {boolean} true if the user was actually deleted
  */
-export async function delete_user_function(_data: { [key: string]: any}): Promise<boolean> {
+export async function delete_user_function(_data: { [key: string]: any }): Promise<boolean> {
 
     let id = _data.id;
 
@@ -612,7 +640,7 @@ export async function delete_user_function(_data: { [key: string]: any}): Promis
  * @param _data 
  * @returns {Promise<Users>} a user object 
  */
-export async function get_user_function(_data: { [key: string]: any}): Promise<Users> {
+export async function get_user_function(_data: { [key: string]: any }): Promise<Users> {
     try {
         let user = await Users.findOne({
             where: {
@@ -635,7 +663,7 @@ export async function get_user_function(_data: { [key: string]: any}): Promise<U
 };
 
 
-export async function activate_user_function(_data: { [key: string]: any}): Promise<boolean> {
+export async function activate_user_function(_data: { [key: string]: any }): Promise<boolean> {
 
 
     //console.log(id)
@@ -665,7 +693,7 @@ export async function activate_user_function(_data: { [key: string]: any}): Prom
 };
 
 
-export async function update_user_function(_data: {[key:string]:any}): Promise<boolean> {
+export async function update_user_function(_data: { [key: string]: any }): Promise<boolean> {
 
 
     //console.log(id)
@@ -696,16 +724,16 @@ export async function update_user_function(_data: {[key:string]:any}): Promise<b
 export async function addRole(_data: {
     role_name: string, description: string,
     selectedPermissions: string[], user_id: string,
-    role_id?:string
+    role_id?: string
 }): Promise<Roles> {
-    
-    
+
+
     try {
         let id = _data.role_id;
         let role;
         //do the permissions
         const permissions: { role_id: string, permission_id: string }[] = [];
-        
+
         if (id) {
             role = await Roles.findByPk(id);
             if (!role) {
@@ -727,13 +755,13 @@ export async function addRole(_data: {
             role = await Roles.create(_data);
             id = role.role_id.toString();
         }
-        
+
         _data.selectedPermissions.forEach(permission => {
             permissions.push({ role_id: id!, permission_id: permission })
         })
-       
+
         await RolePermissions.bulkCreate(permissions)
-        
+
         Activities.create({
             activity: `created a new role ${_data.role_name}`,
             user_id: 'admin',
@@ -756,7 +784,7 @@ export async function addRole(_data: {
  * @param _data the limit and offset
  * @returns a list of roles 
  */
-export async function get_roles_function(_data: { offset?: string, limit?:string}):Promise<Roles[]>  {
+export async function get_roles_function(_data: { offset?: string, limit?: string }): Promise<Roles[]> {
     try {
         let offset = _data.offset == undefined ? 0 : parseInt(_data.offset);
         let limit = _data.limit == undefined ? 100 : parseInt(_data.limit);
@@ -765,7 +793,7 @@ export async function get_roles_function(_data: { offset?: string, limit?:string
             offset: offset,
             raw: true
         })
-        
+
         return data;
     } catch (error: any) {
         logger.error({ message: error })
@@ -781,7 +809,7 @@ export async function get_roles_function(_data: { offset?: string, limit?:string
  * @param _data {id: the id of the role}
  * @returns the list of permissions
  */
-export async function get_role_permissions_function(_data: { id:string}): Promise<Permissions[]> {
+export async function get_role_permissions_function(_data: { id: string }): Promise<Permissions[]> {
     try {
         let data = await Permissions.findAll({
             where: {
@@ -790,9 +818,9 @@ export async function get_role_permissions_function(_data: { id:string}): Promis
                     where role_id = ${_data.id})`)
                 }
             },
-            raw:true
+            raw: true
         })
-       
+
 
         return data
     } catch (error: any) {
@@ -808,7 +836,7 @@ export async function get_role_permissions_function(_data: { id:string}): Promis
  * @param _data 
  * @returns a list of permissions
  */
-export async function get_role_excluded_permissions_function(_data: { [key: string]: any}): Promise<Permissions[]>  {
+export async function get_role_excluded_permissions_function(_data: { [key: string]: any }): Promise<Permissions[]> {
     try {
         let data = await Permissions.findAll({
             where: {
@@ -820,7 +848,7 @@ export async function get_role_excluded_permissions_function(_data: { [key: stri
             raw: true,
             logging: console.log
         })
-       
+
         return data
     } catch (error: any) {
         logger.error({ message: error })
@@ -834,8 +862,8 @@ export async function get_role_excluded_permissions_function(_data: { [key: stri
  * @param _data 
  * @returns the role_permission object
  */
-export async function add_role_permission_function (_data: {[key:string]:any}): Promise<RolePermissions>  {
-    
+export async function add_role_permission_function(_data: { [key: string]: any }): Promise<RolePermissions> {
+
     try {
         let role_permission = await RolePermissions.create(_data);
         Activities.create({
@@ -845,7 +873,7 @@ export async function add_role_permission_function (_data: {[key:string]:any}): 
         })
         return role_permission
     } catch (error: any) {
-        logger.error({message:error})
+        logger.error({ message: error })
         throw new Error(`Unable to add a permission ${_data.permission_name} 
         to role: ${_data.role_name}: : ${error}`)
     }
@@ -872,18 +900,18 @@ export async function get_permissions_function(): Promise<Permissions[]> {
  * @param _data 
  * @returns true if successful
  */
-export async function delete_role_permission_function(_data: { role_id: string; permission_id: string; user_id: string; }):Promise<boolean>  {
-    
+export async function delete_role_permission_function(_data: { role_id: string; permission_id: string; user_id: string; }): Promise<boolean> {
+
     try {
         const role = await Roles.findByPk(_data.role_id);
         const permission = await Permissions.findByPk(_data.permission_id);
         if (!role) {
             throw new Error("Unable to find specified role");
-            
+
         }
         if (!permission) {
             throw new Error("Unable to find specified permission");
-            
+
         }
         await RolePermissions.destroy({
             where: {
@@ -896,10 +924,10 @@ export async function delete_role_permission_function(_data: { role_id: string; 
             user_id: `${_data.user_id}`,
             module: 'users'
         })
-        
+
         return true
     } catch (error: any) {
-        logger.error({message: error})
+        logger.error({ message: error })
         throw new Error(`Error removing permission from role: error: ${error}`)
     }
 
@@ -908,8 +936,8 @@ export async function delete_role_permission_function(_data: { role_id: string; 
 
 
 
-export async function delete_role_function(_data: { id: string; user_id: string; }): Promise<boolean>  {
-   
+export async function delete_role_function(_data: { id: string; user_id: string; }): Promise<boolean> {
+
     try {
         const object = await Roles.findByPk(_data.id, {
             raw: true
@@ -926,14 +954,14 @@ export async function delete_role_function(_data: { id: string; user_id: string;
         return true
 
     } catch (error: any) {
-       logger.error({message:error})
-        throw new Error("Error deleting a role. Error: "+error)
+        logger.error({ message: error })
+        throw new Error("Error deleting a role. Error: " + error)
 
     }
 };//tested
 
-export async function get_role_function(_data: { [key: string]: any}): Promise<Roles>  {
-   
+export async function get_role_function(_data: { [key: string]: any }): Promise<Roles> {
+
     try {
         let object = await Roles.findByPk(_data.id, {
             include: [Permissions]
@@ -943,16 +971,16 @@ export async function get_role_function(_data: { [key: string]: any}): Promise<R
 
         return object
     } catch (error: any) {
-        logger.error({message: error})
+        logger.error({ message: error })
         throw new Error("Error getting a role. Error: " + error)
     }
 
 };
 
 
-export async function change_staff_password_function(_data: { [key: string]: any}) {
-    
-    
+export async function change_staff_password_function(_data: { [key: string]: any }) {
+
+
     let old_password = _data.old_password
     try {
 
@@ -977,7 +1005,7 @@ export async function change_staff_password_function(_data: { [key: string]: any
         user.password_hash = `${hash}`;
         await user.save();
 
-        
+
         Activities.create({
             activity: ` ${user.display_name} changed their password`,
             user_id: user.id,
@@ -986,10 +1014,10 @@ export async function change_staff_password_function(_data: { [key: string]: any
 
         return user;
 
-        
+
 
     } catch (error: any) {
-        logger.error({message: error})
+        logger.error({ message: error })
 
         throw new Error(error)
     }
@@ -998,7 +1026,7 @@ export async function change_staff_password_function(_data: { [key: string]: any
 
 };
 
-export async function resetAdminPassword():Promise<{ error: boolean; message:any }> {
+export async function resetAdminPassword(): Promise<{ error: boolean; message: any }> {
     try {
 
         const token = crypto.randomBytes(5).toString("hex");
@@ -1028,11 +1056,11 @@ export async function resetAdminPassword():Promise<{ error: boolean; message:any
         const subject = "Reset your admin password"
         const message = `You have requested to reset your ${constants.appname} for ${nameSetting!.value} server admin password. 
 Please use this code as token in the reset page: ${token}.`;
-        
-            const response = await sendEmail(message, emailSetting!.value, subject);
-            const data = {
-                error: response.data.status === "1",
-                message: response.data.status === "1" ? `Email sent to your administrator email. Please 
+
+        const response = await sendEmail(message, emailSetting!.value, subject);
+        const data = {
+            error: response.data.status === "1",
+            message: response.data.status === "1" ? `Email sent to your administrator email. Please 
                     check your inbox to retrieve the token` : response.data.data
         }
         return data;
@@ -1045,7 +1073,7 @@ Please use this code as token in the reset page: ${token}.`;
 }
 
 
-export async function doResetAdminPassword(_data:{password:string, token:string}): Promise<boolean> {
+export async function doResetAdminPassword(_data: { password: string, token: string }): Promise<boolean> {
     try {
 
         const hash = bcrypt.hashSync(_data.password, 10);
@@ -1055,7 +1083,7 @@ export async function doResetAdminPassword(_data:{password:string, token:string}
                 name: "reset_admin_password"
             }
         });
-        
+
         await Settings.update({
             value: hash
         }, {
@@ -1064,7 +1092,7 @@ export async function doResetAdminPassword(_data:{password:string, token:string}
             }
         })
 
-        
+
         return true;
     }
     catch (error: any) {

@@ -16,7 +16,7 @@ let serverState: "Application Activated" |
 export type serverStateType = typeof serverState;
 export function registerServerEventHandlers(window: BrowserWindow, databaseUpdateWindow: BrowserWindow | undefined) {
     serverEventEmitter.on(SERVER_STATE_CHANGED, (data: serverStateType) => {
-        serverState = data;
+        appGlobals.serverState = data;
         sendServerState(data, window);
     })
 

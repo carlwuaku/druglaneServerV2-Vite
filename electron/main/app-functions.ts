@@ -5,7 +5,7 @@ import path from 'node:path'
 import { update } from './update'
 import { isAppActivated } from "../appValidation";
 import { logger } from "../../src/config/logger";
-import { constants } from "../electronConstants";
+// import { constants } from "../electronConstants";
 import serverEventEmitter from "../server/utils/ServerEvents";
 import {
     APP_NOT_ACTIVATED, DATABASE_SETUP_EVENT,
@@ -15,6 +15,7 @@ import {
 } from "../utils/stringKeys";
 import Store from "electron-store";
 import { startServer } from "../server/server";
+import { constants } from "../utils/constants";
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -99,7 +100,8 @@ export function restartApp() {
 
 export function sendServerState(state: string, win: BrowserWindow) {
     try {
-        win?.webContents?.send(SERVER_STATE_CHANGED, { data: state, time: new Date().toLocaleString() })
+        console.log(state, 'sending server state');
+        win.webContents?.send(SERVER_STATE_CHANGED, { data: state, time: new Date().toLocaleString() })
 
     }
     catch (error) {
@@ -180,8 +182,9 @@ export async function spawnServer() {
     try {
         serverEventEmitter.emit(SERVER_STATE_CHANGED, "Checking Activation")
         //check if the app is activated. if it is, start the server. else go the activation page
-        const appActivated = await isAppActivated();
+        const appActivated = isAppActivated();
         if (appActivated) {
+            console.log("app is activated")
             serverEventEmitter.emit(SERVER_STATE_CHANGED, "Server Starting")
             await startServer();
         }

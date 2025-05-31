@@ -1,5 +1,5 @@
 import { logger } from './logger';
-import { constants } from '../utils/constants'
+import { constants } from '../../utils/constants'
 import dayjs from 'dayjs';
 const timeZoneOffset = dayjs().utcOffset()
 // console.log(timeZoneOffset)
@@ -7,7 +7,7 @@ const timeZoneOffset = dayjs().utcOffset()
 const timeZoneOffsetMinutes = new Date().getTimezoneOffset();
 const timeZoneOffsetHours = -timeZoneOffsetMinutes / 60;
 
-export const sqliteConfig: {[key:string]: any}= {
+export const sqliteConfig: { [key: string]: any } = {
     "development": {
         "dialect": "sqlite",
         "storage": constants.db_path,
