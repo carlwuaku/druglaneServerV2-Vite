@@ -1,17 +1,9 @@
-import { useEffect, useState } from 'react'
-import UpdateElectron from '@/components/update'
-import logoVite from './assets/logo-vite.svg'
-import logoElectron from './assets/logo-electron.svg'
 import CssBaseline from '@mui/material/CssBaseline';
 
-import "primereact/resources/themes/md-light-indigo/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
-import 'primeflex/primeflex.css';
 import '@fontsource/lato';
 import '@fontsource/ubuntu';
 import '@/App.css'
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Activate from "./pages/activate";
 import Index from "./pages";
 import NotFound from "./pages/notFound";
@@ -22,13 +14,15 @@ import AddRole from "./pages/addRole";
 import Users from "./pages/users";
 import AddUser from "./pages/addUser";
 import Login from "./pages/login";
-import { AuthProvider, RequireAuth } from "react-auth-kit";
 import ResetPassword from "./pages/resetPassword";
 import { DatabaseSetup } from "./pages/databaseSetup";
 import { useGlobalState } from './global/globalProvider';
-import { APP_NOT_ACTIVATED, CHECKING_ACTIVATION, DATABASE_SETUP_EVENT, LOADING, UPDATING_DATABASE } from './utils/stringKeys';
+import { APP_NOT_ACTIVATED, CHECKING_ACTIVATION, LOADING, UPDATING_DATABASE } from './utils/stringKeys';
 import { DatabaseMigration } from './pages/databaseMigration';
 import Loading from './components/Loading';
+
+import RequireAuth from '@auth-kit/react-router/RequireAuth';
+import { SnackbarProvider } from './global/SnackbarContext';
 
 function App() {
   const globalState = useGlobalState();
@@ -52,25 +46,26 @@ function App() {
   return (
     <>
       <CssBaseline />
-      <Routes>
+      <SnackbarProvider maxQueue={10} autoHideDuration={5000}>
 
-        <Route path='/activate' element={<Activate />} />
-        <Route path='/help' element={<Index />} />
-        <Route path='/settings' element={<RequireAuth loginPath={"/login"} ><SettingsPage /></RequireAuth>} />
-        <Route path='/adminPassword' element={<SetAdminPassword />} />
-        <Route path='/roles' element={<RequireAuth loginPath={"/login"} ><Roles /></RequireAuth>} />
-        <Route path='/addRole' element={<AddRole />} />
-        <Route path='/addRole/:id' element={<RequireAuth loginPath={"/login"}><AddRole /></RequireAuth>} />
-        <Route path='/users' element={<RequireAuth loginPath={"/login"}><Users /></RequireAuth>} />
-        <Route path='/addUser' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
-        <Route path='/addUser/:id' element={<RequireAuth loginPath={"/login"}><AddUser /></RequireAuth>} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/resetPassword' element={<ResetPassword />} />
-        <Route path='/databaseSetup' element={<DatabaseSetup />} />
-        <Route path="/" element={<Index />} />
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
+        <Routes>
+          <Route path='/activate' element={<Activate />} />
+          <Route path='/help' element={<Index />} />
+          <Route path='/settings' element={<RequireAuth fallbackPath={"/login"} ><SettingsPage /></RequireAuth>} />
+          <Route path='/adminPassword' element={<SetAdminPassword />} />
+          <Route path='/roles' element={<RequireAuth fallbackPath={"/login"} ><Roles /></RequireAuth>} />
+          <Route path='/addRole' element={<AddRole />} />
+          <Route path='/addRole/:id' element={<RequireAuth fallbackPath={"/login"}><AddRole /></RequireAuth>} />
+          <Route path='/users' element={<RequireAuth fallbackPath={"/login"}><Users /></RequireAuth>} />
+          <Route path='/addUser' element={<RequireAuth fallbackPath={"/login"}><AddUser /></RequireAuth>} />
+          <Route path='/addUser/:id' element={<RequireAuth fallbackPath={"/login"}><AddUser /></RequireAuth>} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/resetPassword' element={<ResetPassword />} />
+          <Route path='/databaseSetup' element={<DatabaseSetup />} />
+          <Route path="/" element={<Index />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </SnackbarProvider>
       {/* <UpdateElectron /> */}
     </>
 

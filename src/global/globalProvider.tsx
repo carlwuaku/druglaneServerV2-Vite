@@ -15,12 +15,14 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
     const { serverUrl, serverUrlLoading } = useGetServerUrl();
     const { dbState, dbStateLoading } = useGetServerDatabaseState();
     const [settings, setSettings] = useState<ISettings | null>(null);
+    const [appName, setAppName] = useState<string>("Druglane Pharmacy Management System");
     const history = useNavigate();
     const globalState = {
         serverUrl: serverUrl,
         serverState: serverState,
         settings,
-        dbState
+        dbState,
+        appName
     };
 
     useEffect(() => {

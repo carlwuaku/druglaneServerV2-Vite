@@ -3,12 +3,11 @@ import IconButton from '@mui/material/IconButton';
 import { deleteData, getData, postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
-import { Toast } from 'primereact/toast';
 import { Backdrop, Button, Card, CardContent, Checkbox, CircularProgress } from '@mui/material';
 import Loading from '../components/Loading';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,9 +15,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Link } from 'react-router-dom';
 import GlobalContext from '../global/global';
-import { useAuthUser } from 'react-auth-kit';
-import { useAuthHeader } from 'react-auth-kit'
-
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import { useSnackbar } from '@/global/SnackbarContext';
 
 const LoadDataList = (props: {
     timestamp: string, url: string,
@@ -29,15 +27,15 @@ const LoadDataList = (props: {
         editable?: boolean,
         sortable?: boolean,
         flex?: number, //set to 1 to take up all available space
-        
+
     }[],
     uniqueField: string,
-    nameField:string
+    nameField: string
     onSelectionChanged: (selectedData: any[]) => void,
     editUrl: string,
     deleteUrl: string
 }) => {
-    const auth = useAuthUser();
+    const auth = useAuthUser<{ token: string }>();
     const objects = useRef<any[]>([]);
     const serverUrl = useRef<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +46,7 @@ const LoadDataList = (props: {
     const [deleteAlertMessage, setDeleteAlertMessage] = useState("")
     const showOverlayLoading = useRef<boolean>(false)
     const deleteId = useRef<string>("")
+    const snackbar = useSnackbar();
     const appData = useContext(GlobalContext)
     const handleClose = () => {
         setOpenDialog(false);
@@ -57,7 +56,7 @@ const LoadDataList = (props: {
     useEffect(() => {
         ipcRenderer.send(GET_SERVER_URL);
 
-       
+
 
 
         const handleServerUrlReceived = async (event: any, data: any) => {
@@ -67,7 +66,7 @@ const LoadDataList = (props: {
         }
 
         ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        
+
         return () => {
             ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
         };
@@ -78,7 +77,7 @@ const LoadDataList = (props: {
     useEffect(() => {
 
 
-        
+
 
         setTableColumns((currentVal) => {
             return [...props.tableColumns, {
@@ -88,7 +87,7 @@ const LoadDataList = (props: {
                 renderCell: (params: any) => (
                     <>
                         <IconButton size='small' color="error" onClick={() => handleClickDelete(params.row[props.uniqueField])}>
-                        <Delete></Delete>
+                            <Delete></Delete>
                         </IconButton >
                         <IconButton component={Link}
                             to={`/${props.editUrl}/${params.row[props.uniqueField]}`} size='small' color="primary" onClick={() => console.log(params)}>
@@ -105,7 +104,7 @@ const LoadDataList = (props: {
     const loadData = async () => {
         try {
             setLoading(true);
-            let response = await getData<any[]>({url:`${serverUrl.current}/${props.url}`, token: auth()?.token});
+            let response = await getData<any[]>({ url: `${serverUrl.current}/${props.url}`, token: auth?.token });
 
             objects.current = response.data;
             setLoading(false);
@@ -116,18 +115,17 @@ const LoadDataList = (props: {
     }
 
 
-    const toast = useRef<Toast>(null);
 
     const showSuccess = (message: string) => {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+        snackbar.showSuccess(message)
     }
     const showError = (message: string) => {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        snackbar.showError(message)
     }
 
     const handleSelectionModelChange = (rowSelectionModel: GridRowSelectionModel, details: GridCallbackDetails) => {
-        setSelectedData(rowSelectionModel);
-        const selectedIDs = new Set(rowSelectionModel);
+        // setSelectedData(rowSelectionModel);
+        const selectedIDs = rowSelectionModel.ids;
         const selectedRowData = objects.current.filter((row) => {
             return selectedIDs.has(row[props.uniqueField])
         }
@@ -136,7 +134,7 @@ const LoadDataList = (props: {
     };
 
     const handleClickDelete = (id: string) => {
-        
+
         const object = objects.current.find((obj) => {
             return obj[props.uniqueField] == id
         });
@@ -148,12 +146,12 @@ const LoadDataList = (props: {
 
     const deleteItem = async () => {
         try {
-            
+
             showOverlayLoading.current = true;
             await deleteData<any[]>({
                 url: `${serverUrl.current}/${props.deleteUrl}/${deleteId.current}`,
-                token: auth()?.token
-});
+                token: auth?.token
+            });
             showOverlayLoading.current = false;
             showSuccess(`Deleted successfully!`);
             handleClose();
@@ -182,7 +180,7 @@ const LoadDataList = (props: {
                                 },
                             }}
                             pageSizeOptions={[5]}
-                            rowSelectionModel={selectedData}
+
                             onRowSelectionModelChange={handleSelectionModelChange}
                             disableRowSelectionOnClick
                             getRowId={(row) => row.id || row[props.uniqueField]}
@@ -192,7 +190,6 @@ const LoadDataList = (props: {
 
 
             }
-            <Toast ref={toast} />
 
             <Dialog
                 open={openDialog}

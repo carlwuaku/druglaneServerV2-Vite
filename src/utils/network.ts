@@ -1,7 +1,6 @@
 import { logger } from "../config/logger";
 import axios, { AxiosHeaders, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios'
 import { constants } from "./constants";
-import { useAuthUser } from 'react-auth-kit'
 
 /**
  * make a get call to a url with some optional params

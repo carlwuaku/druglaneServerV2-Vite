@@ -1,23 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useFormik, FormikErrors, } from 'formik';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
+
 import { getData, postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
-import { Toast } from 'primereact/toast';
 import { getPermissionsResponse, saveRoleResponse, saveSettingsResponse } from '../models/axiosResponse';
-import { Card, CardContent, Checkbox } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, TextField } from '@mui/material';
 import Header from '../components/Header';
 import { Permissions } from '../models/permissions';
 import Loading from '../components/Loading';
-import { classNames } from 'primereact/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 import { IRoles } from '../models/roles';
-import { useAuthUser } from 'react-auth-kit';
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import { useSnackbar } from '@/global/SnackbarContext';
 
 const AddRole = () => {
-    const auth = useAuthUser();
+    const auth = useAuthUser<{ token: string }>();
     const history = useNavigate();
     const [loading, setLoading] = useState(false)
     const serverUrl = useRef("");
@@ -49,7 +47,7 @@ const AddRole = () => {
         formik.setFieldValue('selectedPermissions', selectedPermissions.current);
         // setSelectedPermissions(_selectedPermissions);
 
-       console.log('selected', formik.values.selectedPermissions)
+        console.log('selected', formik.values.selectedPermissions)
     };
 
     const formik = useFormik<IRoles>({
@@ -75,8 +73,10 @@ const AddRole = () => {
             //validate and emit data to parent
             try {
                 setLoading(true);
-                let response = await postData<saveRoleResponse>({url: `${serverUrl.current}/api_admin/saveRole`,
-                    formData: data, token: auth()?.token});
+                let response = await postData<saveRoleResponse>({
+                    url: `${serverUrl.current}/api_admin/saveRole`,
+                    formData: data, token: auth?.token
+                });
                 showSuccess('Role added successfully');
                 setLoading(false);
                 history('/roles');
@@ -91,11 +91,11 @@ const AddRole = () => {
 
     useEffect(() => {
 
-        const handleServerUrlReceived =async (event: any, data: any) => {
+        const handleServerUrlReceived = async (event: any, data: any) => {
             serverUrl.current = data.data;
             try {
                 setLoadingPermissions(true);
-                let response = await getData<Permissions[]>({url: `${data.data}/api_admin/allPermissions`, token: auth()?.token});
+                let response = await getData<Permissions[]>({ url: `${data.data}/api_admin/allPermissions`, token: auth?.token });
                 setPermissions(response.data)
                 setLoadingPermissions(false);
             } catch (error) {
@@ -111,7 +111,7 @@ const AddRole = () => {
         };
 
         ipcRenderer.send(GET_SERVER_URL);
-        
+
         ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived)
 
         return () => {
@@ -119,24 +119,24 @@ const AddRole = () => {
         };
     }, [id, serverUrl]);
 
-    
 
-    const toast = useRef<Toast>(null);
+
+    const snackbar = useSnackbar();
 
     const showSuccess = (message: string) => {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+        snackbar.showSuccess(message);
     }
     const showError = (message: string) => {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        snackbar.showError(message);
     }
 
     const loadExistingRole = async () => {
         try {
             setLoadedExistingRole(false)
-            let response = await getData<IRoles>({url: `${serverUrl.current}/api_admin/role/${id}`, token: auth()?.token});
+            let response = await getData<IRoles>({ url: `${serverUrl.current}/api_admin/role/${id}`, token: auth?.token });
             formik.setValues(response.data);
             setRolePermissions(response.data.Permissions)
-            let _selectedPermissions:string[] = [];
+            let _selectedPermissions: string[] = [];
             response.data.Permissions.forEach((permission) => {
                 _selectedPermissions.push(permission.permission_id.toString())
             })
@@ -151,7 +151,7 @@ const AddRole = () => {
         }
     }
 
-   
+
     return (
         <>
             <Header showBackArrow={true}></Header>
@@ -163,31 +163,29 @@ const AddRole = () => {
                             <div className="flex flex-column gap-3 justify-content-center centeredField">
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="location">Name of Role</label>
-                                    <InputText id="role_name"
+                                    <TextField id="role_name"
                                         aria-describedby="role_name-help"
                                         value={formik.values.role_name}
                                         onChange={(e) => {
                                             formik.setFieldValue('role_name', e.target.value);
                                         }}
-                                        className={classNames({ 'p-invalid': (formik.touched.role_name && formik.errors.role_name) })}
 
                                     />
                                     <small id="role_name-help">
                                         E.g. Accountants, or Cashiers, or Managers
                                     </small>
-                                    { (formik.touched.role_name && formik.errors.role_name)  ? < small className="p-error">{formik.errors.role_name}</small> : <small className="p-error">&nbsp;</small>}
+                                    {(formik.touched.role_name && formik.errors.role_name) ? < small className="p-error">{formik.errors.role_name}</small> : <small className="p-error">&nbsp;</small>}
                                 </div>
 
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="location">Description</label>
-                                    <InputText id="description"
+                                    <TextField id="description"
                                         aria-describedby="description-help"
                                         value={formik.values.description}
                                         onChange={(e) => {
                                             formik.setFieldValue('description', e.target.value);
                                         }}
-                                        className={classNames({ 'p-invalid': (formik.touched.description && formik.errors.description) })}
 
                                     />
                                     <small id="description-help">
@@ -204,11 +202,11 @@ const AddRole = () => {
                                                     <Checkbox
                                                         name={`'${permission.permission_id}'`}
                                                         value={permission.permission_id}
-                                                        onChange={onPermissionChange} 
-                                                        
+                                                        onChange={onPermissionChange}
+
                                                         defaultChecked={rolePermissions.some((rp) => rp.permission_id === permission.permission_id)}
-                                                         />
-                                                {permission.name}</label>
+                                                    />
+                                                    {permission.name}</label>
                                             </div>
                                         );
                                     }) : <Loading></Loading>}
@@ -216,7 +214,7 @@ const AddRole = () => {
 
 
 
-                                <Button type='submit' label='Submit' loading={loading} ></Button>
+                                <Button type='submit' loading={loading} >Submit</Button>
 
                             </div>
                         </CardContent>
@@ -226,7 +224,6 @@ const AddRole = () => {
                 </form>
             </div>
 
-            <Toast ref={toast} />
 
         </>
 

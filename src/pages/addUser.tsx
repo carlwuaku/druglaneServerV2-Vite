@@ -1,26 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useFormik, FormikErrors, } from 'formik';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
 import { getData, postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
-import { Toast } from 'primereact/toast';
 import { genericAxiosPostResponse } from '../models/axiosResponse';
-import { Card, CardContent, FormControlLabel } from '@mui/material';
+import { Button, Card, CardContent, FormControl, FormControlLabel, InputLabel, Select, TextField } from '@mui/material';
 import Header from '../components/Header';
 import { IRoles } from '../models/roles';
-import { classNames } from 'primereact/utils';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Password } from 'primereact/password';
-import { Dropdown } from 'primereact/dropdown';
 import { IUser } from '../models/user';
 import Switch from '@mui/material/Switch';
 import { Permissions } from '../models/permissions';
-import { useAuthUser } from 'react-auth-kit';
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import { useSnackbar } from '@/global/SnackbarContext';
+import MenuItem from '@mui/material/MenuItem';
 
 const AddUser = () => {
-    const auth = useAuthUser();
+    const auth = useAuthUser<{ token: string }>();
     const history = useNavigate();
     const [loading, setLoading] = useState(false)
     const serverUrl = useRef("");
@@ -39,15 +35,15 @@ const AddUser = () => {
     //     });
     //     return ref.current;
     // }
-    
+
     const activeStates = [
         {
-        "label": "Active",
-        "value": 1
-    },
-    {
-        "label": "Inactive",
-        "value": 0
+            "label": "Active",
+            "value": 1
+        },
+        {
+            "label": "Inactive",
+            "value": 0
         }
     ]
     const formik = useFormik({
@@ -83,7 +79,7 @@ const AddUser = () => {
             if (!values.role_id) {
                 errors.role_id = 'Please select a role';
             }
-            
+
             return errors;
         },
         onSubmit: async (data) => {
@@ -91,8 +87,10 @@ const AddUser = () => {
             //validate and emit data to parent
             try {
                 setLoading(true);
-                let response = await postData<genericAxiosPostResponse>({url: `${serverUrl.current}/api_admin/saveUser`,
-                    formData: data, token: auth()?.token});
+                let response = await postData<genericAxiosPostResponse>({
+                    url: `${serverUrl.current}/api_admin/saveUser`,
+                    formData: data, token: auth?.token
+                });
                 showSuccess('User modified successfully');
                 setLoading(false);
                 history('/users');
@@ -110,7 +108,7 @@ const AddUser = () => {
 
     const handleUpdatePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUpdatePassword(event.target.checked);
-        console.log('updatepassword',updatePassword)
+        console.log('updatepassword', updatePassword)
         formik.setFieldValue('updatePassword', updatePassword ? 'yes' : 'no')
     };
 
@@ -152,7 +150,7 @@ const AddUser = () => {
     const loadRolePermissions = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<Permissions[]>({url:`${serverUrl.current}/api_admin/rolePermissions/${formik.values.role_id}`, token: auth()?.token});
+            let response = await getData<Permissions[]>({ url: `${serverUrl.current}/api_admin/rolePermissions/${formik.values.role_id}`, token: auth?.token });
             setRolePermissions(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -164,7 +162,7 @@ const AddUser = () => {
     const loadRoles = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<IRoles[]>({ url: `${serverUrl.current}/api_admin/getRoles`, token: auth()?.token });
+            let response = await getData<IRoles[]>({ url: `${serverUrl.current}/api_admin/getRoles`, token: auth?.token });
             setRoles(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -176,7 +174,7 @@ const AddUser = () => {
     const loadPermissions = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<Permissions[]>({ url: `${serverUrl.current}/api_admin/allPermissions`, token: auth()?.token });
+            let response = await getData<Permissions[]>({ url: `${serverUrl.current}/api_admin/allPermissions`, token: auth?.token });
             setAllPermissions(response.data);
         } catch (error) {
             showError(`error occurred getting permissions: ${error}`);
@@ -187,7 +185,7 @@ const AddUser = () => {
     const loadExistingUser = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<IUser>({ url: `${serverUrl.current}/api_admin/user/${id}`, token: auth()?.token });
+            let response = await getData<IUser>({ url: `${serverUrl.current}/api_admin/user/${id}`, token: auth?.token });
             formik.setValues(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -197,13 +195,12 @@ const AddUser = () => {
     }
 
 
-    const toast = useRef<Toast>(null);
-
+    const snackbar = useSnackbar();
     const showSuccess = (message: string) => {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+        snackbar.showSuccess(message);
     }
     const showError = (message: string) => {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        snackbar.showError(message);
     }
 
     return (
@@ -217,14 +214,13 @@ const AddUser = () => {
                             <div className="flex flex-column gap-3 justify-content-center centeredField">
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="username">Username</label>
-                                    <InputText id="username"
+                                    <TextField id="username"
                                         aria-describedby="username-help"
                                         value={formik.values.username}
                                         onChange={(e) => {
                                             formik.setFieldValue('username', e.target.value);
                                         }}
                                         required
-                                        className={classNames({ 'p-invalid': (formik.touched.username && formik.errors.username) })}
                                     />
                                     <small id="username-help">
                                         The user will login with this username. There should be no spaces
@@ -234,41 +230,34 @@ const AddUser = () => {
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="display_name">Full Name</label>
-                                    <InputText id="display_name"
+                                    <TextField id="display_name"
                                         aria-describedby="display_name-help"
                                         value={formik.values.display_name}
                                         onChange={(e) => {
                                             formik.setFieldValue('display_name', e.target.value);
                                         }}
                                         required
-                                        className={classNames({ 'p-invalid': (formik.touched.display_name && formik.errors.display_name) })}
                                     />
                                     <small id="display_name-help">
                                         The person's full name, for identification
                                     </small>
                                 </div>
 
-{/* password */}
+                                {/* password */}
                                 <div className="flex flex-column gap-2 ">
                                     {showUpdatePassword.current ?
                                         <FormControlLabel control={<Switch
                                             onChange={handleUpdatePasswordChange}
-                                             
-                                            inputProps={{ 'aria-label': 'controlled' }}
+
                                         />} label="Update the password" />
-                                         : ''}
+                                        : ''}
                                     <label htmlFor="password">Password</label>
-                                    <Password value={formik.values.password}
+                                    <TextField value={formik.values.password}
                                         onChange={(e) => { formik.setFieldValue('password', e.target.value); }}
-                                        className={classNames({ 'p-invalid': (formik.touched.password && formik.errors.password) })}
-                                        aria-describedby="password-help"
-                                        promptLabel="Choose a password"
-                                        weakLabel="Too simple"
-                                        mediumLabel="Average complexity"
-                                        toggleMask
+                                        type='password'
                                         required={updatePassword}
                                         disabled={!updatePassword}
-                                        strongLabel="Complex password" />
+                                    />
 
                                     <small id="password-help">
 
@@ -277,14 +266,13 @@ const AddUser = () => {
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="confirm_password">Confirm Password</label>
-                                    <Password value={formik.values.confirm_password}
-                                        
+                                    <TextField value={formik.values.confirm_password}
+
                                         onChange={(e) => { formik.setFieldValue('confirm_password', e.target.value); }}
-                                        className={classNames({ 'p-invalid': (formik.touched.confirm_password && formik.errors.confirm_password) })}
                                         aria-describedby="confirm_password-help"
                                         required={updatePassword}
                                         disabled={!updatePassword}
-                                        toggleMask />
+                                    />
 
                                     <small id="confirm_password-help">
                                         Type the password again
@@ -293,48 +281,52 @@ const AddUser = () => {
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="email">Email</label>
-                                    <InputText id="email"
+                                    <TextField id="email"
                                         aria-describedby="email-help"
                                         value={formik.values.email}
                                         required
                                         onChange={(e) => {
                                             formik.setFieldValue('email', e.target.value);
                                         }}
-                                        className={classNames({ 'p-invalid': (formik.touched.email && formik.errors.email) })}
                                     />
                                 </div>
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="phone">Phone Number</label>
-                                    <InputText id="phone"
+                                    <TextField id="phone"
                                         aria-describedby="phone-help"
                                         value={formik.values.phone}
                                         required
                                         onChange={(e) => {
                                             formik.setFieldValue('phone', e.target.value);
                                         }}
-                                        className={classNames({ 'p-invalid': (formik.touched.phone && formik.errors.phone) })}
                                     />
                                 </div>
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="role_id">User Role</label>
-                                    <Dropdown
-                                        inputId="role_id"
-                                        name="role_id"
-                                        value={formik.values.role_id}
-                                        options={roles}
-                                        optionLabel="role_name"
-                                        optionValue='role_id'
-                                        placeholder="Select a Role"
-                                        className={classNames({ 'p-invalid': (formik.touched.role_id && formik.errors.role_id) })}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('role_id', e.value);
-                                        }}
-                                    />
-                                    
-                                    { formik.values.role_id ? <div>
-                                      {rolePermissions.length} of {allPermissions.length} permissions available to this role.  {rolePermissions.map(permission => <span className='chip light-blue' >{permission.name}</span>)}
+                                    <FormControl fullWidth>
+                                        <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={formik.values.role_id}
+                                            label="Age"
+                                            onChange={(e) => {
+                                                formik.setFieldValue('role_id', e.target.value);
+                                            }}
+                                        >
+                                            {roles.map((role) => (
+                                                <MenuItem key={role.role_id} value={role.role_id}>
+                                                    {role.role_name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+
+
+                                    {formik.values.role_id ? <div>
+                                        {rolePermissions.length} of {allPermissions.length} permissions available to this role.  {rolePermissions.map(permission => <span className='chip light-blue' >{permission.name}</span>)}
                                     </div> : <small id="role_id-help">
                                         Select a role for the user. The permissions available to that role will be displayed below
                                     </small>}
@@ -342,7 +334,25 @@ const AddUser = () => {
 
                                 <div className="flex flex-column gap-2 ">
                                     <label htmlFor="active">Active</label>
-                                    <Dropdown
+                                    <FormControl fullWidth>
+                                        <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={formik.values.active}
+                                            label="Age"
+                                            onChange={(e) => {
+                                                formik.setFieldValue('active', e.target.value);
+                                            }}
+                                        >
+                                            {activeStates.map((state) => (
+                                                <MenuItem key={state.value} value={state.value}>
+                                                    {state.label}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    {/* <Dropdown
                                         inputId="active"
                                         name="active"
                                         value={formik.values.active}
@@ -353,10 +363,10 @@ const AddUser = () => {
                                         onChange={(e) => {
                                             formik.setFieldValue('active', e.value);
                                         }}
-                                    />
+                                    /> */}
                                     <small id="active-help">
                                         An inactive user will not be able to login to the system.
-                                        </small>
+                                    </small>
                                 </div>
                                 {(formik.touched.username && formik.errors.username) ? < div className="p-error">{formik.errors.username}</div> : ''}
                                 {(formik.touched.display_name && formik.errors.display_name) ? < div className="p-error">{formik.errors.display_name}</div> : ''}
@@ -367,7 +377,7 @@ const AddUser = () => {
                                 {(formik.touched.phone && formik.errors.phone) ? < div className="p-error">{formik.errors.phone}</div> : ''}
                                 {(formik.touched.active && formik.errors.active) ? < div className="p-error">{formik.errors.active}</div> : ''}
 
-                                <Button type='submit' label='Submit' loading={loading} ></Button>
+                                <Button type='submit' loading={loading} >Submit</Button>
 
                             </div>
                         </CardContent>
@@ -377,7 +387,6 @@ const AddUser = () => {
                 </form>
             </div>
 
-            <Toast ref={toast} />
 
         </>
     )

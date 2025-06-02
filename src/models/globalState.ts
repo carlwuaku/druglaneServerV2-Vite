@@ -5,6 +5,7 @@ export interface GlobalState {
     serverState: string;
     settings: ISettings | null;
     dbState: string;
+    appName: string;
 }
 
 export interface ISettings {

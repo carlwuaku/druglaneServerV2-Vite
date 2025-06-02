@@ -1,10 +1,11 @@
 :root {
   --primaryColor: indigo;
   --white: #ffffff;
+  --gradientBg: linear-gradient(135deg, #667eea, #764ba2);
 }
 
 body {
-  font-family: 'Ubuntu', sans-serif !important;
+
   /* background-color: #f5f5f5 !important; */
 }
 
@@ -80,6 +81,7 @@ body {
 
 .dashboardContainer {
   display: flex;
+  flex-direction: column;
   -webkit-box-pack: start;
   justify-content: flex-start;
   -webkit-box-align: center;
@@ -160,4 +162,481 @@ body {
 
 .center-input-text {
   text-align: center;
+}
+
+.header-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+/*  */
+body {
+  font-family: 'Ubuntu', sans-serif !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.app-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px;
+  padding: 40px;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 10px;
+}
+
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-avatar {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.admin-initials {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.admin-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.admin-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.admin-role {
+  font-size: 0.8rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #4a5568;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #e53e3e;
+}
+
+.logout-icon {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.logout-btn:hover .logout-icon {
+  transform: rotate(-10deg);
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.app-subtitle {
+  font-size: 1.1rem;
+  color: #718096;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.app-logo {
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  display: inline-block;
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.company-info {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px 20px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.license-text {
+  color: #718096;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.company-name {
+  color: #2d3748;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.status-section {
+  background: #f7fafc;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  border: 1px solid #e2e8f0;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.status-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.status-online {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+
+.status-offline {
+  background: #fed7d7;
+  color: #742a2a;
+  border: 1px solid #fc8181;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.dot-online {
+  background: #38a169;
+}
+
+.dot-offline {
+  background: #e53e3e;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.client-section {
+  background: #edf2f7;
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 30px;
+  border-left: 4px solid #4299e1;
+}
+
+.client-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.browser-icon {
+  width: 20px;
+  height: 20px;
+  background: #4299e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+}
+
+.client-instructions {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.url-display {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.95rem;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.copy-btn {
+  background: #4299e1;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.open-browser-btn {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.open-browser-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.action-card:hover::before {
+  transform: scaleX(1);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.action-card.backup {
+  --accent-color: #38a169;
+}
+
+.action-card.settings {
+  --accent-color: #805ad5;
+}
+
+.action-card.users {
+  --accent-color: #ed8936;
+}
+
+.action-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  background: var(--accent-color);
+}
+
+.action-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.action-description {
+  color: #718096;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  color: #a0aec0;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .app-title {
+    font-size: 1.8rem;
+  }
+
+  .header-top {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .admin-info {
+    order: 2;
+  }
+
+  .logout-btn {
+    order: 1;
+    align-self: flex-end;
+  }
+
+  .status-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .url-display {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+.gradient-bg {
+  background: var(--gradientBg);
 }

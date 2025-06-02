@@ -77,9 +77,13 @@ const appMenu: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
     }
 ]
 
-export function savePreference(store: Store, key: string, value: any) {
+/** Save a preference to the store 
+ * @param store - The electron-store instance. the type of this parameter should be `Store<Record<string, any>>`. but it doesn't seem to have @types/electron-store yet.
+ * @param key - The key under which the value will be stored
+ * @param value - The value to be stored
+*/
+export function savePreference(store: any, key: string, value: any) {
     try {
-        console.log(key, value)
         store.set(key, value);
     } catch (error: any) {
         throw new Error(error);

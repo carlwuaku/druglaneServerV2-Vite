@@ -5,7 +5,8 @@ const GlobalContext = createContext<GlobalState>({
     serverUrl: "",
     serverState: "",
     settings: null,
-    dbState: ""
+    dbState: "",
+    appName: ""
 });
 
 export default GlobalContext;

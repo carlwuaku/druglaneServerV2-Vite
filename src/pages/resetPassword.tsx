@@ -1,28 +1,25 @@
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button'
+
 import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import { useFormik, FormikErrors, } from 'formik';
 import { postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
-import { Toast } from 'primereact/toast';
 import { useNavigate } from 'react-router-dom';
-import { classNames } from 'primereact/utils';
-import { Message } from 'primereact/message';
-import { useAuthUser } from 'react-auth-kit'
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import { useSnackbar } from '@/global/SnackbarContext';
+import { Alert, Button, TextField } from '@mui/material';
 export default function ResetPassword() {
-    const auth = useAuthUser();
+    const auth = useAuthUser<{ token: string }>();
     const [loading, setLoading] = useState(false)
     const serverUrl = useRef("");
-    const toast = useRef<Toast>(null);
     const history = useNavigate();
-
+    const snackbar = useSnackbar();
     const showSuccess = (message: string) => {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+        snackbar.showSuccess(message);
     }
     const showError = (message: string) => {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        snackbar.showError(message);
     }
     const formik = useFormik<{ password: string, confirm_password: string, reset_token: string }>({
         initialValues: {
@@ -30,7 +27,7 @@ export default function ResetPassword() {
             confirm_password: '',
             reset_token: ''
         },
-        validate: (values: { password: string, confirm_password: string, reset_token:string }) => {
+        validate: (values: { password: string, confirm_password: string, reset_token: string }) => {
             let errors: FormikErrors<{ password: string, confirm_password: string, reset_token: string }> = {};
             if (!values.password) {
                 errors.password = 'The password is required';
@@ -47,8 +44,10 @@ export default function ResetPassword() {
 
             try {
                 setLoading(true);
-                let response = await postData<string>({url: `${serverUrl.current}/api_admin/resetAdminPassword`,
-                    formData: data, token: auth()?.token});
+                let response = await postData<string>({
+                    url: `${serverUrl.current}/api_admin/resetAdminPassword`,
+                    formData: data, token: auth?.token
+                });
                 showSuccess('Password reset successfully');
                 setLoading(false);
                 history('/login');
@@ -76,7 +75,7 @@ export default function ResetPassword() {
         };
     }, [serverUrl]);
 
-    
+
 
     return (
         <>
@@ -88,49 +87,47 @@ export default function ResetPassword() {
                             <div className="text-center mb-5">
                                 <img src="/demo/images/blocks/logos/hyper.svg" alt="hyper" height={50} className="mb-3" />
                                 <div className="text-900 text-3xl font-medium mb-3">Reset the administrator password</div>
-                                <Message severity="info" text="Please check your email for the reset token that was sent to you" />
+                                <Alert severity="info" >
+                                    Please check your email for the reset token that was sent to you
+                                </Alert>
 
                             </div>
 
                             <div className='flex-column align-items-center justify-content-center' >
                                 <label htmlFor="password" className="block text-900 font-medium mb-2">Enter Password</label>
-                                <InputText id="password" type="password"
+                                <TextField id="password" type="password"
                                     value={formik.values.password}
                                     onChange={(e) => {
                                         formik.setFieldValue('password', e.target.value);
                                     }}
-                                    className={classNames({ 'p-invalid': (formik.touched.password && formik.errors.password) })}
 
                                 />
 
                                 <label htmlFor="confirm_password" className="block text-900 font-medium mb-2">Confirm Password</label>
-                                <InputText id="confirm_password" type="confirm_password"
+                                <TextField id="confirm_password" type="confirm_password"
                                     value={formik.values.confirm_password}
                                     onChange={(e) => {
                                         formik.setFieldValue('confirm_password', e.target.value);
                                     }}
-                                    className={classNames({ 'p-invalid': (formik.touched.confirm_password && formik.errors.confirm_password) })}
 
                                 />
 
                                 <label htmlFor="reset_token" className="block text-900 font-medium mb-2">Reset Token</label>
-                                <InputText id="reset_token" type="reset_token"
+                                <TextField id="reset_token" type="reset_token"
                                     value={formik.values.reset_token}
                                     onChange={(e) => {
                                         formik.setFieldValue('reset_token', e.target.value);
                                     }}
-                                    className={classNames({ 'p-invalid': (formik.touched.reset_token && formik.errors.reset_token) })}
 
                                 />
 
 
-                                <Button loading={loading} label="Submit" icon="pi pi-user" className="w-full" />
+                                <Button loading={loading} className="w-full" >Submit</Button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <Toast ref={toast} />
         </>
     )
 }

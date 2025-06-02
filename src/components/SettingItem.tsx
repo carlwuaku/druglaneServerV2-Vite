@@ -1,11 +1,8 @@
 
 import React, { useEffect, useRef, useState } from 'react'
-import { InputText } from 'primereact/inputtext';
 import { ipcRenderer } from 'electron';
 import { GET_PREFERENCE, PREFERENCE_RECEIVED, PREFERENCE_SET, RESTART_APPLICATION, SET_PREFERENCE } from '@/utils/stringKeys';
-import { Toast } from 'primereact/toast';
-import { List, ListItem, IconButton, ListItemAvatar, Avatar, ListItemText, Card, Button, CardContent, Typography, Dialog, InputLabel, Select, SelectChangeEvent, Alert, CardHeader } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
+import { IconButton, Card, Button, Dialog, InputLabel, Select, SelectChangeEvent, Alert, CardHeader } from '@mui/material';
 import Edit from '@mui/icons-material/Edit';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -13,13 +10,12 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
+import { useSnackbar } from '@/global/SnackbarContext';
 
 
 const SettingItem = (props: { name: string, type: string, options?: { label: string, value: any }[], description: string }) => {
-    const [editing, setEditing] = useState(false);
     const [new_value, setValue] = useState('');
     const [currentValue, setCurrentValue] = useState<any>('')
-    const [loading, setLoading] = useState(false);
 
     const [open, setOpen] = React.useState(false);
 
@@ -31,6 +27,7 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
         setValue(currentValue)
         setOpen(false);
     };
+    const snackbar = useSnackbar();
 
     useEffect(() => {
         //get the value of the setting
@@ -115,13 +112,12 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
     }, []);
 
 
-    const toast = useRef<Toast>(null);
 
     const showSuccess = (message: string) => {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+        snackbar.showSuccess(message);
     }
     const showError = (message: string) => {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        snackbar.showError(message);
     }
     return (
         <>
@@ -139,7 +135,6 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
 
                 </CardHeader>
             </Card>
-            <Toast ref={toast} />
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{`Edit ${props.name}`}</DialogTitle>

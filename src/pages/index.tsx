@@ -1,25 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react';
 
 import { ipcRenderer } from 'electron';
 import Header from '../components/Header';
-import { BACKUP_TIME, CREATE_BACKUP, GET_PREFERENCES, GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
+import { BACKUP_TIME, CREATE_BACKUP } from '@/utils/stringKeys';
 import ServerState from '../components/ServerState';
-import { Link, Link as RouterLink } from 'react-router-dom';
-import ServerLogs from '../components/ServerLogs';
-import { getData } from '@/utils/network';
-import { Button, Card, CardContent, CardHeader, Typography } from '@mui/material';
-import AppConfig from '../components/AppConfig';
+import { Link } from 'react-router-dom';
 // import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Unstable_Grid2';
-import { Backup, CloudDownload, CloudSync, DisplaySettings, LockPerson, NotificationsOutlined, Person2Outlined, Settings } from '@mui/icons-material';
+import { Backup, CloudSync, LockPerson, NotificationsOutlined, Person2Outlined } from '@mui/icons-material';
 import DashboardTile from '../components/DashboardTile';
 import SettingItem from '../components/SettingItem';
-import GlobalContext from '../global/global';
-import { useAuthUser } from 'react-auth-kit'
-import useGetServerState from '@/hooks/useGetServerState';
 import { useGlobalState } from '@/global/globalProvider';
+import Grid from '@mui/material/Grid';
+import Logo from '@/components/Logo';
 // import logo from '@/app/assets/logo.png';
 
 // const Item = styled(Paper)(({ theme }) => ({
@@ -96,27 +88,24 @@ const Index = () => {
 
   return (
     <>
-      <Header></Header>
+      <Header showBackArrow={false} showLogo={false}></Header>
+      <div className="w-full h-full flex flex-col items-center">
 
-      {/* <Button><Link to="/activate">Activation</Link></Button>
-      <Button><Link to="/settings">settngs</Link></Button> */}
-      <Box className="container">
-        <h3>Druglane Management System</h3>
-        <h4>Licensed to {settings?.company_name}</h4>
-        <Grid container spacing={2}>
+        <Logo className='self-center' />
+        <h1 className="app-title">Druglane Pharmacy Management System v2</h1>
+        <p className="app-subtitle">Server Control Panel</p>
+        <div className="company-info">
+          <span className="license-text">Licensed to:</span>
+          <span className="company-name" id="companyName">{settings?.company_name}</span>
+        </div>
+        <Box className="w-full h-full p-4 flex flex-col gap-4">
 
-          <Grid xs={12} md={8} >
+          <div className="flex flex-col gap-2">
             <ServerState></ServerState>
-
-          </Grid>
-          <Grid xs={6} md={4} lg={4}>
             <SettingItem key={BACKUP_TIME} description='Backup time' name={BACKUP_TIME} type={'select'} options={times}></SettingItem>
 
-          </Grid>
-
-        </Grid>
-        <Grid container spacing={2}>
-          <Grid lg={3} md={3} sm={6}>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link to={''} className="unsetAll link ">
               <DashboardTile
                 title={'Backup your database now'}
@@ -125,58 +114,49 @@ const Index = () => {
                 onClick={backupClicked}
               ></DashboardTile>
             </Link>
-          </Grid>
-          <Grid lg={3} md={3} sm={6}>
+
             <Link to={'backups'} className="unsetAll link">
               <DashboardTile
                 title={'Restore data from a backup'}
                 subtitle={'Revert your database to a previous state if there\'s been an error '}
                 icon={<CloudSync sx={{ fontSize: 30 }}></CloudSync>} ></DashboardTile>
             </Link>
-          </Grid>
-          <Grid lg={3} md={3} sm={6}>
+
             <Link to={'settings'} className="unsetAll link">
               <DashboardTile
                 title={'Edit system settings'}
                 subtitle={'Edit the phone, email, address, etc'}
                 icon={<img src="/assets/001-databases.png" alt="Logo" />} ></DashboardTile>
             </Link>
-          </Grid>
-          <Grid lg={3} md={3} sm={6}>
+
             <Link to={'users'} className="unsetAll link">
               <DashboardTile
                 title={'Manage system users'}
                 subtitle={'Add, edit or view users of the system'}
                 icon={<Person2Outlined sx={{ fontSize: 30 }}></Person2Outlined>} ></DashboardTile>
             </Link>
-          </Grid>
 
-        </Grid>
-
-        <Grid container spacing={2}>
-          <Grid lg={3} md={3} sm={6}>
             <Link to={'roles'} className="unsetAll link ">
               <DashboardTile
                 title={'User Permissions'}
                 subtitle={'Set/disable permissions for user groups'}
                 icon={<LockPerson sx={{ fontSize: 30 }}></LockPerson>} ></DashboardTile>
             </Link>
-          </Grid>
-          <Grid lg={3} md={3} sm={6}>
+
             <Link to={''} className="unsetAll link">
               <DashboardTile
                 title={'Manage Automatic Reminders'}
                 subtitle={'Revert your database to a previous state if there\'s been an error '}
                 icon={<NotificationsOutlined sx={{ fontSize: 30 }}></NotificationsOutlined>} ></DashboardTile>
             </Link>
-          </Grid>
+          </div>
 
 
-        </Grid>
+        </Box>
 
-      </Box>
-
+      </div>
     </>
+
   );
 }
 

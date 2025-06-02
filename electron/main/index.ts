@@ -44,7 +44,7 @@ let mainWindow: BrowserWindow | null = null;
 const preload = path.join(__dirname, '../preload/index.mjs');
 
 
-const store = new Store();
+const store = new Store<Record<string, any>>();
 
 contextMenu({
   showSaveImageAs: true,

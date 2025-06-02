@@ -1,8 +1,7 @@
-import { Card } from 'primereact/card';
-import { Message } from 'primereact/message';
-import React from 'react';
+import Alert from '@mui/material/Alert';
+import CheckIcon from '@mui/icons-material/Check';
 
-const ActivationSuccess = ({ name }: { name:string }) => {
+const ActivationSuccess = ({ name }: { name: string }) => {
     const content = (
         <div className="flex align-items-center">
             <i className="pi pi-check-circle"></i>
@@ -10,12 +9,10 @@ const ActivationSuccess = ({ name }: { name:string }) => {
         </div>
     );
     return (
+        <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+            {content}
+        </Alert>
 
-        <Message
-            className="border-primary w-full justify-content-start"
-            severity="success"
-            content={content}
-        />
 
     )
 }

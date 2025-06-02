@@ -1,14 +1,10 @@
-import { ACTIVATION_RESULT, ADMIN_PASSWORD_NOT_SET, APP_ACTIVATED, CALL_ACTIVATION, COMPANY_NOT_SET, RESTART_APPLICATION, SERVER_RUNNING } from '@/utils/stringKeys';
+import { ACTIVATION_RESULT, APP_ACTIVATED, CALL_ACTIVATION, RESTART_APPLICATION, SERVER_RUNNING } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
-import React, { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
 import ActivationFailed from '../components/ActivationFailed';
 import ActivationSuccess from '../components/ActivationSuccess';
-import { TabPanel, TabView } from 'primereact/tabview';
 import Settings from '../components/settings';
-import { Dialog } from 'primereact/dialog';
 import { useFormik, FormikErrors, } from 'formik';
 import SetAdminPassword from '../components/SetAdminPassword';
 import Box from '@mui/material/Box';
@@ -18,6 +14,9 @@ import StepLabel from '@mui/material/StepLabel';
 import { useGlobalState } from '@/global/globalProvider';
 import { getData } from '@/utils/network';
 import { ActivationStateType } from '@/types/activationStateType';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import { Dialog, DialogTitle } from '@mui/material';
 
 const Activate = () => {
   const history = useNavigate();
@@ -192,17 +191,18 @@ const Activate = () => {
                 </div>
 
                 <label className='font-bold' htmlFor="location">Activation Code</label>
-                <InputText
-                  id="code"
+                <TextField id="code"
                   className='wide-input'
                   aria-describedby="code-help"
                   value={formik.values.code}
                   onChange={(e) => {
-                    formik.setFieldValue('code', e.target.value);
-                  }}
-                />
+                    formik.setFieldValue('password', e.target.value);
+                  }} variant="outlined"
+                  error={formik.touched.code && !!formik.errors.code}
+                  helperText={formik.touched.code && formik.errors.code} />
 
-                <Button type='submit' label='Submit' loading={loading}></Button>
+
+                <Button type='submit' loading={loading}>Submit</Button>
                 {
                   requestStatus && requestStatus.data.status === "-1" ? <ActivationFailed /> : null
                 }
@@ -243,15 +243,13 @@ const Activate = () => {
         </TabPanel>
       </TabView> */}
 
-
-      <Dialog visible={errorVisible} style={{ width: '50vw' }}
-        footer={<Button label="Close" icon="pi pi-times" onClick={() => setErrorVisible(false)} className="p-button-text" />
-        }
-        onHide={() => setErrorVisible(false)}>
+      <Dialog onClose={() => setErrorVisible(false)} open={errorVisible}>
+        <DialogTitle>Set backup account</DialogTitle>
         <p className="m-0">
           Your activation key is invalid. Please check and try again
         </p>
       </Dialog>
+
 
 
     </div>
