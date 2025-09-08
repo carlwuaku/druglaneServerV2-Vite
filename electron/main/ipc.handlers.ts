@@ -2,7 +2,7 @@ import { BrowserWindow, ipcMain } from "electron";
 import { verifyLicenseKey } from "../appValidation";
 // import { defaultOptions } from "../electronConstants";
 import {
-    ACTIVATION_RESULT, CALL_ACTIVATION, CREATE_BACKUP, GET_APP_DETAILS, GET_PREFERENCE, GET_PREFERENCES,
+    ACTIVATION_RESULT, APP_VERSION_RECEIVED, BACKUP_COMPLETE, CALL_ACTIVATION, CREATE_BACKUP, GET_APP_DETAILS, GET_APP_VERSION, GET_PREFERENCE, GET_PREFERENCES,
     GET_SERVER_STATE, GET_SERVER_URL, PREFERENCE_RECEIVED, PREFERENCE_SET,
     RESTART_APPLICATION, RESTART_SERVER, SERVER_DATABASE_UPDATE,
     SERVER_RUNNING,
@@ -14,9 +14,11 @@ import { startServer } from "../server/server";
 import { getAppDetails, restartApp, savePreference, sendServerDatabaseUpdate, sendServerState, sendServerUrl, spawnServer } from "./app-functions";
 import { appGlobals } from "./globals";
 import { constants } from "../utils/constants";
+import { backupDatabase } from "./backup";
+import fs from "fs";
+import path from "path";
 
-
-export function registerIpcHandlers(win: BrowserWindow, store: Store) {
+export function registerIpcHandlers(win: BrowserWindow, store: Store, app: Electron.App) {
 
     /** run when user enters activation code from the ui */
     ipcMain.on(CALL_ACTIVATION, async (event, key) => {
@@ -29,6 +31,9 @@ export function registerIpcHandlers(win: BrowserWindow, store: Store) {
                 if (appGlobals.serverState !== SERVER_RUNNING) {
                     await startServer();
                 }
+                //create the jwt.key file in the settings folder and set the value
+                fs.writeFileSync(path.join(constants.settings_location, 'jwt.key'), data.data.jwt_key);
+
 
             }
             win?.webContents?.send(ACTIVATION_RESULT, { data: data.data, error: false, message: "" })
@@ -84,14 +89,22 @@ export function registerIpcHandlers(win: BrowserWindow, store: Store) {
 
     });
 
-    ipcMain.on(CREATE_BACKUP, (event) => {
-        //do a mysql dump
+    ipcMain.on(CREATE_BACKUP, async (event) => {
+        try {
+            const backupResult = await backupDatabase();
+            event.reply(BACKUP_COMPLETE, backupResult)
+        } catch (error) {
+            event.reply(BACKUP_COMPLETE, { localBackup: null, remoteBackup: null })
+        }
 
-        console.log('create backup')
     })
 
 
     ipcMain.on(SERVER_DATABASE_UPDATE, () => {
         sendServerDatabaseUpdate(appGlobals.databaseState, win)
+    });
+
+    ipcMain.on(GET_APP_VERSION, () => {
+        win?.webContents?.send(APP_VERSION_RECEIVED, app.getVersion());
     })
 }

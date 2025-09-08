@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useFormik, FormikErrors, } from 'formik';
-import { getData, postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
 import { genericAxiosPostResponse } from '../models/axiosResponse';
@@ -11,15 +10,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { IUser } from '../models/user';
 import Switch from '@mui/material/Switch';
 import { Permissions } from '../models/permissions';
-import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 import { useSnackbar } from '@/global/SnackbarContext';
 import MenuItem from '@mui/material/MenuItem';
+import useApiClient from '@/hooks/useApiClient';
+import { useGlobalState } from '@/global/globalProvider';
 
-const AddUser = () => {
-    const auth = useAuthUser<{ token: string }>();
+export default function AddUser() {
     const history = useNavigate();
     const [loading, setLoading] = useState(false)
-    const serverUrl = useRef("");
+    const globalState = useGlobalState();
     const [loadingRoles, setLoadingRoles] = useState(false);
     const [roles, setRoles] = useState<IRoles[]>([]);
     const { id } = useParams();
@@ -27,14 +26,7 @@ const AddUser = () => {
     const showUpdatePassword = useRef(false);
     const [rolePermissions, setRolePermissions] = useState<Permissions[]>([])
     const [allPermissions, setAllPermissions] = useState<Permissions[]>([])
-
-    // function usePrevious(value:any) {
-    //     const ref = useRef();
-    //     useEffect(() => {
-    //         ref.current = value;
-    //     });
-    //     return ref.current;
-    // }
+    const apiClient = useApiClient();
 
     const activeStates = [
         {
@@ -79,6 +71,14 @@ const AddUser = () => {
             if (!values.role_id) {
                 errors.role_id = 'Please select a role';
             }
+            if (!id || updatePassword) {
+                if (!values.password) {
+                    errors.password = 'The password is required';
+                }
+                if (values.password !== values.confirm_password) {
+                    errors.confirm_password = 'The passwords must match';
+                }
+            }
 
             return errors;
         },
@@ -87,23 +87,21 @@ const AddUser = () => {
             //validate and emit data to parent
             try {
                 setLoading(true);
-                let response = await postData<genericAxiosPostResponse>({
-                    url: `${serverUrl.current}/api_admin/saveUser`,
-                    formData: data, token: auth?.token
+                let response = await apiClient.post<genericAxiosPostResponse>({
+                    url: `${globalState.serverUrl}/api_admin/user`,
+                    formData: data
                 });
                 showSuccess('User modified successfully');
                 setLoading(false);
                 history('/users');
-                //go back to roles
+                //go back to users
             } catch (error) {
                 console.log(error)
                 showError(`error occurred: ${error}`);
                 setLoading(false);
             }
-            // ipcRenderer.send(CALL_ACTIVATION, data.code)
         }
     });
-    // const previousRoleId = usePrevious(formik.values.role_id);
 
 
     const handleUpdatePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,23 +121,16 @@ const AddUser = () => {
             showUpdatePassword.current = true;
         }
 
-        const handleServerUrlReceived = (event: any, data: any) => {
-            serverUrl.current = data.data;
-            loadRoles();
-            loadPermissions();
-            if (id) {
-                loadExistingUser();
-            }
-        };
 
-        ipcRenderer.send(GET_SERVER_URL);
+        loadRoles();
+        loadPermissions();
+        if (id) {
+            loadExistingUser();
+        }
 
-        ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived)
-        return () => {
-            ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        };
 
-    }, [id, serverUrl]);
+
+    }, [id]);
 
     useEffect(() => {
         if (formik.values.role_id) {
@@ -150,7 +141,7 @@ const AddUser = () => {
     const loadRolePermissions = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<Permissions[]>({ url: `${serverUrl.current}/api_admin/rolePermissions/${formik.values.role_id}`, token: auth?.token });
+            let response = await apiClient.get<Permissions[]>({ url: `${globalState.serverUrl}/api_admin/rolePermissions/${formik.values.role_id}` });
             setRolePermissions(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -162,7 +153,7 @@ const AddUser = () => {
     const loadRoles = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<IRoles[]>({ url: `${serverUrl.current}/api_admin/getRoles`, token: auth?.token });
+            let response = await apiClient.get<IRoles[]>({ url: `${globalState.serverUrl}/api_admin/getRoles` });
             setRoles(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -174,7 +165,7 @@ const AddUser = () => {
     const loadPermissions = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<Permissions[]>({ url: `${serverUrl.current}/api_admin/allPermissions`, token: auth?.token });
+            let response = await apiClient.get<Permissions[]>({ url: `${globalState.serverUrl}/api_admin/allPermissions` });
             setAllPermissions(response.data);
         } catch (error) {
             showError(`error occurred getting permissions: ${error}`);
@@ -185,7 +176,7 @@ const AddUser = () => {
     const loadExistingUser = async () => {
         try {
             setLoadingRoles(true);
-            let response = await getData<IUser>({ url: `${serverUrl.current}/api_admin/user/${id}`, token: auth?.token });
+            let response = await apiClient.get<IUser>({ url: `${globalState.serverUrl}/api_admin/user/${id}` });
             formik.setValues(response.data)
             setLoadingRoles(false);
         } catch (error) {
@@ -205,154 +196,145 @@ const AddUser = () => {
 
     return (
         <>
-            <Header showBackArrow={true}></Header>
-            <div className="container">
+            <Header showBackArrow={true} showLogo={true}></Header>
+            <div className="page-container">
                 <h4 className="pageTitle">Add a New User</h4>
                 <form onSubmit={formik.handleSubmit} >
-                    <Card>
-                        <CardContent>
-                            <div className="flex flex-column gap-3 justify-content-center centeredField">
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="username">Username</label>
-                                    <TextField id="username"
-                                        aria-describedby="username-help"
-                                        value={formik.values.username}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('username', e.target.value);
-                                        }}
-                                        required
-                                    />
-                                    <small id="username-help">
-                                        The user will login with this username. There should be no spaces
-                                    </small>
-                                </div>
+
+                    <div className="flex flex-column gap-3 justify-content-center centeredField">
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="username">Username</label>
+                            <TextField id="username"
+                                aria-describedby="username-help"
+                                value={formik.values.username}
+                                onChange={(e) => {
+                                    formik.setFieldValue('username', e.target.value);
+                                }}
+                                required
+                            />
+                            <small id="username-help">
+                                The user will login with this username. There should be no spaces
+                            </small>
+                        </div>
 
 
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="display_name">Full Name</label>
-                                    <TextField id="display_name"
-                                        aria-describedby="display_name-help"
-                                        value={formik.values.display_name}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('display_name', e.target.value);
-                                        }}
-                                        required
-                                    />
-                                    <small id="display_name-help">
-                                        The person's full name, for identification
-                                    </small>
-                                </div>
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="display_name">Full Name</label>
+                            <TextField id="display_name"
+                                aria-describedby="display_name-help"
+                                value={formik.values.display_name}
+                                onChange={(e) => {
+                                    formik.setFieldValue('display_name', e.target.value);
+                                }}
+                                required
+                            />
+                            <small id="display_name-help">
+                                The person's full name, for identification
+                            </small>
+                        </div>
 
-                                {/* password */}
-                                <div className="flex flex-column gap-2 ">
-                                    {showUpdatePassword.current ?
-                                        <FormControlLabel control={<Switch
-                                            onChange={handleUpdatePasswordChange}
+                        {/* password */}
+                        <div className="flex flex-column gap-2 ">
+                            {showUpdatePassword.current ?
+                                <FormControlLabel control={<Switch
+                                    onChange={handleUpdatePasswordChange}
 
-                                        />} label="Update the password" />
-                                        : ''}
-                                    <label htmlFor="password">Password</label>
-                                    <TextField value={formik.values.password}
-                                        onChange={(e) => { formik.setFieldValue('password', e.target.value); }}
-                                        type='password'
-                                        required={updatePassword}
-                                        disabled={!updatePassword}
-                                    />
+                                />} label="Update the password" />
+                                : ''}
+                            <label htmlFor="password">Password</label>
+                            <TextField value={formik.values.password}
+                                onChange={(e) => { formik.setFieldValue('password', e.target.value); }}
+                                type='password'
+                                required={updatePassword}
+                                disabled={!updatePassword}
+                            />
 
-                                    <small id="password-help">
+                            <small id="password-help">
 
-                                    </small>
-                                </div>
+                            </small>
+                        </div>
 
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="confirm_password">Confirm Password</label>
-                                    <TextField value={formik.values.confirm_password}
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="confirm_password">Confirm Password</label>
+                            <TextField value={formik.values.confirm_password}
+                                type='password'
+                                onChange={(e) => { formik.setFieldValue('confirm_password', e.target.value); }}
+                                aria-describedby="confirm_password-help"
+                                required={updatePassword}
+                                disabled={!updatePassword}
+                            />
 
-                                        onChange={(e) => { formik.setFieldValue('confirm_password', e.target.value); }}
-                                        aria-describedby="confirm_password-help"
-                                        required={updatePassword}
-                                        disabled={!updatePassword}
-                                    />
+                            <small id="confirm_password-help">
+                                Type the password again
+                            </small>
+                        </div>
 
-                                    <small id="confirm_password-help">
-                                        Type the password again
-                                    </small>
-                                </div>
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="email">Email</label>
+                            <TextField id="email"
+                                aria-describedby="email-help"
+                                value={formik.values.email}
+                                required
+                                onChange={(e) => {
+                                    formik.setFieldValue('email', e.target.value);
+                                }}
+                            />
+                        </div>
 
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="email">Email</label>
-                                    <TextField id="email"
-                                        aria-describedby="email-help"
-                                        value={formik.values.email}
-                                        required
-                                        onChange={(e) => {
-                                            formik.setFieldValue('email', e.target.value);
-                                        }}
-                                    />
-                                </div>
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="phone">Phone Number</label>
+                            <TextField id="phone"
+                                aria-describedby="phone-help"
+                                value={formik.values.phone}
+                                required
+                                onChange={(e) => {
+                                    formik.setFieldValue('phone', e.target.value);
+                                }}
+                            />
+                        </div>
 
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="phone">Phone Number</label>
-                                    <TextField id="phone"
-                                        aria-describedby="phone-help"
-                                        value={formik.values.phone}
-                                        required
-                                        onChange={(e) => {
-                                            formik.setFieldValue('phone', e.target.value);
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="role_id">User Role</label>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="demo-simple-select-label">Age</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-label"
-                                            id="demo-simple-select"
-                                            value={formik.values.role_id}
-                                            label="Age"
-                                            onChange={(e) => {
-                                                formik.setFieldValue('role_id', e.target.value);
-                                            }}
-                                        >
-                                            {roles.map((role) => (
-                                                <MenuItem key={role.role_id} value={role.role_id}>
-                                                    {role.role_name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="role_id">User Role</label>
+                            <FormControl fullWidth>
+                                <Select
+                                    value={formik.values.role_id}
+                                    onChange={(e) => {
+                                        formik.setFieldValue('role_id', e.target.value);
+                                    }}
+                                >
+                                    {roles.map((role) => (
+                                        <MenuItem key={role.role_id} value={role.role_id}>
+                                            {role.role_name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
 
 
-                                    {formik.values.role_id ? <div>
-                                        {rolePermissions.length} of {allPermissions.length} permissions available to this role.  {rolePermissions.map(permission => <span className='chip light-blue' >{permission.name}</span>)}
-                                    </div> : <small id="role_id-help">
-                                        Select a role for the user. The permissions available to that role will be displayed below
-                                    </small>}
-                                </div>
+                            {formik.values.role_id ? <div>
+                                {rolePermissions.length} of {allPermissions.length} permissions available to this role.  {rolePermissions.map(permission => <span className='chip light-blue' >{permission.name}</span>)}
+                            </div> : <small id="role_id-help">
+                                Select a role for the user. The permissions available to that role will be displayed below
+                            </small>}
+                        </div>
 
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="active">Active</label>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="demo-simple-select-label">Age</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-label"
-                                            id="demo-simple-select"
-                                            value={formik.values.active}
-                                            label="Age"
-                                            onChange={(e) => {
-                                                formik.setFieldValue('active', e.target.value);
-                                            }}
-                                        >
-                                            {activeStates.map((state) => (
-                                                <MenuItem key={state.value} value={state.value}>
-                                                    {state.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    {/* <Dropdown
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="active">Active</label>
+                            <FormControl fullWidth>
+                                <Select
+                                    value={formik.values.active}
+                                    onChange={(e) => {
+                                        formik.setFieldValue('active', e.target.value);
+                                    }}
+                                >
+                                    {activeStates.map((state) => (
+                                        <MenuItem key={state.value} value={state.value}>
+                                            {state.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {/* <Dropdown
                                         inputId="active"
                                         name="active"
                                         value={formik.values.active}
@@ -364,24 +346,23 @@ const AddUser = () => {
                                             formik.setFieldValue('active', e.value);
                                         }}
                                     /> */}
-                                    <small id="active-help">
-                                        An inactive user will not be able to login to the system.
-                                    </small>
-                                </div>
-                                {(formik.touched.username && formik.errors.username) ? < div className="p-error">{formik.errors.username}</div> : ''}
-                                {(formik.touched.display_name && formik.errors.display_name) ? < div className="p-error">{formik.errors.display_name}</div> : ''}
-                                {(formik.touched.password && formik.errors.password) ? < div className="p-error">{formik.errors.password}</div> : ''}
-                                {(formik.touched.confirm_password && formik.errors.confirm_password) ? < div className="p-error">{formik.errors.confirm_password}</div> : ''}
-                                {(formik.touched.email && formik.errors.email) ? < div className="p-error">{formik.errors.email}</div> : ''}
-                                {(formik.touched.role_id && formik.errors.role_id) ? < div className="p-error">{formik.errors.role_id}</div> : ''}
-                                {(formik.touched.phone && formik.errors.phone) ? < div className="p-error">{formik.errors.phone}</div> : ''}
-                                {(formik.touched.active && formik.errors.active) ? < div className="p-error">{formik.errors.active}</div> : ''}
+                            <small id="active-help">
+                                An inactive user will not be able to login to the system.
+                            </small>
+                        </div>
+                        <div className="text-red-500">
+                            {(formik.touched.username && formik.errors.username) ? < div className="p-error">{formik.errors.username}</div> : ''}
+                            {(formik.touched.display_name && formik.errors.display_name) ? < div className="p-error">{formik.errors.display_name}</div> : ''}
+                            {(formik.touched.password && formik.errors.password) ? < div className="p-error">{formik.errors.password}</div> : ''}
+                            {(formik.touched.confirm_password && formik.errors.confirm_password) ? < div className="p-error">{formik.errors.confirm_password}</div> : ''}
+                            {(formik.touched.email && formik.errors.email) ? < div className="p-error">{formik.errors.email}</div> : ''}
+                            {(formik.touched.role_id && formik.errors.role_id) ? < div className="p-error">{formik.errors.role_id}</div> : ''}
+                            {(formik.touched.phone && formik.errors.phone) ? < div className="p-error">{formik.errors.phone}</div> : ''}
+                            {(formik.touched.active && formik.errors.active) ? < div className="p-error">{formik.errors.active}</div> : ''}
+                        </div>
+                        <Button type='submit' variant='contained' loading={loading} >Submit</Button>
 
-                                <Button type='submit' loading={loading} >Submit</Button>
-
-                            </div>
-                        </CardContent>
-                    </Card>
+                    </div>
 
 
                 </form>
@@ -392,4 +373,3 @@ const AddUser = () => {
     )
 }
 
-export default AddUser

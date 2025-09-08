@@ -186,7 +186,7 @@ router.post('/saveRole', hasPermission, async (req: Request, res: Response) => {
     }
 });
 
-router.get('/getRoles', hasPermission, hasPermission, async (req: Request, res: Response) => {
+router.get('/getRoles', hasPermission, async (req: Request, res: Response) => {
     try {
         let data = await get_roles_function({});
         res.status(200).json(data)
@@ -255,7 +255,7 @@ router.delete('/rolePermissions/:role_id/:permission_id', hasPermission, async (
     }
 });
 
-router.post('/saveUser', hasPermission, async (req: Request, res: Response) => {
+router.post('/user', hasPermission, async (req: Request, res: Response) => {
     try {
         let data = await save_user_function(req.body);
         res.status(200).json(data)

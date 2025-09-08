@@ -42,12 +42,10 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
         ipcRenderer.send(GET_PREFERENCE, { key: props.name });
 
         ipcRenderer.on(PREFERENCE_RECEIVED, handlePreferenceReceived);
-        // ipcRenderer.removeListener(PREFERENCE_RECEIVED, handlePreferenceReceived);
-    }, [])
-
-    // const editButton = <Button
-    //     onClick={setEditing(true)}
-    //     label="Edit" icon="pi pi-edit"></Button>;
+        return () => {
+            ipcRenderer.removeAllListeners(PREFERENCE_RECEIVED);
+        }
+    }, []);
     function getInput(type: string) {
         switch (type) {
             case "select":
@@ -59,7 +57,7 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
                             id="demo-simple-select-standard"
                             value={new_value}
                             onChange={(e: SelectChangeEvent) => setValue(e.target.value)}
-                            label="Age"
+
                         >
 
 
@@ -121,20 +119,14 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
     }
     return (
         <>
-            <Card key={props.name}>
-                <CardHeader
-                    title={props.name}
-                    action={
-                        <IconButton onClick={handleClickOpen} color='secondary' edge="end" aria-label="edit">
-                            <Edit />
-                        </IconButton>
-                    }
-                    subheader={currentValue}
-                >
+            <div key={props.name} className='flex flex-col gap-2 border border-gray-200 p-2'>
+                <div className="font-bold text-[18px]">{props.name}</div>
+                <div className="flex justify-between items-center">
+                    <div>{currentValue}</div>
+                    <Button variant='contained' onClick={handleClickOpen} color='primary' aria-label="edit">Edit</Button>
+                </div>
 
-
-                </CardHeader>
-            </Card>
+            </div>
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{`Edit ${props.name}`}</DialogTitle>
@@ -142,10 +134,11 @@ const SettingItem = (props: { name: string, type: string, options?: { label: str
                     <DialogContentText>
                         {props.description}
                     </DialogContentText>
+                    <div className="flex flex-col gap-2">
+                        {getInput(props.type)}
+                        <Alert severity="info">The application will restart automatically once you save</Alert>
+                    </div>
 
-
-                    {getInput(props.type)}
-                    <Alert severity="info">The application will restart automatically once you save</Alert>
 
                 </DialogContent>
                 <DialogActions>

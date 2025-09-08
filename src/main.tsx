@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <AuthProvider store={store}>
       <HashRouter>
         <GlobalProvider>
-          <div className="app-container">
+          <div >
             <App />
           </div>
         </GlobalProvider>

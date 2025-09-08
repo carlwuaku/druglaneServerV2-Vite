@@ -1,27 +1,27 @@
-import { Table, Model, Column, DataType,  CreatedAt, ForeignKey, Index, BelongsTo, PrimaryKey } from "sequelize-typescript";
+import { Table, Model, Column, DataType, CreatedAt, ForeignKey, Index, BelongsTo, PrimaryKey } from "sequelize-typescript";
 import { Permissions } from "./Permissions";
 import { Roles } from "./Roles";
 
 @Table({
-   tableName: 'users',
+  tableName: 'users',
   modelName: 'Users',
   paranoid: true,
 })
 
 
-export class Users extends Model{
+export class Users extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
   // id!: number;
-  
+
   @ForeignKey(() => Roles)
   @Column({
     type: DataType.INTEGER
   })
-  role_id!: number;
+  declare role_id: number;
 
   @Index
   @Column({
@@ -29,68 +29,69 @@ export class Users extends Model{
     type: DataType.STRING,
     unique: true,
   })
-  email!: string;
+  declare email: string;
 
-    @Index
+  @Index
   @Column({
     allowNull: false,
     type: DataType.STRING,
     unique: true
   })
-  username!: string;
+  declare username: string;
 
-    @Index
+  @Index
   @Column({
     allowNull: false,
     type: DataType.TEXT,
   })
-  password_hash?: string;
+  declare password_hash?: string;
 
-    @Column({
+  @Column({
     allowNull: true,
     type: DataType.DATEONLY,
   })
-  last_login!: string;
+  declare last_login: string;
 
-    @Column({
+  @Column({
     type: DataType.TEXT
   })
-  last_ip!: string;
+  declare last_ip: string;
 
-    @CreatedAt
-  created_on!: string;
+  @CreatedAt
+  declare created_on: string;
 
   @Column({
     type: DataType.STRING
   })
-  display_name!: string;
+  declare display_name: string;
 
-    @Index
+  @Index
   @Column({
     type: DataType.INTEGER,
     defaultValue: 1,
     allowNull: false
   })
-  active!: number;
+  declare active: number;
 
   @Column({
     type: DataType.STRING
   })
-  last_seen!: string;
+  declare last_seen: string;
 
-    @Index
+  @Index
   @Column({
     allowNull: false,
     type: DataType.TEXT,
     unique: true
   })
-  phone!: string;
-    token!: string;
-    role: any;
-    type!: string;
+  declare phone: string;
 
-    @BelongsTo(() => Roles)
-  userRole!: Roles;
+  token!: string;
+  role: any;
+  type!: string;
 
-  permissions?:Permissions[]
+  @BelongsTo(() => Roles)
+  declare userRole: Roles;
+
+  permissions?: Permissions[]
 }

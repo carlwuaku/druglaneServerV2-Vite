@@ -1,47 +1,49 @@
 import { sequelize } from "../config/sequelize-config";
-import { Table, Model, Column, DataType,  CreatedAt, PrimaryKey, ForeignKey,
-   Index, HasMany, BelongsToMany, UpdatedAt } from "sequelize-typescript";
+import {
+  Table, Model, Column, DataType, CreatedAt, PrimaryKey, ForeignKey,
+  Index, HasMany, BelongsToMany, UpdatedAt
+} from "sequelize-typescript";
 import { RolePermissions } from "./RolePermissions";
 import { Roles } from "./Roles";
 
 @Table({
-   tableName: 'permissions',
+  tableName: 'permissions',
   modelName: 'Permissions',
   paranoid: true,
   timestamps: false
 })
 
 
-export class Permissions extends Model{
+export class Permissions extends Model {
 
   @PrimaryKey
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true
   })
-  permission_id!: number;
+  declare permission_id: number;
 
   @Index
   @Column({
     unique: true,
     type: DataType.STRING
   })
-  name!: string;
+  declare name: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  description!: string;
-  
+  declare description: string;
+
   // updatedAt!: false;
   // deletedAt!: false;
-  
+
 
   // @HasMany(() => Roles)
   // roles:Roles
 
- 
+
 }
 
 

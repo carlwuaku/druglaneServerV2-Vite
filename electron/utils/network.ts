@@ -1,7 +1,8 @@
 import { logger } from "../../src/config/logger";
 import axios, { AxiosHeaders, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios'
 import { constants } from "./constants";
-import { useAuthUser } from 'react-auth-kit'
+import fs from "fs";
+import FormData from 'form-data'
 
 /**
  * make a get call to a url with some optional params
@@ -38,7 +39,7 @@ import { useAuthUser } from 'react-auth-kit'
 
 // }
 
-export async function getData<T>(data: { url: string, params?: Map<string, any>, token: string | undefined }): Promise<AxiosResponse<T>> {
+export async function getData<T>(data: { url: string, params?: Map<string, any>, token?: string | undefined }): Promise<AxiosResponse<T>> {
     try {
         console.log('token', data.token)
         if (data.params) {
@@ -66,7 +67,7 @@ export async function getData<T>(data: { url: string, params?: Map<string, any>,
     }
 }
 
-export async function postData<T>(data: {url: string, formData: any, token:string|undefined}): Promise<AxiosResponse<T>> {
+export async function postData<T>(data: { url: string, formData: any, token: string | undefined }): Promise<AxiosResponse<T>> {
     try {
         logger.info({ message: `call made to ${data.url}. data: ${JSON.stringify(data.formData)}` });
         const response = await axios.post(data.url, data.formData, {
@@ -96,7 +97,7 @@ export async function deleteData<T>(data: { url: string, token: string | undefin
     }
 }
 
-export  async function sendEmail(message:string, recipient:string, subject:string) {
+export async function sendEmail(message: string, recipient: string, subject: string) {
 
     try {
         const FormData = require('form-data');
@@ -111,15 +112,39 @@ export  async function sendEmail(message:string, recipient:string, subject:strin
     catch (error) {
         logger.info({ message: `error sending email : ${error}` })
         throw new Error(`Server error: ${error}`);
-        
+
     };
 }
 
-export function getAuthHeaders(token?:string): AxiosRequestConfig['headers'] {
-    
+export function getAuthHeaders(token?: string): AxiosRequestConfig['headers'] {
+
     const header: AxiosRequestConfig['headers'] = {
         'token': token,
         'Content-Type': 'application/json'
     };
     return header
+}
+
+export async function uploadBackupFile(filePath: string, companyName: string, companyEmail: string, companyPhone: string, companyId: string) {
+
+    try {
+
+        // const file = new Blob([fileBlob], { type: 'application/x-zip' });
+        const form = new FormData();
+        form.append('upload_file', fs.createReadStream(filePath), {
+            filename: 'dlbackup.zip',
+            contentType: 'application/x-zip'
+        });
+        form.append('company_id', companyId)
+        form.append('email', companyEmail);
+        form.append('phone', companyPhone)
+        form.append('name', companyName)
+        const response = await axios.post(constants.server_url + `/api_admin/receive_file`, form)
+        return response;
+    }
+    catch (error) {
+        console.log(error)
+        logger.info({ message: `error sending email : ${error}` })
+        throw new Error(`Server error: ${error}`);
+    }
 }

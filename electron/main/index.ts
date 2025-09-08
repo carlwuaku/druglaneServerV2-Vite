@@ -60,7 +60,7 @@ contextMenu({
 
 app.whenReady().then(() => {
   mainWindow = createWindow();
-  registerIpcHandlers(mainWindow, store);
+  registerIpcHandlers(mainWindow, store, app);
   registerServerEventHandlers(mainWindow, databaseUpdateWindow);
   spawnServer();
   // app.on("activate", function () {
@@ -77,7 +77,7 @@ app.on('window-all-closed', () => {
   mainWindow = null
   logger.info({ message: "app terminated" });
 
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') { app.quit() }
 })
 
 app.on('second-instance', () => {

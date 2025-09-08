@@ -1,7 +1,7 @@
 
 import { ipcRenderer } from 'electron';
 import Header from '../components/Header';
-import { BACKUP_TIME, CREATE_BACKUP } from '@/utils/stringKeys';
+import { BACKUP_COMPLETE, BACKUP_TIME, CREATE_BACKUP } from '@/utils/stringKeys';
 import ServerState from '../components/ServerState';
 import { Link } from 'react-router-dom';
 // import { styled } from '@mui/material/styles';
@@ -12,6 +12,8 @@ import SettingItem from '../components/SettingItem';
 import { useGlobalState } from '@/global/globalProvider';
 import Grid from '@mui/material/Grid';
 import Logo from '@/components/Logo';
+import { useState } from 'react';
+import { useSnackbar } from '@/global/SnackbarContext';
 // import logo from '@/app/assets/logo.png';
 
 // const Item = styled(Paper)(({ theme }) => ({
@@ -49,51 +51,46 @@ const times = [
   { label: "11 PM", value: "23" }
 ]
 
-const Index = () => {
+export default function Index() {
 
-  // const auth = useAuthUser();
-  // const [companyName, setCompanyName] = useState("Company Name");
-  // const openPreferences = () => {
-  //   ipcRenderer.send(GET_PREFERENCES)
-  // }
-  const { settings } = useGlobalState();
+  const [loading, setLoading] = useState<boolean>(false);
+  const { settings, appVersion } = useGlobalState();
+  const snackbar = useSnackbar();
   const backupClicked = () => {
+    const handleBackupComplete = async (event: any, data: { localBackup: string | null, remoteBackup: string | null }) => {
+
+      setLoading(false);
+      console.log('backup complete', data)
+      if (data.localBackup) {
+        snackbar.showSuccess(data.localBackup);
+      }
+      else {
+        alert('Local backup failed');
+      }
+      if (data.remoteBackup) {
+        snackbar.showSuccess(data.remoteBackup);
+      }
+      else {
+        alert('Remote backup failed');
+      }
+    }
     ipcRenderer.send(CREATE_BACKUP);
+    setLoading(true);
+    ipcRenderer.on(BACKUP_COMPLETE, handleBackupComplete);
+
+    return () => {
+      ipcRenderer.removeListener(BACKUP_COMPLETE, handleBackupComplete);
+    }
   }
 
-  // const serverState = useGetServerState();
-
-  // useEffect(() => {
-  //   const handleServerUrlReceived = async (event: any, data: any) => {
-  //     let serverUrl = data.data;
-  //     console.log('index server url ', serverUrl)
-  //     //get the settings
-  //     const getSettings = await getData<any>({ url: `${serverUrl}/api_admin/settings`, token: auth()?.token });
-  //     setCompanyName(getSettings.data.company_name);
-  //     ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-  //   }
-
-  //   ipcRenderer.send(GET_SERVER_URL);
-
-  //   ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
-
-
-
-
-  // }, []);
-
-
-
-
-
   return (
-    <>
+    <div className='flex flex-col items-center h-full w-full'>
       <Header showBackArrow={false} showLogo={false}></Header>
-      <div className="w-full h-full flex flex-col items-center">
+      <div className="max-w-[800px] w-[80%] h-full flex flex-col items-center">
 
         <Logo className='self-center' />
         <h1 className="app-title">Druglane Pharmacy Management System v2</h1>
-        <p className="app-subtitle">Server Control Panel</p>
+        <p className="app-subtitle">version {appVersion}</p>
         <div className="company-info">
           <span className="license-text">Licensed to:</span>
           <span className="company-name" id="companyName">{settings?.company_name}</span>
@@ -102,7 +99,20 @@ const Index = () => {
 
           <div className="flex flex-col gap-2">
             <ServerState></ServerState>
-            <SettingItem key={BACKUP_TIME} description='Backup time' name={BACKUP_TIME} type={'select'} options={times}></SettingItem>
+            <section className="status-section">
+              <div className="status-header">
+                <h2 className="status-title">Database Backups</h2>
+                <div className="status-indicator status-online" id="serverStatus">
+                  <div className="status-dot dot-online" id="statusDot"></div>
+                  <span id="statusText">Server Running</span>
+                </div>
+              </div>
+              <div className='flex flex-col gap-2'>
+                <div>Automatic backups are done once everyday. You can turn it off (not recommended), or change the time at which backups are done.</div>
+                <SettingItem key={BACKUP_TIME} description='Backup time' name={BACKUP_TIME} type={'select'} options={times}></SettingItem>
+              </div>
+            </section>
+
 
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -110,8 +120,9 @@ const Index = () => {
               <DashboardTile
                 title={'Backup your database now'}
                 subtitle={'Create a backup file of your database'}
-                icon={<Backup sx={{ fontSize: 30 }}></Backup>}
+                icon={<img src="/assets/002-backup.png" alt="Backup" />}
                 onClick={backupClicked}
+                isLoading={loading}
               ></DashboardTile>
             </Link>
 
@@ -119,35 +130,35 @@ const Index = () => {
               <DashboardTile
                 title={'Restore data from a backup'}
                 subtitle={'Revert your database to a previous state if there\'s been an error '}
-                icon={<CloudSync sx={{ fontSize: 30 }}></CloudSync>} ></DashboardTile>
+                icon={<img src="/assets/001-sync.png" alt="Restore" />} ></DashboardTile>
             </Link>
 
             <Link to={'settings'} className="unsetAll link">
               <DashboardTile
                 title={'Edit system settings'}
                 subtitle={'Edit the phone, email, address, etc'}
-                icon={<img src="/assets/001-databases.png" alt="Logo" />} ></DashboardTile>
+                icon={<img src="/assets/007-adjust.png" alt="Settings" />} ></DashboardTile>
             </Link>
 
             <Link to={'users'} className="unsetAll link">
               <DashboardTile
                 title={'Manage system users'}
                 subtitle={'Add, edit or view users of the system'}
-                icon={<Person2Outlined sx={{ fontSize: 30 }}></Person2Outlined>} ></DashboardTile>
+                icon={<img src="/assets/012-connection-1.png" alt="Users" />} ></DashboardTile>
             </Link>
 
             <Link to={'roles'} className="unsetAll link ">
               <DashboardTile
                 title={'User Permissions'}
                 subtitle={'Set/disable permissions for user groups'}
-                icon={<LockPerson sx={{ fontSize: 30 }}></LockPerson>} ></DashboardTile>
+                icon={<img src="/assets/011-blueprint.png" alt="Permissions" />} ></DashboardTile>
             </Link>
 
             <Link to={''} className="unsetAll link">
               <DashboardTile
                 title={'Manage Automatic Reminders'}
-                subtitle={'Revert your database to a previous state if there\'s been an error '}
-                icon={<NotificationsOutlined sx={{ fontSize: 30 }}></NotificationsOutlined>} ></DashboardTile>
+                subtitle={'Add/Edit/View Automatic Reminders'}
+                icon={<img src="/assets/004-cloud.png" alt="Permissions" />} ></DashboardTile>
             </Link>
           </div>
 
@@ -155,9 +166,8 @@ const Index = () => {
         </Box>
 
       </div>
-    </>
+    </div>
 
   );
 }
 
-export default Index;

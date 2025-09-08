@@ -6,7 +6,7 @@ import { ListSubheader, ListItemButton, ListItemIcon, ListItemText, Collapse } f
 import { ipcRenderer } from "electron";
 import { DATABASE_SETUP_EVENT } from "@/utils/stringKeys";
 
-export const DatabaseSetup = () => {
+export default function DatabaseSetup() {
     //keep track of the list of events and whether it's complete or not
     const [events, setEvents] = useState<{ content: string }[]>([
         {
@@ -22,13 +22,13 @@ export const DatabaseSetup = () => {
     useEffect(() => {
         ipcRenderer.on(DATABASE_SETUP_EVENT, (event, data) => {
             setEvents(previous => [...previous, data])
-      })
-    
-      return () => {
-          ipcRenderer.removeAllListeners(DATABASE_SETUP_EVENT);
-      }
+        })
+
+        return () => {
+            ipcRenderer.removeAllListeners(DATABASE_SETUP_EVENT);
+        }
     }, [])
-    
+
     return (
         <div>
             <h1>Database Setup</h1>
@@ -55,11 +55,11 @@ export const DatabaseSetup = () => {
                 }
                 <ListItemButton>
                     <ListItemIcon>
-                        
+
                     </ListItemIcon>
                     <ListItemText primary="Sent mail" />
                 </ListItemButton>
-                
+
             </List>
         </div>
     )

@@ -18,7 +18,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { Dialog, DialogTitle } from '@mui/material';
 
-const Activate = () => {
+export default function Activate() {
   const history = useNavigate();
   //track the server url. in some cases the activation would have been done and the database created. in that case we have to check if company details have been set and password set
   const { serverUrl, serverState } = useGlobalState();
@@ -259,4 +259,3 @@ const Activate = () => {
   )
 }
 
-export default Activate

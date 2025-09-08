@@ -79,53 +79,51 @@ export default function ResetPassword() {
 
     return (
         <>
-            <Header showBackArrow={true}></Header>
-            <div className="container">
+            <Header showBackArrow={true} showLogo={true}></Header>
+            <div className="max-w-[400px] mx-auto">
                 <form onSubmit={formik.handleSubmit} >
-                    <div className="flex align-items-center justify-content-center">
-                        <div className="surface-card p-4 shadow-2 border-round w-full lg:w-6">
-                            <div className="text-center mb-5">
-                                <img src="/demo/images/blocks/logos/hyper.svg" alt="hyper" height={50} className="mb-3" />
-                                <div className="text-900 text-3xl font-medium mb-3">Reset the administrator password</div>
-                                <Alert severity="info" >
-                                    Please check your email for the reset token that was sent to you
-                                </Alert>
 
-                            </div>
+                    <div className="text-center mb-5">
+                        <div className="text-900 text-3xl font-medium mb-3">Reset the administrator password</div>
+                        <Alert severity="info" >
+                            Please check your email for the reset token that was sent to you
+                        </Alert>
 
-                            <div className='flex-column align-items-center justify-content-center' >
-                                <label htmlFor="password" className="block text-900 font-medium mb-2">Enter Password</label>
-                                <TextField id="password" type="password"
-                                    value={formik.values.password}
-                                    onChange={(e) => {
-                                        formik.setFieldValue('password', e.target.value);
-                                    }}
-
-                                />
-
-                                <label htmlFor="confirm_password" className="block text-900 font-medium mb-2">Confirm Password</label>
-                                <TextField id="confirm_password" type="confirm_password"
-                                    value={formik.values.confirm_password}
-                                    onChange={(e) => {
-                                        formik.setFieldValue('confirm_password', e.target.value);
-                                    }}
-
-                                />
-
-                                <label htmlFor="reset_token" className="block text-900 font-medium mb-2">Reset Token</label>
-                                <TextField id="reset_token" type="reset_token"
-                                    value={formik.values.reset_token}
-                                    onChange={(e) => {
-                                        formik.setFieldValue('reset_token', e.target.value);
-                                    }}
-
-                                />
-
-
-                                <Button loading={loading} className="w-full" >Submit</Button>
-                            </div>
-                        </div>
                     </div>
+
+                    <div className='flex-column gap-2 justify-center' >
+                        <label htmlFor="password" className="block text-900 font-medium mb-2">Enter Password</label>
+                        <TextField id="password" type="password"
+                            value={formik.values.password}
+                            onChange={(e) => {
+                                formik.setFieldValue('password', e.target.value);
+                            }}
+
+                        />
+
+                        <label htmlFor="confirm_password" className="block text-900 font-medium mb-2">Confirm Password</label>
+                        <TextField id="confirm_password" type="password"
+                            value={formik.values.confirm_password}
+                            onChange={(e) => {
+                                formik.setFieldValue('confirm_password', e.target.value);
+                            }}
+
+                        />
+
+                        <label htmlFor="reset_token" className="block text-900 font-medium mb-2">Reset Token</label>
+                        <TextField id="reset_token" type="reset_token"
+                            value={formik.values.reset_token}
+                            onChange={(e) => {
+                                formik.setFieldValue('reset_token', e.target.value);
+                            }}
+
+                        />
+
+
+                        <Button loading={loading} variant='contained' type='submit' className="w-full" >Submit</Button>
+                    </div>
+
+
                 </form>
             </div>
         </>

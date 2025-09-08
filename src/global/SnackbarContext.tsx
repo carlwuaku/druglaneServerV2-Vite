@@ -34,6 +34,9 @@ export const SnackbarProvider = ({ children, maxQueue, autoHideDuration: default
                 return newQueue.length > maxQueue ? newQueue.slice(-maxQueue) : newQueue;
             })
         }
+        else {
+            setSnackbar({ ...newSnackbar, open: true });
+        }
     }
 
     const hideSnackbar = (): void => {

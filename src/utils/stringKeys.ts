@@ -43,4 +43,7 @@ export const COMPANY_NOT_SET = "Company Not Set";
 export const COMPANY_SET = "Company Set";
 export const ADMIN_PASSWORD_NOT_SET = "Admin Password Not SET";
 export const APP_ACTIVATED = "App Activated";
+export const BACKUP_COMPLETE = "Backup Complete";
+export const GET_APP_VERSION = "Get App Version";
+export const APP_VERSION_RECEIVED = "App Version Received";
 

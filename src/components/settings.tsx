@@ -464,7 +464,7 @@ const Settings = ({ data, onSubmit }: { data: ISettings, onSubmit: Function }) =
                         </small>
                     </div>
 
-                    <Button type="submit" loading={loading}>Submit</Button>
+                    <Button variant='contained' type="submit" loading={loading}>Submit</Button>
                 </form>
 
                 <Notification

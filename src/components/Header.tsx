@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -17,7 +17,8 @@ import Logo from './Logo';
 import { useGlobalState } from '@/global/globalProvider';
 import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated'
 import CustomButton from './Button';
-const Header = ({ showBackArrow, showLogo }: { showBackArrow: boolean, showLogo: boolean }) => {
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+const Header = ({ showBackArrow, showLogo, showLoginButton = true }: { showBackArrow: boolean, showLogo: boolean, showLoginButton?: boolean }) => {
   const [title, setTitle] = useState("...");
   const history = useNavigate();
   useEffect(() => {
@@ -30,21 +31,25 @@ const Header = ({ showBackArrow, showLogo }: { showBackArrow: boolean, showLogo:
   const signOut = useSignOut()
   const globalContext = useGlobalState();
   const isAuthenticated = useIsAuthenticated();
-
-
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-
-
+  const auth = useAuthUser<{ token: string }>()
 
   const logout = () => {
     signOut();
     history("/login")
   }
   return (
-    <header className="header">
+    <header className="header bg-white border-b border-blue-300 w-full">
       <div className="header-top">
-        {showLogo && <div className='flex gap-1 items-center'> <Logo /> {globalContext.appName} </div>}
+        {showBackArrow ?
+          <IconButton onClick={() => { window.history.back(); }} aria-label="Go back">
+            <ArrowBackIcon />
+          </IconButton> : ''}
+
+        <Link to={'/'} className="unsetAll link "><CustomButton className='self-end' >🏠 Home</CustomButton></Link>
+        <div className="flex justify-center flex-auto">
+          {showLogo && <div className='flex gap-1 items-center self-center'> <Logo /> {globalContext.appName} </div>}
+
+        </div>
 
         {isAuthenticated ? <div className="flex gap-1">
           <div className="admin-info">
@@ -61,60 +66,12 @@ const Header = ({ showBackArrow, showLogo }: { showBackArrow: boolean, showLogo:
             Logout
           </button>
         </div> :
-          <CustomButton className='self-end' >🔐 Login as the administrator</CustomButton>
+          <>{showLoginButton && <Link to={'login'} className="unsetAll link "><CustomButton className='self-end' >🔐 Login as the administrator</CustomButton></Link>}</>
         }
 
       </div>
 
     </header>
-    // <AppBar classNameName='margin-bottom-10' position="static">
-    //   <Container maxWidth="xl">
-    //     <Toolbar disableGutters>
-    //       {props.showBackArrow ?
-    //         <IconButton onClick={() => { window.history.back(); }} aria-label="delete">
-    //           <ArrowBackIcon />
-    //         </IconButton> : ''}
-    //       <div classNameName='flex gap-1'>
-    //         <LocalImage classNameName='header-logo' height='35px' image='LogoShadowWhiteOutline' />
-    //         <Typography
-    //           variant="h6"
-    //           noWrap
-    //           component="a"
-    //           href="/"
-    //           sx={{
-    //             mr: 2,
-    //             display: { xs: 'flex', md: 'flex' },
-    //             fontWeight: 700,
-    //             letterSpacing: '.3rem',
-    //             color: 'inherit',
-    //             textDecoration: 'none',
-    //           }}
-    //         >
-    //           Druglane 2.0
-    //         </Typography>
-    //       </div>
-
-    //       <Box sx={{ flexGrow: 1, display: 'flex' }}></Box>
-    //       <Button
-    //         variant='outlined'
-    //         href='/'
-    //         sx={{ color: 'white' }}
-    //         startIcon={<Home />}
-    //       >
-    //         Home/Menu
-    //       </Button>
-    //       <Button
-    //         sx={{ color: 'white' }}
-    //         onClick={logout}
-    //         endIcon={<Logout />}
-    //       >
-    //         Logout
-    //       </Button>
-
-
-    //     </Toolbar>
-    //   </Container>
-    // </AppBar>
   )
 }
 

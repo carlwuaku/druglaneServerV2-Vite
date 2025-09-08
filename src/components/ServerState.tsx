@@ -8,6 +8,7 @@ import Hub from '@mui/icons-material/Hub';
 import { Link, useNavigate } from "react-router-dom";
 import { useGlobalState } from "@/global/globalProvider";
 import { Info } from "@mui/icons-material";
+import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 
 const ServerState = () => {
     const appData = useGlobalState();
@@ -23,6 +24,7 @@ const ServerState = () => {
         ipcRenderer.send(RESTART_SERVER);
     };
 
+    const { copyToClipboard } = useCopyToClipboard();
 
     // useEffect(() => {
     //     const handleServerStateReceived = (event: any, data: any) => {
@@ -67,11 +69,7 @@ const ServerState = () => {
                         </div>
                     </div>
                     <p >Your server is currently operational and ready to handle client connections.</p>
-                    <div className="flex gap-2.5 text-[0.9rem] text-[#4a5568]" >
-                        <span><strong>Port:</strong> 3000</span>
-                        <span><strong>Uptime:</strong> 2h 34m</span>
-                        <span><strong>Connections:</strong> 12 active</span>
-                    </div>
+
                 </section>
                 <section className="client-section">
                     <h2 className="client-title">
@@ -85,11 +83,16 @@ const ServerState = () => {
                     </p>
                     <div className="url-display">
                         <span>{`${appData.serverUrl}/client`}</span>
-                        <button className="copy-btn" >Copy</button>
+                        <div className="flex gap-1">
+                            <Button variant="contained" onClick={() => copyToClipboard(`${appData.serverUrl}/client`)} >Copy</Button>
+                            <Link to={`${appData.serverUrl}/client`} target="_blank">
+                                <Button color="secondary" variant="contained"  >
+                                    🚀 Open in Browser
+                                </Button></Link>
+                        </div>
+
                     </div>
-                    <button className="open-browser-btn" >
-                        🚀 Open in Browser
-                    </button>
+
                     <Alert severity="info" className="font-bold"> The device must be connected to the same network as the server.</Alert>
                 </section>
                 {/* <CardHeader

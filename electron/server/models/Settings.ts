@@ -6,25 +6,25 @@ import { Table, Model, Column, Index, DataType } from "sequelize-typescript";
   paranoid: true,
   createdAt: false,
 })
-export class Settings extends Model{
+export class Settings extends Model {
   @Index
   @Column({
     allowNull: false,
     unique: true,
     type: DataType.STRING
   })
-  name!: string;
+  declare name: string;
 
   @Column({
     type: DataType.STRING
   })
-  value!: string;
+  declare value: string;
 
   @Column({
     allowNull: false,
     type: DataType.STRING
   })
-  module!: string;
+  declare module: string;
 
 
 }

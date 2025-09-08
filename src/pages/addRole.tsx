@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useFormik, FormikErrors, } from 'formik';
 
-import { getData, postData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
 import { getPermissionsResponse, saveRoleResponse, saveSettingsResponse } from '../models/axiosResponse';
@@ -11,20 +10,21 @@ import { Permissions } from '../models/permissions';
 import Loading from '../components/Loading';
 import { useNavigate, useParams } from 'react-router-dom';
 import { IRoles } from '../models/roles';
-import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 import { useSnackbar } from '@/global/SnackbarContext';
+import useApiClient from '@/hooks/useApiClient';
+import { useGlobalState } from '@/global/globalProvider';
 
-const AddRole = () => {
-    const auth = useAuthUser<{ token: string }>();
+export default function AddRole() {
     const history = useNavigate();
     const [loading, setLoading] = useState(false)
-    const serverUrl = useRef("");
     const [permissions, setPermissions] = useState<Permissions[]>([])
     const selectedPermissions = useRef<string[]>([]);
     const [loadingPermissions, setLoadingPermissions] = useState<boolean>(false)
     const { id } = useParams();
     const [rolePermissions, setRolePermissions] = useState<Permissions[]>([])
     const [loadedExistingRole, setLoadedExistingRole] = useState<boolean>(false);
+    const apiClient = useApiClient();
+    const globalState = useGlobalState();
 
     const onPermissionChange = (e: any) => {
         const id = e.target.value
@@ -73,9 +73,9 @@ const AddRole = () => {
             //validate and emit data to parent
             try {
                 setLoading(true);
-                let response = await postData<saveRoleResponse>({
-                    url: `${serverUrl.current}/api_admin/saveRole`,
-                    formData: data, token: auth?.token
+                let response = await apiClient.post<saveRoleResponse>({
+                    url: `${globalState.serverUrl}/api_admin/saveRole`,
+                    formData: data
                 });
                 showSuccess('Role added successfully');
                 setLoading(false);
@@ -91,33 +91,14 @@ const AddRole = () => {
 
     useEffect(() => {
 
-        const handleServerUrlReceived = async (event: any, data: any) => {
-            serverUrl.current = data.data;
-            try {
-                setLoadingPermissions(true);
-                let response = await getData<Permissions[]>({ url: `${data.data}/api_admin/allPermissions`, token: auth?.token });
-                setPermissions(response.data)
-                setLoadingPermissions(false);
-            } catch (error) {
-                showError(`error occurred getting permissions: ${error}`);
-                setLoadingPermissions(false);
-            }
-            if (id) {
-                loadExistingRole();
-            }
-            else {
-                setLoadedExistingRole(true)
-            }
-        };
-
-        ipcRenderer.send(GET_SERVER_URL);
-
-        ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived)
-
-        return () => {
-            ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        };
-    }, [id, serverUrl]);
+        loadPermissions();
+        if (id) {
+            loadExistingRole();
+        }
+        else {
+            setLoadedExistingRole(true)
+        }
+    }, [id]);
 
 
 
@@ -130,10 +111,22 @@ const AddRole = () => {
         snackbar.showError(message);
     }
 
+    const loadPermissions = async () => {
+        try {
+            setLoadingPermissions(true);
+            let response = await apiClient.get<Permissions[]>({ url: `${globalState.serverUrl}/api_admin/allPermissions` });
+            setPermissions(response.data)
+            setLoadingPermissions(false);
+        } catch (error) {
+            showError(`error occurred getting permissions: ${error}`);
+            setLoadingPermissions(false);
+        }
+    }
+
     const loadExistingRole = async () => {
         try {
             setLoadedExistingRole(false)
-            let response = await getData<IRoles>({ url: `${serverUrl.current}/api_admin/role/${id}`, token: auth?.token });
+            let response = await apiClient.get<IRoles>({ url: `${globalState.serverUrl}/api_admin/role/${id}` });
             formik.setValues(response.data);
             setRolePermissions(response.data.Permissions)
             let _selectedPermissions: string[] = [];
@@ -154,71 +147,69 @@ const AddRole = () => {
 
     return (
         <>
-            <Header showBackArrow={true}></Header>
-            <div className="container">
+            <Header showBackArrow={true} showLogo={true}></Header>
+            <div className="page-container">
                 <h4 className="pageTitle">Add a New Role</h4>
                 <form onSubmit={formik.handleSubmit} >
-                    <Card>
-                        <CardContent>
-                            <div className="flex flex-column gap-3 justify-content-center centeredField">
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="location">Name of Role</label>
-                                    <TextField id="role_name"
-                                        aria-describedby="role_name-help"
-                                        value={formik.values.role_name}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('role_name', e.target.value);
-                                        }}
 
-                                    />
-                                    <small id="role_name-help">
-                                        E.g. Accountants, or Cashiers, or Managers
-                                    </small>
-                                    {(formik.touched.role_name && formik.errors.role_name) ? < small className="p-error">{formik.errors.role_name}</small> : <small className="p-error">&nbsp;</small>}
-                                </div>
+                    <div className="flex flex-column gap-3 justify-content-center centeredField">
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="location">Name of Role</label>
+                            <TextField id="role_name"
+                                aria-describedby="role_name-help"
+                                value={formik.values.role_name}
+                                onChange={(e) => {
+                                    formik.setFieldValue('role_name', e.target.value);
+                                }}
 
-
-                                <div className="flex flex-column gap-2 ">
-                                    <label htmlFor="location">Description</label>
-                                    <TextField id="description"
-                                        aria-describedby="description-help"
-                                        value={formik.values.description}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('description', e.target.value);
-                                        }}
-
-                                    />
-                                    <small id="description-help">
-                                        Short description of the role
-                                    </small>
-                                    {(formik.touched.description && formik.errors.description) ? < small className="p-error">{formik.errors.description}</small> : <small className="p-error">&nbsp;</small>}
-
-                                </div>
-                                <div>
-                                    {!loadingPermissions && loadedExistingRole ? permissions.map((permission) => {
-                                        return (
-                                            <div key={permission.permission_id} className="flex align-items-center">
-                                                <label htmlFor={permission.permission_id} className="ml-2">
-                                                    <Checkbox
-                                                        name={`'${permission.permission_id}'`}
-                                                        value={permission.permission_id}
-                                                        onChange={onPermissionChange}
-
-                                                        defaultChecked={rolePermissions.some((rp) => rp.permission_id === permission.permission_id)}
-                                                    />
-                                                    {permission.name}</label>
-                                            </div>
-                                        );
-                                    }) : <Loading></Loading>}
-                                </div>
+                            />
+                            <small id="role_name-help">
+                                E.g. Accountants, or Cashiers, or Managers
+                            </small>
+                            {(formik.touched.role_name && formik.errors.role_name) ? < small className="p-error">{formik.errors.role_name}</small> : <small className="p-error">&nbsp;</small>}
+                        </div>
 
 
+                        <div className="flex flex-column gap-2 ">
+                            <label htmlFor="location">Description</label>
+                            <TextField id="description"
+                                aria-describedby="description-help"
+                                value={formik.values.description}
+                                onChange={(e) => {
+                                    formik.setFieldValue('description', e.target.value);
+                                }}
 
-                                <Button type='submit' loading={loading} >Submit</Button>
+                            />
+                            <small id="description-help">
+                                Short description of the role
+                            </small>
+                            {(formik.touched.description && formik.errors.description) ? < small className="p-error">{formik.errors.description}</small> : <small className="p-error">&nbsp;</small>}
 
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div>
+                            {!loadingPermissions && loadedExistingRole ? permissions.map((permission) => {
+                                return (
+                                    <div key={permission.permission_id} className="flex align-items-center">
+                                        <label htmlFor={permission.permission_id} className="ml-2">
+                                            <Checkbox
+                                                name={`'${permission.permission_id}'`}
+                                                value={permission.permission_id}
+                                                onChange={onPermissionChange}
+
+                                                defaultChecked={rolePermissions.some((rp) => rp.permission_id === permission.permission_id)}
+                                            />
+                                            {permission.name}</label>
+                                    </div>
+                                );
+                            }) : <Loading></Loading>}
+                        </div>
+
+
+
+                        <Button variant='contained' type='submit' loading={loading} >Submit</Button>
+
+                    </div>
+
 
 
                 </form>
@@ -230,5 +221,4 @@ const AddRole = () => {
     )
 }
 
-export default AddRole
 

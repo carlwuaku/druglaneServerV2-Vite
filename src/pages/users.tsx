@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import LoadDataList from '../components/LoadDataList';
 
 const Users = () => {
-    const url= "api_admin/getUsers";
+    const url = "api_admin/getUsers";
     const [timestamp, setTimestamp] = useState("")
     const tableColumns = [
         { headerName: "Full Name", field: "display_name", flex: 1 },
@@ -19,27 +19,27 @@ const Users = () => {
     const onSelectionChanged = (data: any[]) => {
         console.log("parent received", data)
     }
-  return (
-      <>
-          <Header showBackArrow={true}></Header>
+    return (
+        <>
+            <Header showLogo={true} showBackArrow={true}></Header>
 
-          <div className='container'>
-              <h4 className="pageTitle">Manage Users</h4>
-              <Button component={Link} to="/addUser" variant='contained'> <Add></Add> Add a new User</Button>
+            <div className='page-container'>
+                <h4 className="pageTitle">Manage Users</h4>
+                <Button className='self-start' component={Link} to="/addUser" variant='contained'> <Add></Add> Add a new User</Button>
 
-              <LoadDataList
-                  url={url}
-                  timestamp={timestamp}
-                  tableColumns={tableColumns}
-                  uniqueField="id" 
-                  onSelectionChanged={onSelectionChanged}
-                  nameField="display_name"
-                  deleteUrl='api_admin/user'
-                  editUrl='addUser'
-              ></LoadDataList>
-          </div>
-      </>
-  )
+                <LoadDataList
+                    url={url}
+                    timestamp={timestamp}
+                    tableColumns={tableColumns}
+                    uniqueField="id"
+                    onSelectionChanged={onSelectionChanged}
+                    nameField="display_name"
+                    deleteUrl='api_admin/user'
+                    editUrl='addUser'
+                ></LoadDataList>
+            </div>
+        </>
+    )
 }
 
 export default Users

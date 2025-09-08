@@ -10,6 +10,7 @@ import LocalImage from '../components/Image';
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
 import { Button, Snackbar, TextField } from '@mui/material';
 import { useSnackbar } from '@/global/SnackbarContext';
+import { AxiosError } from 'axios';
 export default function Login() {
     const [loading, setLoading] = useState(false)
     const serverUrl = useRef("");
@@ -37,21 +38,23 @@ export default function Login() {
                     url: `${serverUrl.current}/api_admin/admin_login`,
                     formData: data, token: undefined
                 });
+                if (!res.data) {
+                    throw new Error("Error logging in. Please try again")
+                }
                 if (signIn(
                     {
                         auth: {
                             token: res.data,
                             type: 'Bearer'
                         },
-                        refresh: 'ey....mA',
                         userState: {
-                            name: 'React User',
-                            uid: 123456
+                            name: 'admin'
                         }
                     }
                 )) {
                     snackbar.showSuccess('Logged in successfully')
                     setLoading(false);
+                    localStorage.setItem('token', res.data);
                     history('/');
                 } else {
                     throw new Error("Error signing in. Please try again")
@@ -59,8 +62,9 @@ export default function Login() {
 
 
                 //go back to home
-            } catch (error) {
-                snackbar.showError(`Error occurred: ${error}`)
+            } catch (error: any) {
+                console.error(error)
+                snackbar.showError(`Error occurred: ${error.response.data.message || error.message}`)
                 setLoading(false);
             }
         }
@@ -106,14 +110,13 @@ export default function Login() {
 
     return (
         <>
-            <Header showBackArrow={true}></Header>
-            <div className="container">
+            <Header showBackArrow={true} showLogo={true}></Header>
+            <div className="max-w-[400px] mx-auto">
                 <form onSubmit={formik.handleSubmit} >
                     <div className="flex-column align-items-center justify-content-center">
-                        <div className=" w-full lg:w-6">
+                        <div className=" w-full">
                             <div className="text-center mb-5">
-                                <LocalImage image='Logo' height={"75px"} className="mb-3" />
-                                <div className="text-900 text-3xl font-medium mb-3">Log in as the administrator</div>
+                                <div className="text-900 text-3xl font-medium mb-3">Login as the administrator</div>
                             </div>
 
                             <div className='flex-column align-items-center justify-content-center' >
@@ -130,9 +133,9 @@ export default function Login() {
 
                                 <div className="flex align-items-center justify-content-between mb-6">
 
-                                    <a onClick={resetPassword} className="font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer">Forgot your password?</a>
+                                    <a onClick={resetPassword} className="font-medium no-underline ml-2 text-white text-right cursor-pointer">Forgot your password?</a>
                                 </div>
-                                <Button loading={loading} variant="contained" >Sign In</Button>
+                                <Button type="submit" loading={loading} variant="contained" >Sign In</Button>
                             </div>
                         </div>
                     </div>

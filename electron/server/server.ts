@@ -21,7 +21,7 @@ import Store from "electron-store";
 import bodyParser from 'body-parser';
 import path from 'path';
 import { constants } from '../utils/constants';
-const store = new Store();
+const store = new Store<Record<string, any>>();
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

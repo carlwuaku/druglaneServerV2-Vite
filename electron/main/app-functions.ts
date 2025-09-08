@@ -5,7 +5,6 @@ import path from 'node:path'
 import { update } from './update'
 import { isAppActivated } from "../appValidation";
 import { logger } from "../../src/config/logger";
-// import { constants } from "../electronConstants";
 import serverEventEmitter from "../server/utils/ServerEvents";
 import {
     APP_NOT_ACTIVATED, DATABASE_SETUP_EVENT,

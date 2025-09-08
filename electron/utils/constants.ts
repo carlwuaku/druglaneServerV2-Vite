@@ -37,6 +37,7 @@ export const constants = {
    db_filename: databaseName,
    internal_backups_path: path.join(settings_location, 'backups'),
    backup_temp_location: path.join(settings_location, 'backupRestoreTemp'),
+   backup_temp_create_location: path.join(settings_location, 'backupRestoreTempCreate'),
    company_id: '',
    default_functional_groups: [
       "Adult Analgesics Tablets",

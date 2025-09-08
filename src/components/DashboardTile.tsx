@@ -6,8 +6,9 @@ import CardActions from '@mui/material/CardActions';
 import Collapse from '@mui/material/Collapse';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Loading from './Loading';
 interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
+    expand: boolean;
 }
 
 const ExpandMore = styled((props: ExpandMoreProps) => {
@@ -26,7 +27,8 @@ const DashboardTile = (props: {
     subtitle: string,
     icon: ReactNode,
     expandContent?: ReactNode,
-    onClick?: () => void
+    onClick?: () => void,
+    isLoading?: boolean
 }) => {
     const [expanded, setExpanded] = React.useState(false);
 
@@ -34,51 +36,53 @@ const DashboardTile = (props: {
         setExpanded(!expanded);
     };
 
-  return (
-      <Card className='expandOnHover' onClick={() => props.onClick ? props.onClick() : ''}>
-          
-          
-          <CardContent>
-              
-              
-              <div className="dashboardContainer">
-                  <div className="dashboardIconContainer">
-                      <div className="dashboardIcon">{props.icon} </div>
-                  </div>
-                  <div className="">
-                      <p className="dashboardHeader">
-                          {props.title}
-                      </p>
-                      <p className="dashboardDescription">{props.subtitle}</p>
-                  </div>
-              </div>
-              
+    return (
+        <Card className='expandOnHover' onClick={() => props.onClick ? props.onClick() : ''}>
 
-          </CardContent>
-          
-              { props.expandContent ? 
-              <>
-                  <CardActions >
-                  <ExpandMore
-                  expand={expanded}
-                  onClick={handleExpandClick}
-                  aria-expanded={expanded}
-                  aria-label="show more"
-              >
-                  <ExpandMoreIcon />
-              </ExpandMore>
-              </CardActions>
-              <Collapse in={expanded} timeout="auto" unmountOnExit>
-              {props.expandContent}
-                  </Collapse>
-              </>
-              : ''
-              }
-              
-          
-          
-      </Card>
-  )
+
+            <CardContent>
+
+
+                <div className="dashboardContainer">
+                    <div className="dashboardIconContainer">
+                        <div className="dashboardIcon">{props.icon} </div>
+                    </div>
+                    {props.isLoading && <Loading />}
+
+                    <div className="">
+                        <p className="dashboardHeader">
+                            {props.title}
+                        </p>
+                        <p className="dashboardDescription">{props.subtitle}</p>
+                    </div>
+                </div>
+
+
+            </CardContent>
+
+            {props.expandContent ?
+                <>
+                    <CardActions >
+                        <ExpandMore
+                            expand={expanded}
+                            onClick={handleExpandClick}
+                            aria-expanded={expanded}
+                            aria-label="show more"
+                        >
+                            <ExpandMoreIcon />
+                        </ExpandMore>
+                    </CardActions>
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                        {props.expandContent}
+                    </Collapse>
+                </>
+                : ''
+            }
+
+
+
+        </Card>
+    )
 }
 
 export default DashboardTile

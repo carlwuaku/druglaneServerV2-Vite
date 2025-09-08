@@ -1,8 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import IconButton from '@mui/material/IconButton';
-import { deleteData, getData, postData } from '@/utils/network';
-import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
-import { ipcRenderer } from 'electron';
 import { Backdrop, Button, Card, CardContent, Checkbox, CircularProgress } from '@mui/material';
 import Loading from '../components/Loading';
 import Delete from '@mui/icons-material/Delete';
@@ -14,9 +11,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Link } from 'react-router-dom';
-import GlobalContext from '../global/global';
-import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 import { useSnackbar } from '@/global/SnackbarContext';
+import { useGlobalState } from '@/global/globalProvider';
+import useApiClient from '@/hooks/useApiClient';
 
 const LoadDataList = (props: {
     timestamp: string, url: string,
@@ -35,9 +32,8 @@ const LoadDataList = (props: {
     editUrl: string,
     deleteUrl: string
 }) => {
-    const auth = useAuthUser<{ token: string }>();
+    // const auth = useAuthUser<{ token: string }>();
     const objects = useRef<any[]>([]);
-    const serverUrl = useRef<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedData, setSelectedData] = useState<any[]>([]);
     const [tableColumns, setTableColumns] = useState(props.tableColumns);
@@ -47,37 +43,19 @@ const LoadDataList = (props: {
     const showOverlayLoading = useRef<boolean>(false)
     const deleteId = useRef<string>("")
     const snackbar = useSnackbar();
-    const appData = useContext(GlobalContext)
+    const appData = useGlobalState();
+    const apiClient = useApiClient();
     const handleClose = () => {
         setOpenDialog(false);
         deleteId.current = "";
     };
 
-    useEffect(() => {
-        ipcRenderer.send(GET_SERVER_URL);
-
-
-
-
-        const handleServerUrlReceived = async (event: any, data: any) => {
-            console.log(SERVER_URL_RECEIVED, data.data)
-            serverUrl.current = data.data;
-            loadData();
-        }
-
-        ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
-
-        return () => {
-            ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        };
-
-    }, [])
 
     //every time the timestamp changes, refresh the data
     useEffect(() => {
 
 
-
+        loadData();
 
         setTableColumns((currentVal) => {
             return [...props.tableColumns, {
@@ -104,7 +82,7 @@ const LoadDataList = (props: {
     const loadData = async () => {
         try {
             setLoading(true);
-            let response = await getData<any[]>({ url: `${serverUrl.current}/${props.url}`, token: auth?.token });
+            let response = await apiClient.get<any[]>({ url: `${appData.serverUrl}/${props.url}` });
 
             objects.current = response.data;
             setLoading(false);
@@ -148,9 +126,8 @@ const LoadDataList = (props: {
         try {
 
             showOverlayLoading.current = true;
-            await deleteData<any[]>({
-                url: `${serverUrl.current}/${props.deleteUrl}/${deleteId.current}`,
-                token: auth?.token
+            await apiClient.delete<any[]>({
+                url: `${appData.serverUrl}/${props.deleteUrl}/${deleteId.current}`
             });
             showOverlayLoading.current = false;
             showSuccess(`Deleted successfully!`);

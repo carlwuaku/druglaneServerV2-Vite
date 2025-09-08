@@ -37,9 +37,8 @@ import { constants } from "./constants";
 
 // }
 
-export async function getData<T>(data: { url: string, params?: Map<string, any>, token?: string | undefined }): Promise<AxiosResponse<T>> {
+export async function getData<T>(data: { url: string, params?: Map<string, any>, token?: string | undefined | null }): Promise<AxiosResponse<T>> {
     try {
-        console.log('token', data.token)
         if (data.params) {
             let urlParams: string[] = [];
             data.params.forEach((value, key) => {
@@ -60,12 +59,12 @@ export async function getData<T>(data: { url: string, params?: Map<string, any>,
         logger.info({ message: `response received: ${JSON.stringify(response.data)}` })
         return response
     } catch (error) {
-        logger.info({ message: `error in receiving : ${error}` })
-        throw new Error(`Server error: ${error}`);
+        logger.error({ message: `error in receiving : ${error}` })
+        throw error;
     }
 }
 
-export async function postData<T>(data: { url: string, formData: any, token: string | undefined }): Promise<AxiosResponse<T>> {
+export async function postData<T>(data: { url: string, formData: any, token?: string }): Promise<AxiosResponse<T>> {
     try {
         logger.info({ message: `call made to ${data.url}. data: ${JSON.stringify(data.formData)}` });
         const response = await axios.post(data.url, data.formData, {
@@ -75,12 +74,12 @@ export async function postData<T>(data: { url: string, formData: any, token: str
 
         return response
     } catch (error) {
-        logger.info({ message: `error in receiving : ${error}` })
-        throw new Error(`Server error: ${error}`);
+        logger.error({ message: `error in receiving : ${error}` })
+        throw error;
     }
 }
 
-export async function deleteData<T>(data: { url: string, token: string | undefined }): Promise<AxiosResponse<T>> {
+export async function deleteData<T>(data: { url: string, token?: string }): Promise<AxiosResponse<T>> {
     try {
         logger.info({ message: `call made to ${data.url}` });
         const response = await axios.delete(data.url, {
@@ -90,8 +89,8 @@ export async function deleteData<T>(data: { url: string, token: string | undefin
 
         return response
     } catch (error) {
-        logger.info({ message: `error in receiving : ${error}` })
-        throw new Error(`Server error: ${error}`);
+        logger.error({ message: `error in receiving : ${error}` })
+        throw error;
     }
 }
 
@@ -109,16 +108,17 @@ export async function sendEmail(message: string, recipient: string, subject: str
     }
     catch (error) {
         logger.info({ message: `error sending email : ${error}` })
-        throw new Error(`Server error: ${error}`);
+        throw error;
 
     };
 }
 
-export function getAuthHeaders(token?: string): AxiosRequestConfig['headers'] {
+export function getAuthHeaders(token?: string | null): AxiosRequestConfig['headers'] {
 
     const header: AxiosRequestConfig['headers'] = {
-        'token': token,
+        'Authorization': token,
         'Content-Type': 'application/json'
     };
     return header
 }
+

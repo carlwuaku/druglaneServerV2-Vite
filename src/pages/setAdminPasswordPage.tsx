@@ -3,22 +3,20 @@ import Header from '../components/Header';
 
 import SetAdminPassword from '../components/SetAdminPassword';
 import { useNavigate } from 'react-router-dom';
-const setAdminPassword = () => {
+export default function setAdminPassword() {
   const history = useNavigate();
 
-    const [isLoaded, setIsLoaded] = useState(false);
   const formSubmitted = () => {
-      history('/')
-    }
+    history('/')
+  }
   return (
     <>
-      <Header></Header>
-      <div className='container'>
+      <Header showBackArrow={false} showLogo={true}></Header>
+      <div className='page-container'>
         <SetAdminPassword onSubmit={formSubmitted} ></SetAdminPassword>
       </div>
     </>
-    
+
   )
 }
 
-export default setAdminPassword

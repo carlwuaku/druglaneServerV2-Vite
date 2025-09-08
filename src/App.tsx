@@ -15,18 +15,26 @@ import Users from "./pages/users";
 import AddUser from "./pages/addUser";
 import Login from "./pages/login";
 import ResetPassword from "./pages/resetPassword";
-import { DatabaseSetup } from "./pages/databaseSetup";
+import DatabaseSetup from "./pages/databaseSetup";
 import { useGlobalState } from './global/globalProvider';
 import { APP_NOT_ACTIVATED, CHECKING_ACTIVATION, LOADING, UPDATING_DATABASE } from './utils/stringKeys';
-import { DatabaseMigration } from './pages/databaseMigration';
+import DatabaseMigration from './pages/databaseMigration';
 import Loading from './components/Loading';
+import { ErrorBoundary } from "react-error-boundary";
 
 import RequireAuth from '@auth-kit/react-router/RequireAuth';
 import { SnackbarProvider } from './global/SnackbarContext';
+import { ErrorInfo } from 'react';
+import ErrorPage from './pages/errorPage';
+
+
 
 function App() {
   const globalState = useGlobalState();
-  console.log("Global State", globalState);
+  const logError = (error: Error, info: ErrorInfo) => {
+    // Do something with the error, e.g. log to an external API
+  };
+
 
   //if globalState.settings is
   if (globalState.serverState === LOADING || globalState.dbState === UPDATING_DATABASE || globalState.serverState === CHECKING_ACTIVATION) {
@@ -44,7 +52,7 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary FallbackComponent={ErrorPage} onReset={() => { }} onError={logError}>
       <CssBaseline />
       <SnackbarProvider maxQueue={10} autoHideDuration={5000}>
 
@@ -67,7 +75,7 @@ function App() {
         </Routes>
       </SnackbarProvider>
       {/* <UpdateElectron /> */}
-    </>
+    </ErrorBoundary>
 
   )
 }

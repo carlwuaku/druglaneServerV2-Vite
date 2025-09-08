@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import LoadDataList from '../components/LoadDataList';
 
-const Roles = () => {
+export default function Roles() {
     const url = "api_admin/getRoles";
     const [timestamp, setTimestamp] = useState("")
     const onSelectionChanged = (data: any[]) => {
@@ -23,23 +23,23 @@ const Roles = () => {
             flex: 1
         }
     ]
-    
 
-    const deleteButton = <Button onClick={() => {}}>click me</Button>
+
+    const deleteButton = <Button onClick={() => { }}>click me</Button>
 
     return (
         <>
-            <Header showBackArrow={true}></Header>
+            <Header showBackArrow={true} showLogo={true}></Header>
 
-            <div className='container'>
+            <div className='page-container'>
                 <h4 className="pageTitle">Manage Roles</h4>
-                <Button component={Link} to="/addRole" variant='contained'> <Add></Add> Add a new Role</Button>
+                <Button className='self-start' component={Link} to="/addRole" variant='contained'> <Add></Add> Add a new Role</Button>
 
                 <LoadDataList
                     url={url}
-                    timestamp={timestamp} 
+                    timestamp={timestamp}
                     tableColumns={tableColumns}
-                    uniqueField="role_id" 
+                    uniqueField="role_id"
                     onSelectionChanged={onSelectionChanged}
                     nameField="role_name"
                     deleteUrl='api_admin/role'
@@ -50,4 +50,3 @@ const Roles = () => {
     )
 }
 
-export default Roles

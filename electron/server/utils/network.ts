@@ -67,13 +67,11 @@ export async function deleteData<T>(url: string): Promise<AxiosResponse<T>> {
 export async function sendEmail(message: string, recipient: string, subject: string) {
 
     try {
-        const FormData = require('form-data');
-
         const form = new FormData();
         form.append('mails', recipient);
         form.append('message', message);
         form.append('subject', subject);
-        const response = await axios.post(constants.server_url + `/api_admin/sendBulkMail`, form, { headers: form.getHeaders() })
+        const response = await axios.post(constants.server_url + `/api_admin/sendBulkMail`, form)
         return response;
     }
     catch (error) {
@@ -83,3 +81,4 @@ export async function sendEmail(message: string, recipient: string, subject: str
 
     };
 }
+

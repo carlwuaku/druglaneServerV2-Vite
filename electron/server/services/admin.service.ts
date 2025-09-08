@@ -24,6 +24,8 @@ import { sendEmail } from '../utils/network'
 import { isAdminPasswordSet, isAppActivated, isCompanySet } from '../config/appValidation';
 import { ADMIN_PASSWORD_NOT_SET, APP_ACTIVATED, APP_NOT_ACTIVATED, COMPANY_NOT_SET } from '../../utils/stringKeys';
 import { ActivationStateType } from '../types/activationStateType';
+import jwt from 'jsonwebtoken';
+import { getJWTSecret } from '../utils/auth';
 
 // const path = require('path')
 
@@ -129,13 +131,13 @@ export async function login_function(data: { username: any; password: any; }): P
 export async function server_admin_login_function(data: { password: string; }): Promise<string> {
     let password = data.password;
     try {
-
         let settings = await Settings.findOne({
             where: {
                 name: "admin_password",
             }
         });
         let password_valid: boolean = false;
+
         if (settings && settings.value) {
             //username was found. compare the password
             password_valid = bcrypt.compareSync(password, settings.value);
@@ -143,29 +145,44 @@ export async function server_admin_login_function(data: { password: string; }): 
 
         if (!password_valid) {
             throw errorMessages.PASSWORD_INCORRECT
-
         }
         //user is valid
 
+        // Generate JWT token instead of hash
+        const payload = {
+            userId: 'admin', // or a unique admin ID
+            username: 'administrator',
+            role: 'admin',
+            type: 'admin_login',
+            iat: Math.floor(Date.now() / 1000), // issued at
+            exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // expires in 24 hours
+        };
+
+        // Make sure you have JWT_SECRET in your environment variables
+        const jwtSecret = getJWTSecret();
+
+        if (!jwtSecret) {
+            throw new Error('JWT_SECRET is not configured');
+        }
+
+        const token = jwt.sign(payload, jwtSecret);
+
+        // Optional: Store token info in database for tracking/invalidation
         const now = new Date();
-        const hash = bcrypt.hashSync(configKeys.ADMIN_PASSWORD_SALT + now, 10);
-
-        await Settings.update({
-            value: hash
-        }, {
-            where: {
-                name: 'admin_password_token'
-            }
-        })
-
+        await Settings.upsert({
+            name: 'admin_login_token',
+            value: token.substring(-20), // Store last 20 chars for reference
+            module: 'System'
+        });
 
         Activities.create({
             activity: ` server admin ${infoMessages.LOGGED_IN}`,
-            user_id: '',
+            user_id: 'admin',
             module: 'System'
-        })
+        });
 
-        return hash;
+        return token;
+
     } catch (error: any) {
         //if the error is "user not found", rethrow it. else if it's some other error, log it
         if (error instanceof Error) {
@@ -177,14 +194,9 @@ export async function server_admin_login_function(data: { password: string; }): 
 
             logger.error({ message: serializedError });
             throw error;
-
-        }
-        else {
+        } else {
             throw error;
-
         }
-
-
     }
 }
 
@@ -243,7 +255,6 @@ export async function getSettings(_data?: { settings: string[] }): Promise<Setti
                 raw: true
             }
         );
-        console.log(data)
         let returnData: any = {};
         data.forEach(setting => {
             returnData[setting.name] = setting.value;
@@ -564,23 +575,33 @@ export async function save_user_function(_data: { [key: string]: any }): Promise
         }
         //update. else insert
         let password = _data.password;
+        const userData: Record<string, any> = {
+            username: _data.username,
+            phone: _data.phone,
+            email: _data.email,
+            display_name: _data.display_name,
+            role_id: _data.role_id,
+            active: _data.active
+        };
         //console.log(password)
         if (!id || updatePassword === "yes") {
             if (password !== undefined && password !== null && password != "undefined") {
                 let hash = bcrypt.hashSync(password, 10);
                 // console.log(hash)
-                _data.password_hash = `${hash}`;
+                userData.password_hash = `${hash}`;
             }
         }
+        else {
+            delete userData.password_hash;
+        }
 
-        else {
-            delete _data.password_hash;
-        }
+        logger.info({ message: JSON.stringify(userData) })
+
         if (!user) {
-            user = await Users.create(_data)
+            user = await Users.create(userData)
         }
         else {
-            await user.update(_data)
+            await user.update(userData)
         }
 
         Activities.create({
@@ -596,11 +617,6 @@ export async function save_user_function(_data: { [key: string]: any }): Promise
         logger.error({ message: error })
         throw new Error(`Error: ${error}`)
     }
-
-
-
-
-
 };
 
 

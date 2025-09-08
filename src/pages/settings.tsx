@@ -1,15 +1,13 @@
-import { getData } from '@/utils/network';
 import { GET_SERVER_URL, SERVER_URL_RECEIVED } from '@/utils/stringKeys';
 import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Loading from '../components/Loading';
 import Settings from '../components/settings'
-import { useAuthUser } from 'react-auth-kit'
+import useApiClient from '@/hooks/useApiClient';
 const SettingsPage = () => {
-    const auth = useAuthUser();
     const [isLoaded, setIsLoaded] = useState(false);
-
+    const apiClient = useApiClient();
     const [settingsData, setSettingsData] = useState({
         number_of_shifts: '',
         restrict_zero_stock_sales: '',
@@ -44,7 +42,7 @@ const SettingsPage = () => {
         const handleServerUrlReceived = async (event: any, data: any) => {
             let serverUrl = data.data;
             //get the settings
-            const getSettings = await getData<any>({ url: `${serverUrl}/api_admin/settings`, token: auth()?.token })
+            const getSettings = await apiClient.get<any>({ url: `${serverUrl}/api_admin/settings` })
             console.log("settings get settings", getSettings)
             setSettingsData(getSettings.data);
             setIsLoaded(true)
@@ -53,7 +51,7 @@ const SettingsPage = () => {
         ipcRenderer.send(GET_SERVER_URL);
 
         ipcRenderer.on(SERVER_URL_RECEIVED, handleServerUrlReceived);
-        
+
         return () => {
             ipcRenderer.removeListener(SERVER_URL_RECEIVED, handleServerUrlReceived)
         }
@@ -61,15 +59,17 @@ const SettingsPage = () => {
 
     }, [])
 
-  return (
-      <>
-          <Header showBackArrow={true}></Header>
-          <div className='container'>
-              <h3>System Settings</h3>
-             { isLoaded ? (<Settings data={settingsData} onSubmit={settingsSubmitted}></Settings>) : (<Loading/>)}
-          </div>
-      </>
-  )
+    return (
+        <>
+            <Header showLogo={true} showBackArrow={true}></Header>
+            <div className='page-container'>
+                <h4 className="pageTitle">System settings</h4>
+                <div className='max-w-[600px] mx-auto w-[80%]'>
+                    {isLoaded ? (<Settings data={settingsData} onSubmit={settingsSubmitted}></Settings>) : (<Loading />)}
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default SettingsPage
