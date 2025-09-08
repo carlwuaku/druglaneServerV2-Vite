@@ -1,41 +1,41 @@
-import { Table, Model, Column, DataType,  CreatedAt, HasMany, Index, PrimaryKey } from "sequelize-typescript";
+import { Table, Model, Column, DataType, CreatedAt, HasMany, Index, PrimaryKey } from "sequelize-typescript";
 import { CustomerDiagnostics } from "./CustomerDiagnostics";
 
 @Table({
-   tableName: 'customers',
+  tableName: 'customers',
   modelName: 'Customers',
   paranoid: true,
 
 })
 
-export class Customers extends Model{
+export class Customers extends Model {
 
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
-  
+
   @Index
   @Column({
     allowNull: false,
     type: DataType.STRING
   })
-  name!: string;
+  declare name: string;
 
-  
+
   @Column({
     type: DataType.STRING
   })
-  sex!: string;
+  declare sex: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  phone!: string;
+  declare phone: string;
 
   @Index
   @Column({
@@ -44,7 +44,7 @@ export class Customers extends Model{
     },
     type: DataType.STRING
   })
-  email!: string;
+  declare email: string;
 
   @Column({
     validate: {
@@ -52,16 +52,16 @@ export class Customers extends Model{
     },
     type: DataType.STRING
   })
-  date_of_birth!: string;
+  declare date_of_birth: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @Column({
     type: DataType.STRING
   })
-  location!: string;
+  declare location: string;
 
   @HasMany(() => CustomerDiagnostics)
-  customerDiagnostics!: CustomerDiagnostics[];
+  declare customerDiagnostics: CustomerDiagnostics[];
 }

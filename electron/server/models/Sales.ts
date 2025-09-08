@@ -9,21 +9,21 @@ import { Users } from "./Users";
   createdAt: false
 })
 
-export class Sales extends Model{
+export class Sales extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @ForeignKey(() => Customers)
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
     defaultValue: null
   })
-  customer!: number;
+  declare ustomer: number;
 
   @Index
   @Column({
@@ -31,89 +31,89 @@ export class Sales extends Model{
     unique: true,
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Column({
     type: DataType.DATE
   })
-  created_on!: string;
+  declare created_on: string;
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  amount_paid!: number;
+  declare amount_paid: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  payment_method!: string;
+  declare payment_method: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  momo_reference!: string;
+  declare momo_reference: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  date!: string;
+  declare date: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  insurance_provider!: string;
+  declare insurance_provider: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  insurance_member_name!: string;
+  declare insurance_member_name: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  insurance_member_id!: string;
+  declare insurance_member_id: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  creditor_name!: string;
+  declare creditor_name: string;
 
-  
-  @Column({
-    type: DataType.DOUBLE
-  })
-  credit_paid!: number;
 
   @Column({
     type: DataType.DOUBLE
   })
-  discount!: number;
-  
+  declare credit_paid: number;
+
   @Column({
     type: DataType.DOUBLE
   })
-  tax!: number;
+  declare discount: number;
+
+  @Column({
+    type: DataType.DOUBLE
+  })
+  declare tax: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  shift!: string;
+  declare shift: string;
 
   total?: number;
   display_name?: string;

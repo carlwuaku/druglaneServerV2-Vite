@@ -7,33 +7,33 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class UserSessions extends Model{
+export class UserSessions extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  user_id!: number;
+  declare user_id: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  token!: string;
+  declare token: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @Column({
     type: DataType.DATEONLY
   })
-  expires!: string;
+  declare expires: string;
 }
 

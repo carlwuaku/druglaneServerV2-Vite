@@ -4,79 +4,79 @@ import { Purchases } from "./Purchases";
 import { Users } from "./Users";
 
 @Table({
-   tableName: 'purchase_details',
+  tableName: 'purchase_details',
   modelName: 'PurchaseDetails',
   paranoid: true,
 })
 
-export class PurchaseDetails extends Model{
+export class PurchaseDetails extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
-  
+
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  product!: number;
+  declare product: number;
 
   @Index
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  quantity!: number;
+  declare quantity: number;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  price!: number;
+  declare price: number;
 
   @Column({
     type: DataType.STRING
   })
-  unit!: string;
+  declare unit: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  markup!: number;
+  declare markup: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @Index
   @Column({
     type: DataType.DATEONLY
   })
-  date!: string;
+  declare date: string;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  selling_price!: number;
-  
+  declare selling_price: number;
+
   @Column({
     type: DataType.DATEONLY
   })
-  expiry!: string;
+  declare expiry: string;
 }

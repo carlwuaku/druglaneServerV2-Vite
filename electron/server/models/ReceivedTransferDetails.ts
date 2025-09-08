@@ -11,74 +11,74 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class ReceivedTransferDetails extends Model{
+export class ReceivedTransferDetails extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
-  
+
   @ForeignKey(() => Products)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  product!: number;
+  declare product: number;
 
   @Index
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  quantity!: number;
+  declare quantity: number;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  price!: number;
+  declare price: number;
 
   @Column({
     type: DataType.STRING
   })
-  unit!: string;
+  declare unit: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  markup!: number;
+  declare markup: number;
 
   @Index
   @ForeignKey(() => ReceivedTransfers)
   @Column({
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  date!: string;
+  declare date: string;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  selling_price!: number;
+  declare selling_price: number;
 
   // @BelongsTo(() => ReceivedTransfers, 'code')
 }

@@ -6,14 +6,14 @@ import { Column, CreatedAt, DataType, Index, Model, PrimaryKey, Table } from "se
   paranoid: true,
 })
 
-export class StockValues extends Model{
+export class StockValues extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     type: DataType.DATEONLY,
@@ -22,12 +22,12 @@ export class StockValues extends Model{
       isDate: true
     }
   })
-  date!: string;
+  declare date: string;
 
   @Column({
     type: DataType.DATEONLY
   })
-  last_modified!: string;
+  declare last_modified: string;
 
   @Index
   @Column({
@@ -35,7 +35,7 @@ export class StockValues extends Model{
     allowNull: false,
     defaultValue: 0
   })
-  selling_value!: number;
+  declare selling_value: number;
 
   @Index
   @Column({
@@ -43,9 +43,9 @@ export class StockValues extends Model{
     allowNull: false,
     defaultValue: 0
   })
-  cost_value!: number;
+  declare cost_value: number;
 
   @CreatedAt
-  created_on!: string;
-  
+  declare created_on: string;
+
 }

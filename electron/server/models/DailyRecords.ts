@@ -1,104 +1,104 @@
 
 import { sequelize } from "../config/sequelize-config";
-import { Table, Model, Column, DataType,  CreatedAt, HasMany, Index, ForeignKey, PrimaryKey } from "sequelize-typescript";
+import { Table, Model, Column, DataType, CreatedAt, HasMany, Index, ForeignKey, PrimaryKey } from "sequelize-typescript";
 import { Users } from "./Users";
 
 @Table({
-   tableName: 'dailyRecords',
+  tableName: 'dailyRecords',
   modelName: 'DailyRecords',
   paranoid: true,
 })
 
-export class DailyRecords extends Model{
-    
-    
+export class DailyRecords extends Model {
+
+
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
-  
+
   @Index
   @Column({
     type: DataType.DATEONLY
   })
-  date!: string;
+  declare date: string;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  amount!: number;
+  declare amount: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  pos!: number;
+  declare pos: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  cheque!: number;
+  declare cheque: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  insurance!: number;
+  declare insurance: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  momo!: number;
+  declare momo: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  cash!: number;
+  declare cash: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  other!: number;
+  declare other: number;
 
 
   @Column({
     type: DataType.DOUBLE,
     defaultValue: 0
   })
-  credit!: number;
+  declare credit: number;
 
 
   @Column({
     type: DataType.STRING
   })
-  shift!: string;
+  declare shift: string;
 
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER
   })
-  created_by!: number;
+  declare created_by: number;
 
 
   @Index
   @CreatedAt
-  created_on!: number;
+  declare created_on: number;
 
   computer_sales?: string;
   difference?: number;

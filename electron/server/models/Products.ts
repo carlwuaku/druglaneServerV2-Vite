@@ -1,26 +1,26 @@
 import { Table, Model, Column, DataType, ForeignKey, Index, CreatedAt, PrimaryKey } from "sequelize-typescript";
 
 @Table({
-   tableName: 'products',
+  tableName: 'products',
   modelName: 'Products',
   paranoid: true,
 })
 
-export class Products extends Model{
+export class Products extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     allowNull: false,
     unique: true,
     type: DataType.STRING
   })
-  name!: string;
+  declare name: string;
 
   @Index
   @Column({
@@ -31,32 +31,32 @@ export class Products extends Model{
       isNumeric: true
     }
   })
-  price!: number;
+  declare price: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  category!: string;
+  declare category: string;
 
   @Column({
     type: DataType.STRING
   })
-  notes!: string;
+  declare notes: string;
 
   @Column({
     type: DataType.STRING
   })
-  unit!: string;
+  declare unit: string;
 
   @Column({
     type: DataType.STRING
   })
-  picture!: string;
+  declare picture: string;
 
   @Index
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @Index
   @Column({
@@ -67,7 +67,7 @@ export class Products extends Model{
       isNumeric: true
     }
   })
-  max_stock!: number;
+  declare max_stock: number;
 
   @Index
   @Column({
@@ -78,7 +78,7 @@ export class Products extends Model{
       isNumeric: true
     }
   })
-  min_stock!: number;
+  declare min_stock: number;
 
   @Index
   @Column({
@@ -88,12 +88,12 @@ export class Products extends Model{
       isDate: true
     }
   })
-  expiry!: string;
+  declare expiry: string;
 
   @Column({
     type: DataType.STRING
   })
-  barcode!: string;
+  declare barcode: string;
 
   @Index
   @Column({
@@ -104,13 +104,13 @@ export class Products extends Model{
       isNumeric: true
     }
   })
-  current_stock!: number;
+  declare current_stock: number;
 
   @Column({
     type: DataType.DATEONLY,
     allowNull: true
   })
-  last_modified!: string;
+  declare last_modified: string;
 
   @Index
   @Column({
@@ -121,70 +121,70 @@ export class Products extends Model{
       isNumeric: true
     }
   })
-  cost_price!: number;
+  declare cost_price: number;
 
   @Column({
     type: DataType.STRING
   })
-  size!: string;
+  declare size: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  description!: string;
+  declare description: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
     defaultValue: 1
   })
-  status!: number;
+  declare status: number;
 
   @Column({
     type: DataType.STRING
   })
-  shelf!: string;
+  declare shelf: string;
 
   @Column({
     type: DataType.STRING
   })
-  preferred_vendor!: number;
+  declare preferred_vendor: number;
 
   @Column({
     type: DataType.STRING
   })
-  is_drug!: string;
+  declare is_drug: string;
 
   @Column({
     type: DataType.STRING
   })
-  generic_name!: string;
+  declare generic_name: string;
 
   @Column({
     type: DataType.STRING
   })
-  contraindications!: string;
+  declare contraindications: string;
 
   @Column({
     type: DataType.STRING
   })
-  pregnancy!: string;
+  declare pregnancy: string;
 
   @Column({
     type: DataType.STRING
   })
-  side_effects!: string;
+  declare side_effects: string;
 
   @Column({
     type: DataType.STRING
   })
-  caution!: string;
+  declare caution: string;
 
   @Column({
     type: DataType.STRING
   })
-  indications!: string;
+  declare indications: string;
 
   @Column({
     type: DataType.DOUBLE,
@@ -195,22 +195,22 @@ export class Products extends Model{
       isFloat: true
     }
   })
-  markup!: number;
+  declare markup: number;
 
   @Column({
     type: DataType.STRING
   })
-  active_ingredients!: string;
+  declare active_ingredients: string;
 
   @Column({
     type: DataType.STRING
   })
-  drug_info!: string;
+  declare drug_info: string;
 
   @Column({
     type: DataType.STRING
   })
-  last_stock_modification!: string;
+  declare last_stock_modification: string;
 
   @Column({
     type: DataType.VIRTUAL,
@@ -218,7 +218,7 @@ export class Products extends Model{
       return Date.parse(this.getDataValue('expiry')) < Date.now();
     },
   })
-  expired!: boolean;
+  declare expired: boolean;
 
   @Column({
     type: DataType.VIRTUAL,
@@ -226,7 +226,7 @@ export class Products extends Model{
       return this.getDataValue('current_stock') < 1;
     },
   })
-  out_of_stock!: boolean;
+  declare out_of_stock: boolean;
 
   @Column({
     type: DataType.VIRTUAL,
@@ -235,7 +235,7 @@ export class Products extends Model{
         this.getDataValue('current_stock') <= this.getDataValue('min_stock');
     },
   })
-  near_min!: boolean;
+  declare near_min: boolean;
 
   @Column({
     type: DataType.VIRTUAL,
@@ -244,14 +244,14 @@ export class Products extends Model{
         this.getDataValue('current_stock') >= this.getDataValue('max_stock');
     },
   })
-  near_max!: boolean;
+  declare near_max: boolean;
 
-  
+
 
   stock_value?: number
   selling_value?: number;
   cost_value?: number
-  
+
 
 }
 

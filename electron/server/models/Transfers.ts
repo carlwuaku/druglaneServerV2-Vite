@@ -3,50 +3,50 @@ import { Branches } from "./Branches";
 import { Users } from "./Users";
 
 @Table({
-  tableName:"transfers",
+  tableName: "transfers",
   modelName: 'Transfers',
   paranoid: true,
 })
 
-export class Transfers extends Model{
+export class Transfers extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @ForeignKey(() => Branches)
   @Column({
     type: DataType.INTEGER
   })
-  receiver!: number;
+  declare receiver: number;
 
   @Index
   @Column({
     type: DataType.DATEONLY
   })
-  date!: string;
+  declare date: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @Column({
     type: DataType.STRING
   })
-  status!: string;
+  declare status: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 }
 

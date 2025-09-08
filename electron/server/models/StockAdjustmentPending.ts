@@ -15,7 +15,7 @@ export class StockAdjustmentPending extends Model {
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
   @Index
   @Column({
@@ -24,7 +24,7 @@ export class StockAdjustmentPending extends Model {
       isDate: true
     }
   })
-  date!: string;
+  declare date: string;
 
 
   @ForeignKey(() => Products)
@@ -32,7 +32,7 @@ export class StockAdjustmentPending extends Model {
     type: DataType.INTEGER,
     allowNull: false
   })
-  product!: number;
+  declare product: number;
 
   @Index
   @Column({
@@ -44,7 +44,7 @@ export class StockAdjustmentPending extends Model {
       notNull: true
     }
   })
-  quantity_counted!: number;
+  declare quantity_counted: number;
 
   @Index
   @Column({
@@ -55,7 +55,7 @@ export class StockAdjustmentPending extends Model {
       isNumeric: true
     }
   })
-  quantity_expected!: number;
+  declare quantity_expected: number;
 
 
   @Column({
@@ -67,33 +67,33 @@ export class StockAdjustmentPending extends Model {
       notNull: true
     }
   })
-  current_price!: number;
+  declare current_price: number;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Column({
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
 
   @Column({
     type: DataType.STRING
   })
-  category!: string;
+  declare category: string;
 
   @Column({
     type: DataType.STRING
   })
-  size!: string;
+  declare size: string;
 
   @Column({
     type: DataType.DATEONLY,
@@ -101,12 +101,12 @@ export class StockAdjustmentPending extends Model {
       isDate: true
     }
   })
-  expiry!: string;
+  declare expiry: string;
 
   @Column({
     type: DataType.STRING
   })
-  comments!: string;
+  declare comments: string;
 
   @Index
   @Column({
@@ -118,7 +118,7 @@ export class StockAdjustmentPending extends Model {
       notNull: true
     }
   })
-  quantity_expired!: number;
+  declare quantity_expired: number;
 
   @Index
   @Column({
@@ -130,15 +130,15 @@ export class StockAdjustmentPending extends Model {
       notNull: true
     }
   })
-  quantity_damaged!: number;
+  declare quantity_damaged: number;
 
   @Column({
     type: DataType.STRING
   })
-  shelf!: string;
+  declare shelf: string;
 
   @Column({
     type: DataType.STRING
   })
-  unit!: string;
+  declare unit: string;
 }

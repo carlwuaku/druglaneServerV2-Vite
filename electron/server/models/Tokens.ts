@@ -14,18 +14,18 @@ export class Tokens extends Model {
     //     type: DataType.INTEGER,
     //     autoIncrement: true
     // })
-    // id!: number;
+    // id: number;
 
     @Column({
         type: DataType.STRING
     })
-    name!: string;
+    declare name: string;
 
     @CreatedAt
-    created_on!: string;
+    declare created_on: string;
 
     @Column({
         type: DataType.STRING
     })
-    token!: string;
+    declare token: string;
 }

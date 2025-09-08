@@ -1,35 +1,35 @@
-import { Table, Model, Column,   CreatedAt, DataType, PrimaryKey } from "sequelize-typescript";
+import { Table, Model, Column, CreatedAt, DataType, PrimaryKey } from "sequelize-typescript";
 
 @Table({
-   tableName: 'db_sync',
+  tableName: 'db_sync',
   modelName: 'DbSync',
   paranoid: true,
 })
 
-export class DbSync extends Model{
+export class DbSync extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
-  @Column({
-    type: DataType.STRING
-  })
-  type!: string;
+  // id: number;
 
   @Column({
     type: DataType.STRING
   })
-  action!: string;
+  declare type: string;
 
   @Column({
     type: DataType.STRING
   })
-  data!: string;
+  declare action: string;
+
+  @Column({
+    type: DataType.STRING
+  })
+  declare data: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 }
 

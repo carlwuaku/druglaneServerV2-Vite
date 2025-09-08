@@ -11,72 +11,72 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class Refills extends Model{
+export class Refills extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     type: DataType.STRING
   })
-  product!: string;
+  declare product: string;
 
   @ForeignKey(() => Products)
   @Column({
     type: DataType.INTEGER,
     allowNull: true
   })
-  product_id!: number;
+  declare product_id: number;
 
-   @Column({
+  @Column({
     type: DataType.DOUBLE,
     defaultValue: 1
   })
-  quantity!: number;
+  declare quantity: number;
 
-    @Index
+  @Index
   @Column({
     type: DataType.DATEONLY,
     allowNull: false
   })
-  start_date!: string;
+  declare start_date: string;
 
-    @Index
+  @Index
   @Column({
     type: DataType.DATEONLY,
   })
-  end_date!: string;
+  declare end_date: string;
 
-    @ForeignKey(() => Users)
+  @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
-    @Index
-    @Column({
-      type: DataType.STRING
-    })
-  status!: string;
+  @Index
+  @Column({
+    type: DataType.STRING
+  })
+  declare status: string;
 
-    @ForeignKey(() => Customers)
+  @ForeignKey(() => Customers)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  customer_id!: number;
+  declare customer_id: number;
 
   @Column({
     type: DataType.STRING
   })
-  customer_name!: string;
+  declare customer_name: string;
 
-    @CreatedAt
-  created_on!: string;
-    
+  @CreatedAt
+  declare created_on: string;
+
 }

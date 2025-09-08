@@ -8,14 +8,14 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class StockAdjustmentSessions extends Model{
+export class StockAdjustmentSessions extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     type: DataType.DATEONLY,
@@ -24,24 +24,24 @@ export class StockAdjustmentSessions extends Model{
       isDate: true
     }
   })
-  date!: string;
+  declare date: string;
 
   @Index
   @Column({
     unique: true,
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
 
 }

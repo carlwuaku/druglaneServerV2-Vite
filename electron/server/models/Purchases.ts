@@ -1,81 +1,81 @@
 import { Table, Model, Column, DataType, Index, CreatedAt, PrimaryKey } from "sequelize-typescript";
 
 @Table({
-   tableName: 'purchases',
+  tableName: 'purchases',
   modelName: 'Purchases',
   paranoid: true,
 })
 
-export class Purchases extends Model{
+export class Purchases extends Model {
 
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
+  // id: number;
 
-  
+
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  vendor!: number;
+  declare vendor: number;
 
   @Column({
     type: DataType.DATEONLY,
     allowNull: false
   })
-  date!: string;
+  declare date: string;
 
   @Column({
     type: DataType.STRING
   })
-  site!: string;
+  declare site: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @Column({
     type: DataType.STRING
   })
-  status!: string;
+  declare status: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  invoice!: string;
+  declare invoice: string;
 
   @Index
   @Column({
     type: DataType.STRING
   })
-  payment_method!: string;
+  declare payment_method: string;
 
   @Column({
     type: DataType.DOUBLE
   })
-  amount_paid!: number;
+  declare amount_paid: number;
 
   @Column({
     type: DataType.DATEONLY,
   })
-  last_payment_date!: string;
+  declare last_payment_date: string;
 
-  
+
 }
 
 

@@ -2,55 +2,55 @@ import { Table, Model, Column, DataType, PrimaryKey, CreatedAt, ForeignKey } fro
 import { Users } from "./Users";
 
 @Table({
-   tableName: 'activities',
+    tableName: 'activities',
     modelName: 'Activities',
     paranoid: true,
 })
 
-export class Activities extends Model{
+export class Activities extends Model {
     @Column({
         type: DataType.STRING,
         allowNull: false,
     })
-    activity!: string;
+    declare activity: string;
 
     @PrimaryKey
     @Column({
         type: DataType.BIGINT,
         autoIncrement: true
     })
-    activity_id!: string;
+    declare activity_id: string;
 
     @ForeignKey(() => Users)
     @Column({
         type: DataType.INTEGER,
         allowNull: false,
     })
-    user_id!: number;
+    declare user_id: number;
 
     @Column({
         type: DataType.STRING,
         allowNull: true,
     })
-    module!: string;
+    declare module: string;
 
 
 
     @CreatedAt
-    created_on!: string;
+    declare created_on: string;
 
     @Column({
         type: DataType.INTEGER,
         allowNull: true,
         defaultValue: 0
     })
-    deleted!: string;
-    
+    declare deleted: string;
+
     @Column({
         type: DataType.INTEGER,
         allowNull: true,
         defaultValue: 0
     })
-    object_id!: string;
-    
+    declare object_id: string;
+
 }

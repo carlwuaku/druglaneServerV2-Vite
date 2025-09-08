@@ -8,14 +8,14 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
- export class StockAdjustment extends Model{
+export class StockAdjustment extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     type: DataType.DATEONLY,
@@ -23,15 +23,15 @@ import { Users } from "./Users";
       isDate: true
     }
   })
-  date!: string;
+  declare date: string;
 
-  
+
   @ForeignKey(() => Products)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  product!: number;
+  declare product: number;
 
   @Index
   @Column({
@@ -43,7 +43,7 @@ import { Users } from "./Users";
       notNull: true
     }
   })
-  quantity_counted!: number;
+  declare quantity_counted: number;
 
   @Index
   @Column({
@@ -54,9 +54,9 @@ import { Users } from "./Users";
       isNumeric: true
     }
   })
-  quantity_expected!: number;
+  declare quantity_expected: number;
 
-  
+
   @Column({
     type: DataType.DOUBLE,
     allowNull: false,
@@ -66,34 +66,34 @@ import { Users } from "./Users";
       notNull: true
     }
   })
-  current_price!: number;
+  declare current_price: number;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @Column({
     allowNull: true,
     type: DataType.STRING
   })
-  code!: string;
+  declare code: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
 
   @Column({
     type: DataType.STRING
   })
-  category!: string;
+  declare category: string;
 
   @Column({
     type: DataType.STRING
   })
-  size!: string;
+  declare size: string;
 
   @Column({
     type: DataType.DATEONLY,
@@ -101,12 +101,12 @@ import { Users } from "./Users";
       isDate: true,
     }
   })
-  expiry!: string;
+  declare expiry: string;
 
   @Column({
     type: DataType.STRING
   })
-  comments!: string;
+  declare comments: string;
 
   @Index
   @Column({
@@ -116,7 +116,7 @@ import { Users } from "./Users";
       isNumeric: true
     }
   })
-  quantity_expired!: number;
+  declare quantity_expired: number;
 
   @Index
   @Column({
@@ -126,15 +126,15 @@ import { Users } from "./Users";
       isNumeric: true
     }
   })
-  quantity_damaged!: number;
+  declare quantity_damaged: number;
 
 
   @Column({
     type: DataType.STRING
   })
-  unit!: string;
-  
- 
+  declare unit: string;
+
+
 }
 
 

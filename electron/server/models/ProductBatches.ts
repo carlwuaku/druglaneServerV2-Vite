@@ -8,37 +8,37 @@ import { Users } from "./Users";
   modelName: 'ProductBatches',
   paranoid: true,
 })
-export class ProductBatches extends Model{
+export class ProductBatches extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Column({
     type: DataType.STRING
   })
-  batch_number!: string;
+  declare batch_number: string;
 
   @Column({
     type: DataType.DATEONLY
   })
-  expiry!: string;
+  declare expiry: string;
   @Column({
     type: DataType.STRING
   })
-  barcode!: string;
+  declare barcode: string;
 
   @ForeignKey(() => Products)
   @Column({
     type: DataType.INTEGER
   })
-  product!: number;
+  declare product: number;
 
   @Column({
     type: DataType.STRING
   })
-  purchase_code!: string;
+  declare purchase_code: string;
 
 }

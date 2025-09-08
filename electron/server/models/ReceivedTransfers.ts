@@ -10,49 +10,49 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class ReceivedTransfers extends Model{
+export class ReceivedTransfers extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Column({
     type: DataType.DATEONLY,
     allowNull: false
   })
-  date!: string;
+  declare date: string;
 
   @Index
   @Column({
     allowNull: false,
     type: DataType.STRING
   })
-  code!: string;
-  
+  declare code: string;
+
   @Index
   @Column({
     allowNull: false,
     type: DataType.STRING
   })
-  invoice!: string;
+  declare invoice: string;
 
   @CreatedAt
-  created_on!: string;
+  declare created_on: string;
 
   @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  created_by!: number;
+  declare created_by: number;
 
   @ForeignKey(() => Branches)
   @Column({
     type: DataType.INTEGER,
     allowNull: false
   })
-  sender!: number;
+  declare sender: number;
 }
 

@@ -8,59 +8,59 @@ import { Users } from "./Users";
   paranoid: true,
 })
 
-export class OutgoingPayments extends Model{
+export class OutgoingPayments extends Model {
   // @PrimaryKey
   // @Column({
   //   type: DataType.INTEGER,
   //   autoIncrement: true
   // })
-  // id!: number;
-  
+  // id: number;
+
   @Index
   @Column({
     type: DataType.DATEONLY,
     allowNull: false
   })
-  date!: string;
+  declare date: string;
 
   @Column({
     type: DataType.DOUBLE,
     allowNull: false
   })
-  amount!: number;
-    @Index
-    @Column({
-      type: DataType.STRING
-    })
-  type!: string;
+  declare amount: number;
+  @Index
+  @Column({
+    type: DataType.STRING
+  })
+  declare type: string;
 
-    @Index
-    @Column({
-      type: DataType.STRING
-    })
-  recipient!: string;
+  @Index
+  @Column({
+    type: DataType.STRING
+  })
+  declare recipient: string;
 
   @Column({
     type: DataType.STRING
   })
-  transaction_id!: string;
+  declare transaction_id: string;
 
   @Column({
     type: DataType.STRING
   })
-  item_code!: string;
+  declare item_code: string;
 
   @Column({
     type: DataType.STRING
   })
-  notes!: string;
+  declare notes: string;
 
-    @ForeignKey(() => Users)
+  @ForeignKey(() => Users)
   @Column({
     type: DataType.INTEGER
   })
-  created_by!: number;
+  declare created_by: number;
 
-    @CreatedAt
-  created_on!: string;
+  @CreatedAt
+  declare created_on: string;
 }
